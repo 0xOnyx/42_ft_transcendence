@@ -1,0 +1,40 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Type https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#int
+
+generator client {
+	provider = "prisma-client-js"
+}
+
+datasource db {
+	provider = "postgresql"
+	url      = env("DATABASE_URL")
+}
+
+model User
+{
+	id				Int			@default(autoincrement()) @id
+	CreatedAt		DateTime	@default(now())
+	email			String		@unique
+	pseudo			String		@unique
+	avatar			String		@unique
+	2fa				String		@unique
+	token			Token?
+	followedBy		User[]		@relation("UserFollows")
+    following		User[]		@relation("UserFollows")
+}
+
+
+model Token
+{
+	id				Int			@default(autoincrement()) @id
+    access_token	String,
+    token_type		String,
+    expires_in		Int,
+    refresh_token	String,
+	scope			String,
+    created_at		DateTime,
+    userId			Int			@unique,
+    user			User 		@relation(fields: [userId], reference: [id]])
+}
