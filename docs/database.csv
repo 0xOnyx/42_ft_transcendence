@@ -58,6 +58,7 @@ messages;type;description
 id;int;id
 room_id;int;the id of room
 user_id;int;user id
+message_type;varchar(20);type of message. Can be MESSAGE, ADD_FRIEND, INVITE_GAME
 content;varchar(max);the text in message
 created_at;datetime;date of creation
 ;;

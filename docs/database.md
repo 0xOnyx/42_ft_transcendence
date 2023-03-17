@@ -83,6 +83,7 @@
 |id                  |int         |id          |
 |room_id             |int         |the id of room|
 |user_id             |int         |user id     |
+|message_type        |varchar(20) |type of message. For identify a game invitation or to accept friendship. Can be MESSAGE, ADD_FRIEND, INVITE_GAME|
 |content             |varchar(max)|the text in message|
 |created_at          |datetime    |date of creation|
 
