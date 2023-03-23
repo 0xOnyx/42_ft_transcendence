@@ -1,2 +1,2 @@
 # ft_transcendence
-pong project with react nest ans typescript
+pong project with react nest and typescript
