@@ -1,0 +1,16 @@
+{
+	"Servers": {
+		"1": {
+			"Name": "Transcendence",
+			"Host": "postgres",
+			"Group": "Servers",
+			"Port": 5432,
+			"MaintenanceDB": "postgres",
+			"Username": "yourusername",
+			"KerberosAuthentication": false,
+			"ConnectionParameters": {
+				"sslmode": "prefer"
+			}
+		}
+	}
+}
