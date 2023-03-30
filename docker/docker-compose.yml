@@ -33,6 +33,13 @@ services:
     networks:
       - transcendence
 
+#  front:
+#    build: docker/front
+#    volumes:
+#      - ./front:/app:delegated
+#    ports:
+#      - "3000:3000"
+
 networks:
   transcendence:
     driver: bridge
