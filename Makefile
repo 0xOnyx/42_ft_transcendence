@@ -16,5 +16,5 @@ all:
 svelte:
 	echo "Start front (svelte)"
 	$(DOCKER) build -t front docker/front
-	$(DOCKER) run -p 3000:3000 -v $(PWD)/front:/app front
+	$(DOCKER) run -p 3000:3000 -v $(PWD)/front:/app --name front front
 
