@@ -68,7 +68,7 @@ model	Friend {
 	friend_id				Int
 	friend_user			User		@relation("symetric_friend", fields: [friend_id], references: [id])
 	request_at			DateTime @default(now())
-	accept_at				DateTime
+	accept_at				DateTime?
 }
 
 model	UserState {
@@ -89,7 +89,7 @@ enum	Log {
 
 model	ActivityLog {
 	id							Int		@default(autoincrement()) @id
-	user_id					Int		@unique
+	user_id					Int
 	user						User	@relation(fields: [user_id], references: [id])
 	type						Log
 	datas						Json
