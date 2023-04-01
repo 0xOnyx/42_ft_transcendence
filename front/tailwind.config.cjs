@@ -7,7 +7,8 @@ export default {
             'color1' : '#FFD700',
             'color2' : '#2F83E4',
             'color3' : '#6356AF',
-            'color4' : '#2A2358'
+            'color4' : '#2A2358',
+            'color5' : '#001329'
         },
         fontFamily: {
             'itim': ['Itim']
