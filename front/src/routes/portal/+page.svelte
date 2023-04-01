@@ -3,14 +3,26 @@
     import Button from '../../components/Button.svelte';
     import ItemName from '../../components/Itemname.svelte';
 
-	let friends = [
+	var friends = [
 		{ id: 1, name: 'Jacob Jones' },
 		{ id: 2, name: 'Leslie Alexander' },
 		{ id: 3, name: 'Eleanor Pena' },
         { id: 4, name: 'Wade Warren' },
-        { id: 5, name: 'Kathryn Murphy' },
-        { id: 6, name: 'Marvin McKinney' }
+    //    { id: 5, name: 'Kathryn Murphy' },
+    //    { id: 6, name: 'Marvin McKinney' }
 	];
+
+    var search_value : string = '';
+
+	var search = friends;
+
+    function filter()
+    {
+        console.log(search);
+        search = friends.filter((f) => {
+            return f.name.toLowerCase().includes(search_value.toLowerCase());
+        });
+    }
 
     export let data: PageData;
 </script>
@@ -30,10 +42,13 @@
             backColor: "#383683"
         };
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/jdenticon@3.2.0/dist/jdenticon.min.js" async
+    integrity="sha384-yBhgDqxM50qJV5JPdayci8wCfooqvhFYbIKhv0hTtLvfeeyJMJCscRfFNKIxt43M" crossorigin="anonymous">
+    </script>
 </svelte:head>
 
-<div class="grid grow items-center container bg-color3 sm:m-20 sm:border-4 border-black rounded p-2 sm:p-10">
-    <div class="sm:flex grow text-center align-middle m-5 h-full">
+<div class="bg-color3 self-center container m-auto sm:border-4 border-black rounded p-2 sm:p-10">
+    <div class="flex text-center align-middle m-5 max-h-full overflow-hidden">
 
         <div class="bg-color5 grow grid grid-cols-2 grid-rows-1">
 
@@ -77,26 +92,12 @@
                 </div>
 
                 <div class="mt-2">
-                    <input class="w-full rounded-2xl py-1 px-3 bg-color5" type="text" placeholder="Search">
+                    <input class="w-full rounded-2xl py-1 px-3 bg-color5" type="text" bind:value={search_value} placeholder="Search" on:keyup={filter}>
                 </div>
 
                 <div class="overflow-auto mt-3">
 
-                    <div class="rounded-xl bg-color5 p-5 flex items-center mt-1">
-
-                        <div class="mx-2">
-                            <svg class="rounded-full mx-auto bg-color3" width="50" height="50" data-jdenticon-value="icon"></svg>
-                        </div>
-                        <div class="mx-2">
-                            Jacob Jones
-                        </div>
-                        <div class="mx-2">
-                            online
-                        </div>
-
-                    </div>
-
-                    {#each friends as friend, i}
+                    {#each search as friend, i}
 
                         <ItemName name={friend.name}></ItemName>
 
@@ -109,10 +110,6 @@
         </div>
 
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/jdenticon@3.2.0/dist/jdenticon.min.js" async
-    integrity="sha384-yBhgDqxM50qJV5JPdayci8wCfooqvhFYbIKhv0hTtLvfeeyJMJCscRfFNKIxt43M" crossorigin="anonymous">
-    </script>
 
 </div>
 
