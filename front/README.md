@@ -36,3 +36,60 @@ npm run build
 You can preview the production build with `npm run preview`.
 
 > To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+
+
+## Install Tailwind CSS with SvelteKit
+
+Using npm, install tailwindcss and its peer dependencies, and then run the following commands to generate both tailwind.config.cjs and postcss.config.cjs.
+
+```bash
+
+npm install -D tailwindcss postcss autoprefixer
+npx tailwindcss init tailwind.config.cjs -p
+
+```
+
+### Configure your template paths
+
+Add the paths to all of your template files in your tailwind.config.cjs file.
+
+```javascript
+
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: ['./src/**/*.{html,js,svelte,ts}'],
+  theme: {
+    extend: {}
+  },
+  plugins: []
+};
+
+```
+
+### Add the Tailwind directives to your CSS
+
+Create a ./src/app.css file and add the @tailwind directives for each of Tailwind’s layers.
+
+
+```css
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+```
+
+### Import the CSS file
+
+Create a ./src/routes/+layout.svelte file and import the newly-created app.css file.
+
+
+```javascript
+
+<script>
+  import "../app.css";
+</script>
+
+<slot />
+
+```
