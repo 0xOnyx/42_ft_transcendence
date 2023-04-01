@@ -1,8 +1,9 @@
-<script lang="ts">
-    import type { LayoutData } from './$types';
+<script>
     import "../app.css";
-    
-    export let data: LayoutData;
 </script>
+
+<svelte:head>
+  <link href="https://fonts.googleapis.com/css?family=Itim" rel="stylesheet">
+</svelte:head>
 
 <slot />
