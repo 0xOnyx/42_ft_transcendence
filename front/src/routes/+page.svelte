@@ -1,5 +1,5 @@
 
-<div class="grow flex items-center">
+
     <div class="v-auto text-center align-middle">
         <h1 class="uppercase text-4xl">Transcendence <br> <small class="italic">Pong</small></h1>
 
@@ -8,5 +8,5 @@
         </div>
 
     </div>
-</div>
+
 

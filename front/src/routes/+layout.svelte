@@ -7,11 +7,9 @@
 </svelte:head>
 
 
-<div class="flex flex-col items-center text-slate-50 bg-color4 min-h-screen font-itim">
-
+<div class="grid grid-cols-1 grid-rows-1 items-center text-slate-50 bg-color4 h-screen font-itim">
 
     <slot />
-
 
 </div>
 
