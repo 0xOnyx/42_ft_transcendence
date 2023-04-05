@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
-import { User, Prisma } from '@prisma/client';
+import { User, Prisma} from '@prisma/client';
 
 @Injectable()
 export class UserService {
@@ -15,7 +15,6 @@ export class UserService {
 			include: include,
 		});
 	}
-
 	async userSelect(
 		userWhereUniqueInput: Prisma.UserWhereUniqueInput,
 		select: Prisma.UserSelect
@@ -74,6 +73,15 @@ export class UserService {
 		});
 	}
 
+
+	getFriend(where: Prisma.FriendWhereUniqueInput)
+	{
+		return this.prisma.friend.findUnique({
+			where: where
+		});
+
+	}
+
 	async createFriend(where: Prisma.UserWhereUniqueInput, add_id: Prisma.UserWhereUniqueInput)
 	{
 		const data: Prisma.FriendCreateInput = {
@@ -96,5 +104,12 @@ export class UserService {
 		});
 	}
 
+	async updateFriend(where: Prisma.FriendWhereUniqueInput, data: Prisma.FriendUpdateInput)
+	{
+		await this.prisma.friend.update({
+			where,
+			data
+		})
+	}
 
 }
