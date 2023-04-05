@@ -39,7 +39,7 @@ export class UserProviderController {
         return this.userServiceServer.deleteFriend(req.user.id, Number(id));
     }
 
-    //usage exemple => /user/search?skip=0&take=1
+    //usage exemple => /user/search?skip=0&take=1&element=name&value=salut
     @UseGuards(AuthenticatedGuard)
     @Get("search")
     async searchUser(@Query() queryList: {

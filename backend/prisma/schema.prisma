@@ -105,7 +105,7 @@ model	Rooms {
 	owner_id				Int
 	owner						User				@relation(fields: [owner_id], references: [id])
 	type						TypeRoom
-	password				String
+	password				String?
 	messages				Messages[]	@relation("message")
 	user						RoomUser[]
 	last_message_id	Int					@unique

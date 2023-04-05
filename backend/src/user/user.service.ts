@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import {UserService} from "../prisma/user.service";
-import {Prisma, User} from "@prisma/client";
+import {Prisma, User, Friend} from "@prisma/client";
 
 
 @Injectable()
@@ -19,9 +19,15 @@ export class UserServiceService {
         })
     }
 
-    addFriend(id: number, to_add: number)
+    async addFriend(user_id: number, id: number)
     {
-        return this.userService.createFriend({id: id}, {id: to_add})
+        const friend: Friend  | null= await this.userService.getFriend({id: id});
+        if (!friend || friend.friend_id != user_id || friend.accept_at == null)
+            return ;
+        const to_change: Prisma.FriendUpdateInput = {
+            accept_at : new Date()
+        }
+        await this.userService.updateFriend({id: id}, to_change);
     }
 
     deleteFriend(id: number, to_delete: number)
