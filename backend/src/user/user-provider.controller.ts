@@ -4,7 +4,15 @@ import {UserServiceService} from "./user.service";
 import {UserService} from "../prisma/user.service";
 import {Prisma, User} from '@prisma/client'
 import {request} from "express";
+import {ApiBody, ApiQuery, ApiProperty, ApiCookieAuth, ApiOperation} from '@nestjs/swagger';
 import {UnknownElementException} from "@nestjs/core/errors/exceptions";
+
+export class updateUser {
+    @ApiProperty()
+    name: string;
+}
+
+@ApiCookieAuth()
 
 @Controller('user')
 export class UserProviderController {
@@ -12,6 +20,7 @@ export class UserProviderController {
 
     @UseGuards(AuthenticatedGuard)
     @Get("id/:id")
+    @ApiOperation({summary: "Get user by id"})
     getprofile(@Param("id") id: string, @Request() req: any) {
         if (id == "me")
             id = req.user.id;
@@ -20,6 +29,7 @@ export class UserProviderController {
 
     @UseGuards(AuthenticatedGuard)
     @Get("friend")
+    @ApiOperation({summary: "Get all current friend user log"})
     getFriend(@Request() req: any)
     {
         return this.userServiceServer.getFriend(req.user.id);
@@ -27,6 +37,7 @@ export class UserProviderController {
 
     @UseGuards(AuthenticatedGuard)
     @Post("friend/add/:id")
+    @ApiOperation({summary: "Accept friend request by id", description: "the id send by websocket"})
     createFriend(@Param(":id") id : string, @Request() req: any)
     {
         return this.userServiceServer.addFriend(req.user.id, Number(id));
@@ -34,6 +45,7 @@ export class UserProviderController {
 
     @UseGuards(AuthenticatedGuard)
     @Post("friend/delete/:id")
+    @ApiOperation({summary: "Delete friend by relation id"})
     deleteFriend(@Param(":id") id: string, @Request() req: any)
     {
         return this.userServiceServer.deleteFriend(req.user.id, Number(id));
@@ -42,6 +54,13 @@ export class UserProviderController {
     //usage exemple => /user/search?skip=0&take=1&element=name&value=salut
     @UseGuards(AuthenticatedGuard)
     @Get("search")
+    @ApiOperation({summary: "Search user by username or other in db"})
+    @ApiQuery({name: 'skip', required: false, type: Number})
+    @ApiQuery({name: 'take', required: false, type: Number})
+    @ApiQuery({name: 'cursor', required: false, type: Number})
+    @ApiQuery({name: 'element', required: false, type: String})
+    @ApiQuery({name: 'value', required: false, type: String})
+    @ApiQuery({name: 'orderBy', required: false, type: String})
     async searchUser(@Query() queryList: {
         skip?: number;
         take?: number;
@@ -78,6 +97,8 @@ export class UserProviderController {
 
     @UseGuards(AuthenticatedGuard)
     @Post("me")
+    @ApiOperation({summary: "Update user only username is accept"})
+    @ApiBody({ type: updateUser})
     postUser(@Request() req: any, @Body() body: Prisma.UserUpdateInput)
     {
         this.userServiceServer.updateUser(req.user.id, body);
@@ -85,6 +106,7 @@ export class UserProviderController {
 
     @UseGuards(AuthenticatedGuard)
     @Post("block/:id")
+    @ApiOperation({summary: "Block user by id"})
     blockuser(@Param("id") id: string, @Request() req: any)
     {
         //this.userServiceServer.delete_friend(req.user.id, Number(id)); TODO: IMPLEMENT THIS
@@ -93,6 +115,7 @@ export class UserProviderController {
 
     @UseGuards(AuthenticatedGuard)
     @Post("unblock/:id")
+    @ApiOperation({summary: "Unblock user by id"})
     unblockUser(@Param("id") id: string, @Request() req: any)
     {
         this.userServiceServer.unblockuser(req.user.id, Number(id));
