@@ -5,12 +5,15 @@ type Param = {
     };
   }
 
-/** @type {import('./$types').PageLoad} */
-export function load({ params } : Param) {
+import { PUBLIC_API_URI } from '$env/static/public';
+
+
+export async function load() {
+    const res = await fetch(`${PUBLIC_API_URI}/auth/islogged`);
+    console.log(await res.json());
     return {
-        post: {
-            title: `Title for ${params.slug} goes here`,
-            content: `Content for ${params.slug} goes here`
+        data: {
+            uri_redirect: `${PUBLIC_API_URI}/auth`
         }
     };
 }

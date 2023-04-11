@@ -6,7 +6,6 @@ import {Api42Service} from "../../prisma/api42.service";
 import { Prisma, Status, Log } from '@prisma/client';
 import * as jdenticon from 'jdenticon';
 import * as fs from "fs"
-import {ActivitylogService} from "../../prisma/activitylog.service";
 
 
 @Injectable()
