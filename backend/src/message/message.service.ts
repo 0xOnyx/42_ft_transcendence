@@ -1,7 +1,8 @@
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
 import {MessageService} from "../prisma/message.service";
 import {UserService} from "../prisma/user.service";
-import {Prisma, Rooms, RoomUser, User} from "@prisma/client";
+import {Prisma} from "@prisma/client";
+import {TypeRoom} from ".prisma/client";
 
 
 @Injectable()
@@ -24,8 +25,8 @@ export class MessageServiceService {
         })
         if (!room)
             throw new HttpException("not room found", HttpStatus.NOT_FOUND);
-        if (room.password)
-            room.password = "pass";
+        if (room.password && room.password?.length > 0)
+            room.password = "lock";
         return room;
     }
 
@@ -34,8 +35,8 @@ export class MessageServiceService {
         let rooms = await this.messageService.rooms({id: user_id});
 
         return rooms.map(item => {
-            if (item.password)
-                item.password = "pass";
+            if (item.password && item.password?.length > 0)
+                item.password = "lock";
             return (item)
         });
     }
@@ -55,6 +56,17 @@ export class MessageServiceService {
             ...params,
             where: {room_id: room_id},
             orderBy: {create_at: "asc"}
+        });
+    }
+
+    async getAllRoom()
+    {
+        const rooms = await this.messageService.roomAll(TypeRoom.PUBLIC_ROOM);
+
+        return rooms.map(item => {
+            if (item.password && item.password?.length > 0)
+                item.password = "lock";
+            return (item)
         });
     }
 }

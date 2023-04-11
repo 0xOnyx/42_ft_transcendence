@@ -57,22 +57,52 @@ export class UserService {
 		})
 	}
 
-	async blockUser(where: Prisma.UserWhereUniqueInput, block_id: Prisma.UserWhereUniqueInput)
+	async blockUser(user_where: Prisma.UserWhereUniqueInput, user_block: Prisma.UserWhereUniqueInput)
 	{
 		const data: Prisma.LockUsersCreateInput = {
-			user: {connect: where},
-			lock_user: {connect: block_id},
+			user: {connect: user_where},
+			lock_user: {connect: user_block},
 		}
 		return this.prisma.lockUsers.create({data});
 	}
 
-	async unblockUser(where: Prisma.LockUsersWhereInput, block_id: Prisma.LockUsersWhereInput)
+	async unblockUser(user_where: Prisma.UserWhereUniqueInput, user_block: Prisma.UserWhereUniqueInput)
 	{
 		return this.prisma.lockUsers.deleteMany({
-			where: {...where, ...block_id},
+			where: {
+				user: user_where,
+				lock_user: user_block
+			},
 		});
 	}
 
+	async getBlockUserUnique(user_where: Prisma.UserWhereUniqueInput, block_user_where: Prisma.UserWhereUniqueInput)
+	{
+		return this.prisma.lockUsers.findMany({
+			where: {
+				user: user_where,
+				lock_user: block_user_where
+			}
+		})
+	}
+
+	async getBlockUser(user_where: Prisma.UserWhereUniqueInput, block_user_where: Prisma.UserWhereUniqueInput)
+	{
+		return this.prisma.lockUsers.findMany({
+			where: {
+				OR: [
+					{
+						user: user_where,
+						lock_user: block_user_where
+					},
+					{
+						user: block_user_where,
+						lock_user: user_where
+					}
+				]
+			}
+		})
+	}
 
 	getFriend(where: Prisma.FriendWhereUniqueInput)
 	{

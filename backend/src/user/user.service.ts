@@ -52,14 +52,4 @@ export class UserServiceService {
         return this.userService.updateUser({where: {id: id}, data: to_change});
     }
 
-    blockUser(id: number, to_block: number) {
-        return this.userService.blockUser({id: id}, {id: to_block});
-    }
-
-    unblockuser(id: number, to_block: number)
-    {
-        return this.userService.unblockUser({user_id: id}, {lock_user_id: to_block});
-    }
-
-
 }

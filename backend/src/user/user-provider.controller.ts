@@ -1,22 +1,43 @@
-import {Controller, Body, Request, Param, Post, Get, UseGuards, Query} from '@nestjs/common';
+import {
+    Controller,
+    Body,
+    Request,
+    Param,
+    Post,
+    Get,
+    UseGuards,
+    Query,
+    UploadedFile,
+    UseInterceptors,
+    ParseFilePipe, MaxFileSizeValidator, FileTypeValidator
+} from '@nestjs/common';
 import {AuthenticatedGuard} from "../auth/guards/authenticated.guard";
 import {UserServiceService} from "./user.service";
-import {UserService} from "../prisma/user.service";
-import {Prisma, User} from '@prisma/client'
-import {request} from "express";
-import {ApiBody, ApiQuery, ApiProperty, ApiCookieAuth, ApiOperation} from '@nestjs/swagger';
-import {UnknownElementException} from "@nestjs/core/errors/exceptions";
+import {Prisma} from '@prisma/client'
+import {ApiBody, ApiQuery, ApiProperty, ApiCookieAuth, ApiConsumes, ApiOperation} from '@nestjs/swagger';
+import { Express } from 'express'
+import {FileInterceptor} from "@nestjs/platform-express";
+import * as multer from 'multer'
 
 export class updateUser {
     @ApiProperty()
     name: string;
 }
 
-@ApiCookieAuth()
+const storage = multer.diskStorage({
+    destination: function (req , file, cb) {
+        cb(null, './image')
+    },
+    filename: function (req: any, file, cb) {
+        cb(null, req.user.image_url);
+    }
+})
 
+@ApiCookieAuth()
 @Controller('user')
 export class UserProviderController {
-    constructor(private readonly userServiceServer: UserServiceService) {}
+    constructor(private readonly userServiceServer: UserServiceService) {
+    }
 
     @UseGuards(AuthenticatedGuard)
     @Get("id/:id")
@@ -30,24 +51,21 @@ export class UserProviderController {
     @UseGuards(AuthenticatedGuard)
     @Get("friend")
     @ApiOperation({summary: "Get all current friend user log"})
-    getFriend(@Request() req: any)
-    {
+    getFriend(@Request() req: any) {
         return this.userServiceServer.getFriend(req.user.id);
     }
 
     @UseGuards(AuthenticatedGuard)
     @Post("friend/add/:id")
     @ApiOperation({summary: "Accept friend request by id", description: "the id send by websocket"})
-    createFriend(@Param(":id") id : string, @Request() req: any)
-    {
+    createFriend(@Param(":id") id: string, @Request() req: any) {
         return this.userServiceServer.addFriend(req.user.id, Number(id));
     }
 
     @UseGuards(AuthenticatedGuard)
     @Post("friend/delete/:id")
     @ApiOperation({summary: "Delete friend by relation id"})
-    deleteFriend(@Param(":id") id: string, @Request() req: any)
-    {
+    deleteFriend(@Param(":id") id: string, @Request() req: any) {
         return this.userServiceServer.deleteFriend(req.user.id, Number(id));
     }
 
@@ -68,8 +86,7 @@ export class UserProviderController {
         element?: keyof Prisma.UserWhereInput;
         value?: any;
         orderBy?: Prisma.UserOrderByWithRelationInput;
-    })
-    {
+    }) {
         let user: {
             skip?: number;
             take?: number;
@@ -98,12 +115,42 @@ export class UserProviderController {
     @UseGuards(AuthenticatedGuard)
     @Post("me")
     @ApiOperation({summary: "Update user only username is accept"})
-    @ApiBody({ type: updateUser})
-    postUser(@Request() req: any, @Body() body: Prisma.UserUpdateInput)
-    {
+    @ApiBody({type: updateUser})
+    postUser(@Request() req: any, @Body() body: Prisma.UserUpdateInput) {
         this.userServiceServer.updateUser(req.user.id, body);
     }
 
+    @UseGuards(AuthenticatedGuard)
+    @Post("me/image")
+    @UseInterceptors(FileInterceptor('image', {
+        storage: storage
+    }))
+    @ApiOperation({summary: "upload the new image for the profile"})
+    @ApiConsumes('multipart/form-data')
+    @ApiBody({
+        schema: {
+            type: 'object',
+            properties: {
+                file: {
+                    type: 'string',
+                    format: 'binary',
+                },
+            },
+        },
+    })
+    imageMe(@UploadedFile(
+        new ParseFilePipe({
+            validators: [
+                new MaxFileSizeValidator({ maxSize: 1000 }),
+                new FileTypeValidator({ fileType: 'image/png' }),
+            ],
+        }),
+    ) file: Express.Multer.File, @Request() req: any)
+    {
+        return ({file: req.user.image_url});
+    }
+
+    /*
     @UseGuards(AuthenticatedGuard)
     @Post("block/:id")
     @ApiOperation({summary: "Block user by id"})
@@ -120,5 +167,5 @@ export class UserProviderController {
     {
         this.userServiceServer.unblockuser(req.user.id, Number(id));
     }
-
+    */
 }

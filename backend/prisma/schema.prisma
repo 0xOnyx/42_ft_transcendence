@@ -109,8 +109,8 @@ model	Rooms {
 	messages				Messages[]	@relation("message")
 	user						RoomUser[]
 	last_message_id	Int					@unique
-	last_message		Messages		@relation("last_message", fields: [last_message_id], references: [id])
-	count_messages	Int
+	last_message		Messages?		@relation("last_message", fields: [last_message_id], references: [id])
+	count_messages	Int					@default(0)
 }
 
 enum		TypeMessage {
@@ -147,17 +147,17 @@ model	RoomUser {
 	ban										Boolean		@default(false)
 	mute									Boolean		@default(false)
 	term_penalty					DateTime	@default(now())
-	last_message_read_id	Int
-	last_message					Messages	@relation(fields: [last_message_read_id], references: [id])
-	count_read_messages		Int
+	last_message_read_id	Int?
+	last_message					Messages?	@relation(fields: [last_message_read_id], references: [id])
+	count_read_messages		Int				@default(0)
 }
 
 model	LockUsers {
-	id							Int			@default(autoincrement()) @id
-	user_id					Int
-	user						User		@relation("user_lock", fields: [user_id], references: [id])
-	lock_user_id		Int
-	lock_user				User		@relation("symetric_user_lock", fields: [lock_user_id], references: [id] )
+	id										Int			@default(autoincrement()) @id
+	user_id								Int
+	user									User		@relation("user_lock", fields: [user_id], references: [id])
+	lock_user_id					Int
+	lock_user							User		@relation("symetric_user_lock", fields: [lock_user_id], references: [id] )
 }
 
 enum	StatusGame {
@@ -172,17 +172,17 @@ enum	TypeGame {
 }
 
 model	Game {
-	id							Int					@default(autoincrement()) @id
-	status					StatusGame	@default(CREATED)
-	player_one_id		Int
-	player_one			User				@relation("player_one", fields: [player_one_id], references: [id])
-	player_two_id		Int
-	player_two			User				@relation("player_two", fields: [player_two_id], references: [id])
-	player_one_accepted	Boolean	@default(false)
-	player_two_accepted	Boolean	@default(false)
-	map_type				TypeGame		@default(STANDARD)
-	level						Int
-	created_at			DateTime		@default(now())
-	score_one				Int
-	score_two				Int
+	id										Int					@default(autoincrement()) @id
+	status								StatusGame	@default(CREATED)
+	player_one_id					Int
+	player_one						User				@relation("player_one", fields: [player_one_id], references: [id])
+	player_two_id					Int
+	player_two						User				@relation("player_two", fields: [player_two_id], references: [id])
+	player_one_accepted		Boolean			@default(false)
+	player_two_accepted		Boolean			@default(false)
+	map_type							TypeGame		@default(STANDARD)
+	level									Int
+	created_at						DateTime		@default(now())
+	score_one							Int
+	score_two							Int
 }
