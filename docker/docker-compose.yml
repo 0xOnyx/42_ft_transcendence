@@ -1,6 +1,18 @@
 version: '3.6'
 
 services:
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/ssl/
+    networks:
+      - transcendence
   postgres:
     container_name: postgres
     image: postgres
@@ -29,16 +41,27 @@ services:
     ports:
       - "8080:80"
     depends_on:
-      - db
+      - postgres
     networks:
       - transcendence
-
-#  front:
-#    build: docker/front
-#    volumes:
-#      - ./front:/app:delegated
-#    ports:
-#      - "3000:3000"
+  frontend:
+    container_name: frontend
+    build: ./front
+    volumes:
+      - ../front:/app:delegated
+    ports:
+      - "3001:3001"
+    networks:
+      - transcendence
+  backend:
+    container_name: backend
+    build: ./back
+    volumes:
+      - ../backend:/app:delegated
+    ports:
+      - "3000:3000"
+    networks:
+      - transcendence
 
 networks:
   transcendence:
