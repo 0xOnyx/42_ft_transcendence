@@ -1,0 +1,8 @@
+DATABASE_URL="postgresql://user:pass@IP:5432/transcendence?schema=public&connect_timeout=1000"
+API_OAUTH2=https://api.intra.42.fr/
+CLIENT_ID=id
+CLIENT_SECRET=secret
+HOST=http://localhost:3000/
+PHOTO_PATH=image
+SECRET_COOKIE=secret
+REDIRECT=http://localhost:3001/portal
