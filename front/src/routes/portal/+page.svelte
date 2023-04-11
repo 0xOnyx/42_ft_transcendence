@@ -3,28 +3,51 @@
     import Button from '../../components/Button.svelte';
     import ItemName from '../../components/Itemname.svelte';
 
-	var friends = [
+    interface UserStats {
+        played: number,
+        ratio: number,
+        level: number,
+    }
+    interface User {
+        id: number,
+        name: string,
+        login?: string,
+    }
+
+    let user : User = {
+        id: 1,
+        name: 'Marvin McKinney',
+        login: 'mmckinne'
+    }
+
+    let userstats : UserStats = {
+        played : 42,
+        ratio: 84,
+        level: 21
+    }
+
+    var connected : Array<User> = [
 		{ id: 1, name: 'Jacob Jones' },
 		{ id: 2, name: 'Leslie Alexander' },
 		{ id: 3, name: 'Eleanor Pena' },
         { id: 4, name: 'Wade Warren' },
-    //    { id: 5, name: 'Kathryn Murphy' },
-    //    { id: 6, name: 'Marvin McKinney' }
+        { id: 5, name: 'Kathryn Murphy' },
+        { id: 6, name: 'Marvin McKinney' }
 	];
 
     var search_value : string = '';
 
-	var search = friends;
+	var search : Array<Object> = connected;
 
     function filter()
     {
         console.log(search);
-        search = friends.filter((f) => {
+        search = connected.filter((f) => {
             return f.name.toLowerCase().includes(search_value.toLowerCase());
         });
     }
 
-    export let data: PageData;
+    //export let data: PageData;
 </script>
 
 <svelte:head>
@@ -47,45 +70,68 @@
     </script>
 </svelte:head>
 
-<div class="bg-color3 self-center container m-auto sm:border-4 border-black rounded p-2 sm:p-10">
-    <div class="flex text-center align-middle m-5 max-h-full overflow-hidden">
+<div class="h-full container md:py-10 xl:py-20 mx-auto">
 
-        <div class="bg-color5 grow grid grid-cols-2 grid-rows-1">
+    <div class="h-full bg-color3 self-center md:border-4 border-black rounded p-1 pb-3 xl:p-8">
 
-            <div class="flex items-center">
+        <div class="md:flex h-full text-center align-middle m-1">
 
-                <div class="grow">
+            <div class="bg-color5 grow justify-around lg:flex mr-2 xl:mr-8 overflow-auto p-5">
 
-                    <div class=""><svg class="rounded-full mx-auto bg-color3" width="100" height="100" data-jdenticon-value="icon"></svg></div>
-                    <div class="mt-5">
-                        <h1 class="text-lg">Marvin McKinney</h1>
-                        <small>#mmckinne</small>
+                <div class="flex items-center">
+
+                    <div class="grow">
+
+                        <div class=""><svg class="rounded-full mx-auto bg-color3" width="100" height="100" data-jdenticon-value="icon"></svg></div>
+                        <div class="mt-5">
+                            <h1 class="text-lg">{user.name}</h1>
+                            <small>#{user.login}</small>
+                        </div>
+                        <div class="mt-5"><Button width="w-52" name="Change Username" url="/"></Button></div>
+                        <div class="mt-2"><Button width="w-52" name="Change Avatar" url="/"></Button></div>
+                        <div class="mt-2"><Button width="w-52" name="Logout" url="/"></Button></div>
+
                     </div>
-                    <div class="mt-5"><Button name="Change Username" url="/"></Button></div>
-                    <div class="mt-2"><Button name="Change Avatar" url="/"></Button></div>
-                    <div class="mt-2"><Button name="Logout" url="/"></Button></div>
+
+                </div>
+
+                <div class="flex items-center">
+
+                    <div class="grow">
+
+                        <div class="mt-5">
+                            <p>Statistics</p>
+
+                            <p class="mt-5">Game played : <span>{userstats.played}</span></p>
+
+                            <p>Win ratio : <span>{userstats.ratio}%</span></p>
+
+                            <p>Rank : <span>{userstats.level}</span></p>
+
+                        </div>
+
+                        <div class="mt-5"><Button width="w-52" name="Gold League" color="bg-yellow-400"  url="/"></Button></div>
+
+                        <div class="mt-12"><Button width="w-52" name="New Game" url="/"></Button></div>
+
+
+                        <div class="md:flex justify-center mt-5">
+
+                            <div class="m-2"><Button width="w-28" name="DM" url="/"></Button></div>
+                            <div class="m-2"><Button width="w-28" name="Private" url="/"></Button></div>
+                            <div class="m-2"><Button width="w-28" name="Public" url="/"></Button></div>
+
+                        </div>
+
+                    </div>
 
                 </div>
 
             </div>
 
-            <div class="flex items-center">
+            <div class="md:w-1/3 lg:w-1/4 md:flex md:flex-col">
 
-                <div class="grow">
-
-
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <div class="sm:w-1/4">
-
-            <div class="mx-5">
-
-                <h2>Friends lists</h2>
+                <h2 class="text-left border-b-2 text-lg">Friends lists</h2>
 
                 <div class="mt-2">
                     <a class="w-full bg-color2 px-8 py-2 rounded-md inline-block" href="">Add Friend</a>
@@ -112,7 +158,6 @@
     </div>
 
 </div>
-
 
 
 
