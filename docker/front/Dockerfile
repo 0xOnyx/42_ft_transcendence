@@ -15,7 +15,7 @@ WORKDIR /app
 
 VOLUME /app
 
-EXPOSE 3000
+EXPOSE 3001
 
 ENTRYPOINT /entrypoint.sh
 
