@@ -12,6 +12,6 @@ export class AuthService {
 			type: Log.LOGIN,
 			datas: JSON.stringify({ip_address: ip, time: new Date()})
 		})
-		return res.redirect("/home"); //TODO: redirect to real home page
+		return res.redirect(process.env.REDIRECT); //TODO: redirect to real home page
 	}
 }

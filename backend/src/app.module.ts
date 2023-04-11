@@ -6,9 +6,11 @@ import { PrismaModule } from './prisma/prisma.module';
 import { UserModule } from './user/user.module';
 import { EventWsModule } from './eventWs/eventWsModule';
 import { MessageModule } from './message/message.module';
+import {ConfigModule} from "@nestjs/config";
+
 
 @Module({
-  imports: [AuthModule, PrismaModule, UserModule, EventWsModule, MessageModule],
+  imports: [ConfigModule.forRoot(), AuthModule, PrismaModule, UserModule, EventWsModule, MessageModule],
   controllers: [AppController],
   providers: [AppService],
 })
