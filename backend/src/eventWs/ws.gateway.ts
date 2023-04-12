@@ -10,12 +10,10 @@ import {
   WsException
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { AuthenticatedGuard } from "../auth/guards/authenticated.guard";
 import { IncomingMessage } from 'http';
 import { ActivitylogService } from "../prisma/activitylog.service";
 import { UserService } from "../prisma/user.service";
 import { MessageService } from "../prisma/message.service";
-import { UseGuards } from "@nestjs/common";
 import { TypeRoom, RoleUser, Log, Status, TypeMessage, Friend, Rooms, RoomUser, User } from "@prisma/client"
 import sessionMiddleware from '../sessions'
 import * as passport from "passport";
@@ -32,7 +30,7 @@ interface CustomSocket extends Socket {
   };
 }
 
-@WebSocketGateway({ namespace: 'events' })
+@WebSocketGateway({path: "/ws/", namespace: 'events' })
 export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   constructor(private readonly activitylog: ActivitylogService, private readonly userService: UserService, private readonly messageService: MessageService) {}
   async check_user(data: {room_id: number, user_id: number}, client: CustomSocket)
@@ -60,11 +58,10 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
     server.use(wrap(passport.initialize()))
     server.use(wrap(passport.session()))
     server.use((client: any, next) => {
-      if (client.request.user) {
-        next();
-      } else {
+      if (!client.request.isAuthenticated() || !client.request.user)
         next(new Error('unauthorized'))
-      }
+      else
+        next();
     })
   }
   async handleConnection(client: CustomSocket) {
@@ -132,7 +129,16 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
       client.emit('dissconect', "disconnect to server");
     }
 
-    @UseGuards(AuthenticatedGuard)
+
+    @SubscribeMessage("PING")
+    async ping(
+        @ConnectedSocket() client: CustomSocket
+    )
+    {
+      client.emit("PING", client.request.user);
+    }
+
+
     @SubscribeMessage('message')
     async handleEvent(
       @MessageBody() data: {room_id: number, message: string, message_type: string},
@@ -192,21 +198,19 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
       this.server.in(room_user.room.id.toString()).emit("message", to_send_data);
     }
 
-    @UseGuards(AuthenticatedGuard)
-    @SubscribeMessage('createRoomPublic')
-    async createRoomPublic(
-        @MessageBody() data: {password?: string},
-        @ConnectedSocket() client: CustomSocket,
-    ) {
-      if (!client.request.user)
-        throw new WsException("no user");
-      const room: Rooms = await this.messageService.createRoom(TypeRoom.PUBLIC_ROOM, {id: client.request.user.id}, data);
-      await this.messageService.joinRoom({id: room.id}, {id: client.request.user.id}, RoleUser.ADMIN, data.password);
-      this.server.in(client.request.user.id.toString()).socketsJoin(room.id.toString());
-      this.server.in(room.id.toString()).emit("updateRoom", room);
-  }
+  @SubscribeMessage('createRoomPublic')
+  async createRoomPublic(
+      @MessageBody() data: {password?: string},
+      @ConnectedSocket() client: CustomSocket,
+  ) {
+    if (!client.request.user)
+      throw new WsException("no user");
+    const room: Rooms = await this.messageService.createRoom(TypeRoom.PUBLIC_ROOM, {id: client.request.user.id}, data);
+    await this.messageService.joinRoom({id: room.id}, {id: client.request.user.id}, RoleUser.ADMIN, data.password);
+    this.server.in(client.request.user.id.toString()).socketsJoin(room.id.toString());
+    this.server.in(room.id.toString()).emit("updateRoom", room);
+}
 
-  @UseGuards(AuthenticatedGuard)
   @SubscribeMessage('joinRoomPublic')
   async joinRoomPublic(
       @MessageBody() data: {room_id: number, password?: string},
@@ -223,7 +227,6 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
     this.server.in(client.request.user.id.toString()).socketsJoin(data.room_id.toString());
   }
 
-  @UseGuards(AuthenticatedGuard)
   @SubscribeMessage('leftRoomPublic')
   async leftRoomPublic(
       @MessageBody() data: {room_id: number},
@@ -240,7 +243,6 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
     this.server.in(client.request.user.id.toString()).socketsLeave(data.room_id.toString());
   }
 
-  @UseGuards(AuthenticatedGuard)
   @SubscribeMessage('updateRoomPublic')
   async updateRoomPublic(
       @MessageBody() data: {room_id: number, password: string},
@@ -252,7 +254,6 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
     this.server.in(room.id.toString()).emit("updateRoom", room);
   }
 
-  @UseGuards(AuthenticatedGuard)
   @SubscribeMessage('createDm')
   async createDM(
       @MessageBody() data: {user_id: number},
@@ -278,7 +279,6 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
     this.server.in(data.user_id.toString()).socketsJoin(room.id.toString());
   }
 
-  @UseGuards(AuthenticatedGuard)
   @SubscribeMessage('leftDm')
   async leftDm(
       @MessageBody() data: {user_id: number},
@@ -298,7 +298,6 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
     this.server.in(data.user_id.toString()).socketsLeave(room.id.toString());
   }
 
-  @UseGuards(AuthenticatedGuard)
   @SubscribeMessage('setUserRole')
   async setUserRole(
       @MessageBody() data: {room_id: number, user_id: number, role: RoleUser},
@@ -313,7 +312,6 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
     this.server.in(data.room_id.toString()).emit("updateRoom", room_update);
   }
 
-  @UseGuards(AuthenticatedGuard)
   @SubscribeMessage('banUserChannel')
   async banUserChannel(
       @MessageBody() data: {room_id: number, user_id: number},
@@ -330,7 +328,6 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
     this.server.in(data.room_id.toString()).emit("updateRoom", room_update);
   }
 
-  @UseGuards(AuthenticatedGuard)
   @SubscribeMessage('unbanUserChannel')
   async unbanUserChannel(
       @MessageBody() data: {room_id: number, user_id: number},
@@ -352,7 +349,6 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
     return new Date(Date.now() + (3600000 * number_hours))
   }
 
-  @UseGuards(AuthenticatedGuard)
   @SubscribeMessage('muteUser')
   async muteUser(
       @MessageBody() data: {room_id: number, user_id: number, number_hours: number},
@@ -369,7 +365,6 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
     this.server.in(data.room_id.toString()).emit("updateRoom", room_update);
   }
 
-  @UseGuards(AuthenticatedGuard)
   @SubscribeMessage('kickUser')
   async kickUser(
       @MessageBody() data: {room_id: number, user_id: number},
@@ -386,7 +381,6 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
     this.server.in(data.room_id.toString()).emit("updateRoom", room);
   }
 
-  @UseGuards(AuthenticatedGuard)
   @SubscribeMessage('blockUser')
   async blockUser(
     @MessageBody() data: {user_id: number},
@@ -412,7 +406,6 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
     this.server.in(data.user_id.toString()).socketsLeave(room.id.toString());
   }
 
-  @UseGuards(AuthenticatedGuard)
   @SubscribeMessage('unblockUser')
   async unblockUser(
       @MessageBody() data: {user_id: number},

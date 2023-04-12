@@ -7,7 +7,9 @@ const config = {
 		include: ['src/**/*.{test,spec}.{js,ts}']
 	},
     server: {
-        host: '0.0.0.0',
+        port: 3001,
+        host: true,
+        strictPort: true,
 		watch : {
 			usePolling: true
 		}

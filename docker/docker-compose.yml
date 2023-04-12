@@ -1,26 +1,33 @@
 version: '3.6'
 
 services:
+
   nginx:
     image: nginx:latest
     container_name: nginx
     restart: unless-stopped
     ports:
-      - 80:80
-      - 443:443
+      - "80:80"
+      - "443:443"
     volumes:
       - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ../backend/image:/backend/image
       - ./ssl:/ssl/
+    depends_on:
+      - backend
     networks:
       - transcendence
+
   postgres:
     container_name: postgres
     image: postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: yourusername
-      POSTGRES_PASSWORD: yourpassword
-      POSTGRES_DB: yourdatabase
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mysecretpassword
+      POSTGRES_DB: transcendence
+    ports:
+      - "5432:5432"
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
     networks:
@@ -44,6 +51,7 @@ services:
       - postgres
     networks:
       - transcendence
+
   frontend:
     container_name: frontend
     build: ./front
@@ -51,8 +59,11 @@ services:
       - ../front:/app:delegated
     ports:
       - "3001:3001"
+    depends_on:
+      - backend
     networks:
       - transcendence
+
   backend:
     container_name: backend
     build: ./back
@@ -60,6 +71,8 @@ services:
       - ../backend:/app:delegated
     ports:
       - "3000:3000"
+    depends_on:
+      - postgres
     networks:
       - transcendence
 

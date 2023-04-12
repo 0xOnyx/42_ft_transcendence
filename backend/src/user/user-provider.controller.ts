@@ -105,10 +105,8 @@ export class UserProviderController {
         if (queryList.element && queryList.value) {
             user.where = {};
             if (user.where)
-                user.where[queryList.element] = queryList.value;
+                user.where[queryList.element] = {contains: queryList.value};
         }
-        console.log(queryList);
-        console.log(user);
         return this.userServiceServer.getSearch(user);
     }
 

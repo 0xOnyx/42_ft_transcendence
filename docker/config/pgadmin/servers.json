@@ -6,7 +6,7 @@
 			"Group": "Servers",
 			"Port": 5432,
 			"MaintenanceDB": "postgres",
-			"Username": "yourusername",
+			"Username": "postgres",
 			"KerberosAuthentication": false,
 			"ConnectionParameters": {
 				"sslmode": "prefer"

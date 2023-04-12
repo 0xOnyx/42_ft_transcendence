@@ -1,24 +1,54 @@
 <script lang="ts">
-    import type { PageData } from './$types';
+    import {PUBLIC_API_URI} from "$env/static/public";
+
     import Button from '../../components/Button.svelte';
     import ItemName from '../../components/Itemname.svelte';
+    import {onMount} from "svelte";
+    import {goto} from "$app/navigation";
+    import {io, Socket} from "socket.io-client";
 
     interface UserStats {
         played: number,
         ratio: number,
         level: number,
     }
-    interface User {
+
+    let Status: {
+        ONLINE: 'ONLINE',
+        OFFLINE: 'OFFLINE',
+        HIDDEN: 'HIDDEN'
+    };
+    type Status = (typeof Status)[keyof typeof Status]
+    type User =
+    {
         id: number,
-        name: string,
-        login?: string,
+        name?: string,
+        email?: string,
+        first_name?: string,
+        last_name?: string,
+        image_url?: string,
+        oauth_42_login?: string,
+        oauth_42_id?: number,
+        last_login?: Date,
+        online_status?: Status,
+    }
+    type Friend = {
+        id: number
+        user_id: number
+        friend_id: number
+        request_at: Date
+        accept_at: Date | null
     }
 
-    let user : User = {
-        id: 1,
-        name: 'Marvin McKinney',
-        login: 'mmckinne'
-    }
+
+
+    let search_value: string = "";
+    let search : User[] = [];
+    let friends : User[] = [];
+    let user : User;
+    let connectedWs: Boolean = false;
+    let socket: Socket ;
+
 
     let userstats : UserStats = {
         played : 42,
@@ -26,26 +56,71 @@
         level: 21
     }
 
-    var connected : Array<User> = [
-		{ id: 1, name: 'Jacob Jones' },
-		{ id: 2, name: 'Leslie Alexander' },
-		{ id: 3, name: 'Eleanor Pena' },
-        { id: 4, name: 'Wade Warren' },
-        { id: 5, name: 'Kathryn Murphy' },
-        { id: 6, name: 'Marvin McKinney' }
-	];
 
-    var search_value : string = '';
-
-	var search : Array<Object> = connected;
-
-    function filter()
+    async function searchUser()
     {
-        console.log(search);
-        search = connected.filter((f) => {
-            return f.name.toLowerCase().includes(search_value.toLowerCase());
+        const res: Response = await fetch(`${PUBLIC_API_URI}/user/search?skip=0&take=10&element=name&value=${search_value}`, {
+            method: 'GET',
+            credentials: 'include'
         });
+        search = await res.json();
     }
+    onMount(async () => {
+
+        let res: Response = await fetch(`${PUBLIC_API_URI}/auth/islogged`, {
+            method: 'GET',
+            credentials: 'include'
+        });
+        res = await res.json();
+        if (!res)
+            await goto("/")
+
+        res = await fetch(`${PUBLIC_API_URI}/user/friend`, {
+            method: 'GET',
+            credentials: 'include'
+        });
+
+        const friends_list: Friend[] = (await res.json()).friend;
+
+
+        res = await fetch(`${PUBLIC_API_URI}/user/id/me`, {
+            method: 'GET',
+            credentials: 'include'
+        });
+        user = await res.json();
+
+        for (const item of friends_list) {
+            try {
+                let id =  item.friend_id === user.id ? item.user_id : item.friend_id
+                const res: Response = await fetch(`${PUBLIC_API_URI}/user/id/${id}`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                const new_friend: User = (await res.json());
+                friends.push(new_friend)
+            }
+            catch (err)
+            {
+                console.error(err);
+            }
+        }
+
+
+        socket = io('/events', {
+            path: "/ws/"
+        });
+
+        socket.on("connection", (data) => {
+            connectedWs = true;
+        })
+
+        socket.on("FriendStatusUdpate", (data: {id: number, status: Status})=>{
+            const index = friends.findIndex((element: Friend)=> element.id == data.id)
+            friends[index].online_status = data.status;
+        })
+
+    })
+
 
     //export let data: PageData;
 </script>
@@ -65,9 +140,6 @@
             backColor: "#383683"
         };
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/jdenticon@3.2.0/dist/jdenticon.min.js" async
-    integrity="sha384-yBhgDqxM50qJV5JPdayci8wCfooqvhFYbIKhv0hTtLvfeeyJMJCscRfFNKIxt43M" crossorigin="anonymous">
-    </script>
 </svelte:head>
 
 <div class="h-full container md:py-10 xl:py-20 mx-auto">
@@ -82,15 +154,18 @@
 
                     <div class="grow">
 
-                        <div class=""><svg class="rounded-full mx-auto bg-color3" width="100" height="100" data-jdenticon-value="icon"></svg></div>
+                        <div class="border:rad">
+                            <div class="w-[150px] h-[150px] bg-cover  rounded-full mx-auto"
+                                 style="background-image: url( {user?.image_url || `image/default.png`} )">
+                            </div>
+                        </div>
+
                         <div class="mt-5">
-                            <h1 class="text-lg">{user.name}</h1>
-                            <small>#{user.login}</small>
+                            <h1 class="text-lg">{user?.name || "loading.."}</h1>
+                            <small>#{user?.oauth_42_login || "loading.."}</small>
                         </div>
                         <div class="mt-5"><Button width="w-52" name="Change Username" url="/"></Button></div>
                         <div class="mt-2"><Button width="w-52" name="Change Avatar" url="/"></Button></div>
-                        <div class="mt-2"><Button width="w-52" name="Logout" url="/"></Button></div>
-
                     </div>
 
                 </div>
@@ -118,8 +193,7 @@
                         <div class="md:flex justify-center mt-5">
 
                             <div class="m-2"><Button width="w-28" name="DM" url="/"></Button></div>
-                            <div class="m-2"><Button width="w-28" name="Private" url="/"></Button></div>
-                            <div class="m-2"><Button width="w-28" name="Public" url="/"></Button></div>
+                            <div class="m-2"><Button width="w-28" name="Channel" url="/"></Button></div>
 
                         </div>
 
@@ -133,22 +207,30 @@
 
                 <h2 class="text-left border-b-2 text-lg">Friends lists</h2>
 
-                <div class="mt-2">
-                    <a class="w-full bg-color2 px-8 py-2 rounded-md inline-block" href="">Add Friend</a>
-                </div>
+
 
                 <div class="mt-2">
-                    <input class="w-full rounded-2xl py-1 px-3 bg-color5" type="text" bind:value={search_value} placeholder="Search" on:keyup={filter}>
+                    <input class="w-full rounded-2xl py-1 px-3 bg-color5" type="text" bind:value={search_value} placeholder="Search" on:keyup={searchUser}>
                 </div>
 
                 <div class="overflow-auto mt-3">
-
-                    {#each search as friend, i}
-
-                        <ItemName name={friend.name}></ItemName>
-
-                    {/each}
-
+                    {#if search_value.length <= 0}
+                        {#if friends.length <= 0}
+                            <p>NO FRIEND</p>  <!-- CREATE THIS -->
+                        {:else}
+                            {#each friends as friend}
+                                <ItemName user={friend}></ItemName>
+                            {/each}
+                        {/if}
+                    {:else}
+                        {#if  search.length <= 0}
+                            <p>no user found :/</p>  <!-- CREATE THIS -->
+                        {:else}
+                            {#each search as user}
+                                <ItemName user={user}></ItemName>
+                            {/each}
+                        {/if}
+                    {/if}
                 </div>
 
             </div>
