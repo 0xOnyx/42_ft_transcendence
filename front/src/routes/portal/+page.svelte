@@ -3,6 +3,10 @@
 
     import Button from '../../components/Button.svelte';
     import ItemName from '../../components/Itemname.svelte';
+
+    import type {User, Status} from '../../types/user';
+    import type {Friend} from '../../types/friend';
+
     import {onMount} from "svelte";
     import {goto} from "$app/navigation";
     import {io, Socket} from "socket.io-client";
@@ -12,35 +16,6 @@
         ratio: number,
         level: number,
     }
-
-    let Status: {
-        ONLINE: 'ONLINE',
-        OFFLINE: 'OFFLINE',
-        HIDDEN: 'HIDDEN'
-    };
-    type Status = (typeof Status)[keyof typeof Status]
-    type User =
-    {
-        id: number,
-        name?: string,
-        email?: string,
-        first_name?: string,
-        last_name?: string,
-        image_url?: string,
-        oauth_42_login?: string,
-        oauth_42_id?: number,
-        last_login?: Date,
-        online_status?: Status,
-    }
-    type Friend = {
-        id: number
-        user_id: number
-        friend_id: number
-        request_at: Date
-        accept_at: Date | null
-    }
-
-
 
     let search_value: string = "";
     let search : User[] = [];
@@ -55,7 +30,6 @@
         ratio: 84,
         level: 21
     }
-
 
     async function searchUser()
     {
@@ -115,7 +89,7 @@
         })
 
         socket.on("FriendStatusUdpate", (data: {id: number, status: Status})=>{
-            const index = friends.findIndex((element: Friend)=> element.id == data.id)
+            const index = friends.findIndex((element: User)=> element.id == data.id)
             friends[index].online_status = data.status;
         })
 
