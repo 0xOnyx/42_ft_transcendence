@@ -1,9 +1,11 @@
 <script lang="ts">
 
     import type {Room, RoomUser} from '../types/room';
+	import type { User } from '../types/user';
 
     //bg-green-600
     export let room : Room;
+    export let user : User;
 
 </script>
 
@@ -28,6 +30,7 @@
             </div>
 
         </div>
+
         {/if}
     {/each}
 {/if}

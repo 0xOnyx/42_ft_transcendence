@@ -1,0 +1,36 @@
+<script lang="ts">
+	import type { User } from "../types/user";
+	import Icon from "./Icon.svelte";
+
+    export let user : User;
+</script>
+
+<div class="flex bg-color5 rounded-xl items-center">
+
+    <div class="">
+
+        <Icon icon="bell" css="inline m-3 h-8 stroke-2 stroke-white fill-none"></Icon>
+
+    </div>
+
+    <div class="">
+
+        {#if user.image_url}
+            <img class="h-8" src={user.image_url} alt="logo">
+        {/if}
+
+    </div>
+
+    <div class="flex-grow text-left px-2">
+
+        {user.name}
+
+    </div>
+
+    <div class="">
+
+        <Icon icon="exit" css="inline m-3 h-8 stroke-none fill-white"></Icon>
+
+    </div>
+
+</div>
