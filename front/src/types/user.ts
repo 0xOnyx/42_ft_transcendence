@@ -18,3 +18,9 @@ export enum Status {
     OFFLINE = 'OFFLINE',
     HIDDEN = 'HIDDEN'
 };
+
+export type UserStats = {
+    played: number,
+    ratio: number,
+    level: number,
+}

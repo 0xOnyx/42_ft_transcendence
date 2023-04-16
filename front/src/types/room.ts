@@ -3,13 +3,14 @@ import type { User } from './user.js';
 export type Room =
 {
     id: number,
+    name: string,
     owner_id: number,
     type: RoomType,
     password?: string,
     last_message_id?: number,
     count_messages?: number,
     users?: Array<RoomUser>,
-    mesages?: Array<Message>,
+    messages?: Array<Message>,
 }
 
 export enum RoomType
