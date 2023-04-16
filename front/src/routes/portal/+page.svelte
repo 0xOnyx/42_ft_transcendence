@@ -4,18 +4,14 @@
     import Button from '../../components/Button.svelte';
     import ItemName from '../../components/Itemname.svelte';
 
-    import type {User, Status} from '../../types/user';
+    import type {User, Status, UserStats} from '../../types/user';
     import type {Friend} from '../../types/friend';
 
     import {onMount} from "svelte";
     import {goto} from "$app/navigation";
     import {io, Socket} from "socket.io-client";
-
-    interface UserStats {
-        played: number,
-        ratio: number,
-        level: number,
-    }
+	import UserStat from "../../components/UserStat.svelte";
+	import UserInfo from "../../components/UserInfo.svelte";
 
     let search_value: string = "";
     let search : User[] = [];
@@ -23,7 +19,6 @@
     let user : User;
     let connectedWs: Boolean = false;
     let socket: Socket ;
-
 
     let userstats : UserStats = {
         played : 42,
@@ -122,22 +117,13 @@
 
         <div class="md:flex h-full text-center align-middle m-1">
 
-            <div class="bg-color5 grow justify-around lg:flex mr-2 xl:mr-8 overflow-auto p-5">
+            <div class="bg-color5 grow justify-around lg:flex mr-2 xl:mr-8 overflow-auto p-5 rounded-xl">
 
                 <div class="flex items-center">
 
                     <div class="grow">
+                        <UserInfo user={user}></UserInfo>
 
-                        <div class="border:rad">
-                            <div class="w-[150px] h-[150px] bg-cover  rounded-full mx-auto"
-                                 style="background-image: url( {user?.image_url || `image/default.png`} )">
-                            </div>
-                        </div>
-
-                        <div class="mt-5">
-                            <h1 class="text-lg">{user?.name || "loading.."}</h1>
-                            <small>#{user?.oauth_42_login || "loading.."}</small>
-                        </div>
                         <div class="mt-5"><Button width="w-52" name="Change Username" url="/"></Button></div>
                         <div class="mt-2"><Button width="w-52" name="Change Avatar" url="/"></Button></div>
                     </div>
@@ -149,25 +135,15 @@
                     <div class="grow">
 
                         <div class="mt-5">
-                            <p>Statistics</p>
-
-                            <p class="mt-5">Game played : <span>{userstats.played}</span></p>
-
-                            <p>Win ratio : <span>{userstats.ratio}%</span></p>
-
-                            <p>Rank : <span>{userstats.level}</span></p>
-
+                            <UserStat userstats={userstats}></UserStat>
                         </div>
-
-                        <div class="mt-5"><Button width="w-52" name="Gold League" color="bg-yellow-400"  url="/"></Button></div>
 
                         <div class="mt-12"><Button width="w-52" name="New Game" url="/"></Button></div>
 
-
                         <div class="md:flex justify-center mt-5">
 
-                            <div class="m-2"><Button width="w-28" name="DM" url="/"></Button></div>
-                            <div class="m-2"><Button width="w-28" name="Channel" url="/"></Button></div>
+                            <div class="m-2"><Button width="w-28" name="DM" url="/rooms/dms"></Button></div>
+                            <div class="m-2"><Button width="w-28" name="Channel" url="/rooms/channel"></Button></div>
 
                         </div>
 
@@ -184,7 +160,7 @@
 
 
                 <div class="mt-2">
-                    <input class="w-full rounded-2xl py-1 px-3 bg-color5" type="text" bind:value={search_value} placeholder="Search" on:keyup={searchUser}>
+                    <input class="w-full rounded-2xl py-1 px-3 bg-color5 focus:outline-none" type="text" bind:value={search_value} placeholder="Search" on:keyup={searchUser}>
                 </div>
 
                 <div class="overflow-auto mt-3">

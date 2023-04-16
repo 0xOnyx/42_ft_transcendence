@@ -1,6 +1,6 @@
 <script lang="ts">
     import Button from '../../../components/Button.svelte';
-    import ItemRoomDm from '../../../components/ItemRoomDm.svelte';
+    import ItemRoom from '../../../components/ItemRoom.svelte';
     import Message from '../../../components/Message.svelte';
     import Icon from '../../../components/Icon.svelte';
 
@@ -15,6 +15,7 @@
 	import UserNotification from '../../../components/UserNotification.svelte';
 	import UserStat from '../../../components/UserStat.svelte';
 	import UserInfo from '../../../components/UserInfo.svelte';
+	import ItemRoomUser from '../../../components/ItemRoomUser.svelte';
 
 
     let search_value: string = "";
@@ -122,18 +123,18 @@
 
                 <div class="mt-2 flex mb-5">
 
-                    <div class="mt-2 md:w-1/2 md:pr-2"><Button width="w-full" color="bg-color5 text-white border-2 border-color2" name="DM" url="/rooms/dms"></Button></div>
-                    <div class="mt-2 md:w-1/2 md:pl-2"><Button width="w-full" name="Channel" url="/rooms/channel"></Button></div>
+                    <div class="mt-2 md:w-1/2 md:pr-2"><Button width="w-full" name="DM" url="/rooms/dms"></Button></div>
+                    <div class="mt-2 md:w-1/2 md:pl-2"><Button width="w-full" color="bg-color5 text-white border-2 border-color2" name="Channel" url="/rooms/channel"></Button></div>
 
                 </div>
 
                 <div class="mt-2 flex mb-5">
 
-                    <div class="mt-2 flex-grow"><Button width="w-full" name="new DM" url="/"></Button></div>
+                    <div class="mt-2 flex-grow"><Button width="w-full" name="new Channel" url="/"></Button></div>
 
                 </div>
 
-                <h2 class="text-left border-b-2 text-lg">MD lists</h2>
+                <h2 class="text-left border-b-2 text-lg">Channel lists</h2>
 
                 <div class="mt-2">
 
@@ -144,7 +145,7 @@
                 <div class="overflow-auto mt-3">
 
                     {#each rooms as room}
-                        <ItemRoomDm user={user} room={room}></ItemRoomDm>
+                        <ItemRoom user={user} room={room}></ItemRoom>
                     {/each}
 
                 </div>
@@ -153,7 +154,7 @@
 
             <div class="bg-color5 grow justify-around md:flex md:flex-col my-5 md:my-0 md:mx-5 xl:mx-8 overflow-auto rounded-xl">
 
-                <div class="overflow-auto mt-3 flex-grow">
+                <div class="overflow-auto mt-3 flex-grow px-5">
 
                     {#each rooms as room}
                         <Message user={user} room={room}></Message>
@@ -176,7 +177,15 @@
 
                 <UserNotification user={user}></UserNotification>
 
-                <div class="overflow-auto mt-3 bg-color5 flex-grow  rounded-xl">
+                <div class="md:flex justify-center mt-5">
+
+                    <div class="m-2"><Button padding="" width="" name="Add Member" url="/"></Button></div>
+                    <div class="m-2"><Button padding="" width="" name="Quit group" url="/"></Button></div>
+                    <div class="m-2"><Button padding="" width="" name="Delete group" url="/"></Button></div>
+
+                </div>
+
+                <div class="overflow-auto mt-3 bg-color5 flex-grow rounded-xl">
 
                     <UserInfo user={user}></UserInfo>
 
@@ -186,6 +195,13 @@
 
                     </div>
 
+                </div>
+
+                <div class="overflow-auto mt-3">
+
+                    {#each rooms as room}
+                        <ItemRoomUser user={user} room={room}></ItemRoomUser>
+                    {/each}
 
                 </div>
 
