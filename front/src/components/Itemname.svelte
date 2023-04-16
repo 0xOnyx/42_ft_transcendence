@@ -1,23 +1,8 @@
 <script lang="ts">
-    let Status = {
-        ONLINE: 'ONLINE',
-        OFFLINE: 'OFFLINE',
-        HIDDEN: 'HIDDEN'
-    };
-    type Status = (typeof Status)[keyof typeof Status]
-    interface User
-    {
-        id: number,
-        name?: string,
-        email?: string,
-        first_name?: string,
-        last_name?: string,
-        image_url?: string,
-        oauth_42_login?: string,
-        oauth_42_id?: number,
-        last_login?: Date,
-        online_status?: Status,
-    }
+
+    import type {User} from '../types/user';
+    import {Status} from '../types/user';
+
     //bg-green-600
     export let user : User;
 
