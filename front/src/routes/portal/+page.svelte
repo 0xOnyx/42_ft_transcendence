@@ -6,6 +6,10 @@
     import {onMount} from "svelte";
     import {goto} from "$app/navigation";
     import {io, Socket} from "socket.io-client";
+    import Popup from "../../components/Popup.svelte";
+    import Popup_modify from "../../components/Popup_modify_username.svelte";
+    import Popup_modify_username from "../../components/Popup_modify_username.svelte";
+    import Popup_modify_picture from "../../components/Popup_modify_picture.svelte";
 
     interface UserStats {
         played: number,
@@ -19,7 +23,7 @@
         HIDDEN: 'HIDDEN'
     };
     type Status = (typeof Status)[keyof typeof Status]
-    type User =
+    type hUser =
     {
         id: number,
         name?: string,
@@ -121,8 +125,43 @@
 
     })
 
+    let openUpdate: boolean = false;
+    let openFile: boolean = false;
+
+    const closeUpdate = () => {
+        openUpdate = false;
+    }
+
+    const closeFile = ()=>{
+        openFile = false;
+    }
+    let error : string = ""
+    async function updateUser(value)
+    {
+        if (value.level <= 0)
+            return ;
+        const res: Response = await fetch(`${PUBLIC_API_URI}/user/me`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({name: value})
+        });
+        if (res.status != 201)
+        {
+            error = (await res.json()).message;
+            return ;
+        }
+        else
+        {
+            user = await res.json();
+            openUpdate = false;
+        }
+    }
 
     //export let data: PageData;
+
 </script>
 
 <svelte:head>
@@ -156,7 +195,7 @@
 
                         <div class="border:rad">
                             <div class="w-[150px] h-[150px] bg-cover  rounded-full mx-auto"
-                                 style="background-image: url( {user?.image_url || `image/default.png`} )">
+                                 style="background-image: url( {user?.image_url ? `${user?.image_url}?${Date.now()}` : `image/default.png`} )">
                             </div>
                         </div>
 
@@ -164,8 +203,33 @@
                             <h1 class="text-lg">{user?.name || "loading.."}</h1>
                             <small>#{user?.oauth_42_login || "loading.."}</small>
                         </div>
-                        <div class="mt-5"><Button width="w-52" name="Change Username" url="/"></Button></div>
-                        <div class="mt-2"><Button width="w-52" name="Change Avatar" url="/"></Button></div>
+                        {#if error.length > 0}
+                            <div class="relative z-[100]" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+                                <div class="fixed inset-0 overflow-y-auto">
+                                    <div class="flex min-h-full items-center justify-center p-4 text-left sm:items-center sm:p-0">
+
+                                        <div class="bg-red-100 border border-red-400 text-red-700 px-60 py-3 rounded relative" role="alert">
+                                            <strong class="font-bold">ERROR SERVER !</strong>
+                                            <span class="block sm:inline">{error}</span>
+                                            <span on:click={()=>{error=""}} class="absolute top-0 bottom-0 right-0 px-4 py-3">
+                                                <svg class="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/></svg>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {/if}
+
+                        {#if openUpdate}
+                            <Popup_modify_username updateUser={updateUser} close={closeUpdate} title="Modify username" placeholder="Username"></Popup_modify_username>
+                        {/if}
+                        {#if openFile}
+                            <Popup_modify_picture close={closeFile} title="Modify profile picture"></Popup_modify_picture>
+                        {/if}
+
+                        <div class="mt-5" disabled='{connectedWs}'  on:click={()=>{openUpdate = true }} ><Button width="w-45" color={connectedWs ? 'bg-color2': 'bg-neutral-600'} name={connectedWs ? "Change Username": "Loading.."}></Button></div>
+                        <div class="mt-7" disabled='{connectedWs}' on:click={()=>{openFile = true}}> <Button width="w-45" color={connectedWs ? 'bg-color2': 'bg-neutral-600'} name={connectedWs ? "Change Avatar": "Loading.."}></Button></div>
                     </div>
 
                 </div>
@@ -185,18 +249,11 @@
 
                         </div>
 
-                        <div class="mt-5"><Button width="w-52" name="Gold League" color="bg-yellow-400"  url="/"></Button></div>
+                        <div class="mt-8"><Button width="w-52" name="Gold League" color="bg-yellow-400"  ></Button></div>
 
-                        <div class="mt-12"><Button width="w-52" name="New Game" url="/"></Button></div>
+                        <div class="mt-7"><Button width="w-52" name="New Game" url="/game"></Button></div>
 
-
-                        <div class="md:flex justify-center mt-5">
-
-                            <div class="m-2"><Button width="w-28" name="DM" url="/"></Button></div>
-                            <div class="m-2"><Button width="w-28" name="Channel" url="/"></Button></div>
-
-                        </div>
-
+                        <div class="mt-7"><Button width="w-52" name="Message" url="/chat"></Button></div>
                     </div>
 
                 </div>

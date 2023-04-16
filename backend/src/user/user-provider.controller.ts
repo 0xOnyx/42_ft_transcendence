@@ -1,6 +1,7 @@
 import {
     Controller,
     Body,
+    Response,
     Request,
     Param,
     Post,
@@ -9,7 +10,7 @@ import {
     Query,
     UploadedFile,
     UseInterceptors,
-    ParseFilePipe, MaxFileSizeValidator, FileTypeValidator
+    ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, ConflictException
 } from '@nestjs/common';
 import {AuthenticatedGuard} from "../auth/guards/authenticated.guard";
 import {UserServiceService} from "./user.service";
@@ -26,7 +27,7 @@ export class updateUser {
 
 const storage = multer.diskStorage({
     destination: function (req , file, cb) {
-        cb(null, './image')
+        cb(null, './')
     },
     filename: function (req: any, file, cb) {
         cb(null, req.user.image_url);
@@ -114,8 +115,14 @@ export class UserProviderController {
     @Post("me")
     @ApiOperation({summary: "Update user only username is accept"})
     @ApiBody({type: updateUser})
-    postUser(@Request() req: any, @Body() body: Prisma.UserUpdateInput) {
-        this.userServiceServer.updateUser(req.user.id, body);
+    async postUser(@Request() req: any, @Body() body: Prisma.UserUpdateInput) {
+        try {
+            return await this.userServiceServer.updateUser(req.user.id, body);
+        }
+        catch(e)
+        {
+            throw new ConflictException();
+        }
     }
 
     @UseGuards(AuthenticatedGuard)
@@ -129,7 +136,7 @@ export class UserProviderController {
         schema: {
             type: 'object',
             properties: {
-                file: {
+                image: {
                     type: 'string',
                     format: 'binary',
                 },
@@ -139,13 +146,13 @@ export class UserProviderController {
     imageMe(@UploadedFile(
         new ParseFilePipe({
             validators: [
-                new MaxFileSizeValidator({ maxSize: 1000 }),
+                new MaxFileSizeValidator({ maxSize: 10 * 1000000 }),
                 new FileTypeValidator({ fileType: 'image/png' }),
             ],
         }),
-    ) file: Express.Multer.File, @Request() req: any)
+    ) file: Express.Multer.File, @Request() req: any, @Response() res: any)
     {
-        return ({file: req.user.image_url});
+        return res.redirect(process.env.REDIRECT);
     }
 
     /*

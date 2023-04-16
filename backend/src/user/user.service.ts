@@ -48,7 +48,7 @@ export class UserServiceService {
     updateUser(id: number, data: Prisma.UserUpdateInput) {
         let to_change: Prisma.UserUpdateInput = {};
         if (data.name)
-            to_change.name;
+            to_change.name = data.name;
         return this.userService.updateUser({where: {id: id}, data: to_change});
     }
 
