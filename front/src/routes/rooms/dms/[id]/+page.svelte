@@ -31,7 +31,6 @@
     let user : User;
     let socket: Socket;
     let connectedWs: Boolean = false;
-    let mounted = true;
 
     let userstats : UserStats = {
         played : 42,

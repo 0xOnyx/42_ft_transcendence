@@ -1,19 +1,14 @@
 <script lang="ts">
-    import Button from '../../../components/Button.svelte';
-    import ItemRoom from '../../../components/ItemRoom.svelte';
     import Message from '../../../components/Message.svelte';
     import Icon from '../../../components/Icon.svelte';
 
     import type {User} from '../../../types/user';
     import type {UserStats} from '../../../types/user';
-    import type {Room} from '../../../types/room';
-    import  {RoomType} from '../../../types/room';
-    import  {UserRole} from '../../../types/room';
-    import  {MessageRole} from '../../../types/room';
+    import type {Messages, Rooms} from '../../../types/room';
+    import  {UserRole, RoomType} from '../../../types/room';
 	import UserNotification from '../../../components/UserNotification.svelte';
 	import UserStat from '../../../components/UserStat.svelte';
 	import UserInfo from '../../../components/UserInfo.svelte';
-	import ItemRoomUser from '../../../components/ItemRoomUser.svelte';
 
     import Pong from '../../../pong/classic/pong';
 
@@ -22,8 +17,52 @@
 
 
     let search_value: string = "";
+    let connectedWs: Boolean = true;
+    let room_message: (Messages & {user: User})[]= [
+        {
+            "id": 1,
+            "room_id": 40,
+            "user_id": 1,
+            "message_type": "MESSAGE",
+            "content": "asdf",
+            "create_at": "2023-04-18T14:50:05.942Z",
+            "user": {
+                "id": 1,
+                "name": "jer",
+                "email": "jerdos-s@student.42lausanne.ch",
+                "first_name": "Jérémy",
+                "last_name": "Dos santos",
+                "image_url": "image/jerdos-s.png",
+                "oauth_42_login": "jerdos-s",
+                "oauth_42_id": 116337,
+                "last_login": "2023-04-17T15:44:38.719Z",
+                "online_status": "ONLINE"
+            }
+        },
+        {
+            "id": 2,
+            "room_id": 40,
+            "user_id": 1,
+            "message_type": "MESSAGE",
+            "content": "asdf",
+            "create_at": "2023-04-18T14:50:06.709Z",
+            "user": {
+                "id": 1,
+                "name": "jer",
+                "email": "jerdos-s@student.42lausanne.ch",
+                "first_name": "Jérémy",
+                "last_name": "Dos santos",
+                "image_url": "image/jerdos-s.png",
+                "oauth_42_login": "jerdos-s",
+                "oauth_42_id": 116337,
+                "last_login": "2023-04-17T15:44:38.719Z",
+                "online_status": "ONLINE"
+            }
+        },
+    ];
 
-    let rooms : Array<Room> = [
+
+    let rooms : Array<Rooms> = [
 
         {
             id: 1,
@@ -41,7 +80,7 @@
                     user: {
                         id: 1,
                         name: 'Jacob Jones',
-                        image_url: 'https://cdn.icon-icons.com/icons2/2620/PNG/512/among_us_player_white_icon_156940.png'
+                        image_url: 'image/default.png'
                     }
                 },
         		{
@@ -52,65 +91,21 @@
                     user: {
                         id: 2,
                         name: 'Leslie Alexander',
-                        image_url: 'https://cdn.icon-icons.com/icons2/2620/PNG/512/among_us_player_red_icon_156942.png'
+                        image_url: 'image/default.png'
                     }
                 },
             ],
-            messages: [
-                {
-                    id: 1,
-                    room_id: 1,
-                    user_id: 1,
-                    message_type: MessageRole.MESSAGE,
-                    content: 'Salut comment ça va ?',
-                    created_at: new Date
-                },
-                {
-                    id: 2,
-                    room_id: 1,
-                    user_id: 2,
-                    message_type: MessageRole.MESSAGE,
-                    content: 'Bien et toi ?',
-                    created_at: new Date
-                },
-                {
-                    id: 3,
-                    room_id: 1,
-                    user_id: 1,
-                    message_type: MessageRole.MESSAGE,
-                    content: 'Je fais tout pour préparer les templates...',
-                    created_at: new Date
-                },
-                {
-                    id: 2,
-                    room_id: 1,
-                    user_id: 2,
-                    message_type: MessageRole.MESSAGE,
-                    content: 'Ok, c\'est cool',
-                    created_at: new Date
-                },
 
-            ],
         }
     ]
 
-    let friends : Array<User> = [
-		{ id: 1, name: 'Jacob Jones', image_url: 'https://cdn.icon-icons.com/icons2/2620/PNG/512/among_us_player_white_icon_156940.png' },
-		{ id: 2, name: 'Leslie Alexander', image_url: 'https://cdn.icon-icons.com/icons2/2620/PNG/512/among_us_player_red_icon_156942.png' },
-		{ id: 3, name: 'Eleanor Pena', image_url: 'https://cdn.icon-icons.com/icons2/2620/PNG/512/among_us_player_blue_icon_156941.png'},
-        { id: 4, name: 'Wade Warren', image_url: 'https://cdn.icon-icons.com/icons2/2620/PNG/512/among_us_player_orange_icon_156939.png'},
-        { id: 5, name: 'Kathryn Murphy', image_url: 'https://cdn.icon-icons.com/icons2/2620/PNG/512/among_us_player_pink_icon_156938.png'},
-        { id: 6, name: 'Marvin McKinney', image_url: 'https://cdn.icon-icons.com/icons2/2620/PNG/512/among_us_player_green_icon_156937.png'},
-    ];
-
-    let user : User = { id: 1, name: 'Jacob Jones', image_url: 'https://cdn.icon-icons.com/icons2/2620/PNG/512/among_us_player_white_icon_156940.png' };
+    let user : User = { id: 1, name: 'Jacob Jones', image_url: 'image/default.png' };
 
     let userstats : UserStats = {
         played : 42,
         ratio: 84,
         level: 21
     }
-    export let data: PageData;
 
 
 	onMount(async () => {
@@ -132,7 +127,10 @@
 
                 <div class="overflow-auto bg-color5 flex-grow rounded-xl">
 
-                    <UserInfo user={user}></UserInfo>
+                    <div  class="mt-20">
+
+                        <UserInfo user={user}></UserInfo>
+                    </div>
 
                     <div>
 
@@ -151,9 +149,13 @@
 
                 <div class="overflow-auto mt-3 flex-grow px-5">
 
-                    {#each rooms as room}
-                        <Message user={user} room={room}></Message>
-                    {/each}
+
+                    {#if connectedWs}
+                        <Message user={user} message={room_message}></Message>
+                    {:else}
+                        <p>CONNECTING WS..</p>
+                    {/if}
+
 
                 </div>
 
@@ -174,7 +176,10 @@
 
                 <div class="overflow-auto mt-3 bg-color5 flex-grow rounded-xl">
 
-                    <UserInfo user={user}></UserInfo>
+                    <div class="mt-20">
+
+                        <UserInfo user={user}></UserInfo>
+                    </div>
 
                     <div>
 
