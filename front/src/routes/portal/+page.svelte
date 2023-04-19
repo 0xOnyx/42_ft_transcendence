@@ -130,16 +130,17 @@
 
     })
 
-    let openUpdate: boolean = false;
-    let openFile: boolean = false;
+    let _openUpdate: boolean = false;
+    let _openFile: boolean = false;
 
-    const closeUpdate = () => {
-        openUpdate = false;
-    }
+	const updatePopUp = ( _popup : string ) => {
+		if (_popup === "update") {
+			_openUpdate = !_openUpdate;
+		} else if ( _popup === "file" ) {
+			_openFile = !_openFile;
+		}
+	}
 
-    const closeFile = ()=>{
-        openFile = false;
-    }
     let error : string = ""
     async function updateUser(value)
     {
@@ -161,7 +162,7 @@
         else
         {
             user = await res.json();
-            openUpdate = false;
+            _openUpdate = false;
         }
     }
 
@@ -197,10 +198,17 @@
                 <div class="flex items-center">
 
                     <div class="grow">
-                        <UserInfo user={user}></UserInfo>
+                        <UserInfo portal=true user={user} update={updatePopUp}></UserInfo>
 
-                        <div class="mt-5"><Button width="w-52" name="Change Username" url="/"></Button></div>
-                        <div class="mt-2"><Button width="w-52" name="Change Avatar" url="/"></Button></div>
+                        {#if _openUpdate}
+                            <Popup_modify_username updateUser={updateUser} close={updatePopUp} title="Modify username" placeholder="Username"></Popup_modify_username>
+                        {/if}
+                        {#if _openFile}
+                            <Popup_modify_picture close={updatePopUp} title="Modify profile picture"></Popup_modify_picture>
+                        {/if}
+
+                        <div class="mt-5" disabled='{connectedWs}'  on:click={()=>{updatePopUp("update")}} ><Button width="w-45" color={connectedWs ? 'bg-color2': 'bg-neutral-600'} name={connectedWs ? "Change Username": "Loading.."}></Button></div>
+                        <div class="mt-7" disabled='{connectedWs}' on:click={()=>{updatePopUp("file")}}> <Button width="w-45" color={connectedWs ? 'bg-color2': 'bg-neutral-600'} name={connectedWs ? "Change Avatar": "Loading.."}></Button></div>
                     </div>
 
                 </div>
