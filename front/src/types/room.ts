@@ -1,6 +1,6 @@
 import type { User } from './user.js';
 
-export type Room =
+export type Rooms =
 {
     id: number,
     name: string,
@@ -41,7 +41,16 @@ export enum UserRole
     USER = "USER"
 }
 
-export type Message =
+
+export enum MessageRole
+{
+    MESSAGE = "MESSAGE",
+    ADD_FRIEND = "ADD_FRIEND",
+    INVITE_GAME = "INVITE_GAME"
+}
+
+
+export type Messages =
 {
     id: number,
     room_id: number,
@@ -49,11 +58,4 @@ export type Message =
     message_type: MessageRole,
     content?: string,
     created_at?: Date,
-}
-
-export enum MessageRole
-{
-    MESSAGE = "MESSAGE",
-    ADD_FRIEND = "ADD_FRIEND",
-    INVITE_GAME = "INVITE_GAME"
 }

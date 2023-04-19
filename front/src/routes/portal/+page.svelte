@@ -1,19 +1,14 @@
 <script lang="ts">
     import {PUBLIC_API_URI} from "$env/static/public";
-
     import Button from '../../components/Button.svelte';
     import ItemName from '../../components/Itemname.svelte';
-
     import type {User, Status, UserStats} from '../../types/user';
     import type {Friend} from '../../types/friend';
-
     import {onMount} from "svelte";
     import {goto} from "$app/navigation";
     import {io, Socket} from "socket.io-client";
 	import UserStat from "../../components/UserStat.svelte";
 	import UserInfo from "../../components/UserInfo.svelte";
-    import Popup from "../../components/Popup.svelte";
-    import Popup_modify from "../../components/Popup_modify_username.svelte";
     import Popup_modify_username from "../../components/Popup_modify_username.svelte";
     import Popup_modify_picture from "../../components/Popup_modify_picture.svelte";
 
@@ -22,35 +17,6 @@
         ratio: number,
         level: number,
     }
-
-    let Status: {
-        ONLINE: 'ONLINE',
-        OFFLINE: 'OFFLINE',
-        HIDDEN: 'HIDDEN'
-    };
-    type Status = (typeof Status)[keyof typeof Status]
-    type hUser =
-    {
-        id: number,
-        name?: string,
-        email?: string,
-        first_name?: string,
-        last_name?: string,
-        image_url?: string,
-        oauth_42_login?: string,
-        oauth_42_id?: number,
-        last_login?: Date,
-        online_status?: Status,
-    }
-    type Friend = {
-        id: number
-        user_id: number
-        friend_id: number
-        request_at: Date
-        accept_at: Date | null
-    }
-
-
 
     let search_value: string = "";
     let search : User[] = [];
@@ -67,11 +33,14 @@
 
     async function searchUser()
     {
+        if (search_value.length <= 0)
+            return ;
         const res: Response = await fetch(`${PUBLIC_API_URI}/user/search?skip=0&take=10&element=name&value=${search_value}`, {
             method: 'GET',
             credentials: 'include'
         });
         search = await res.json();
+        search = search.filter((item: User)=>{return (item.id != user.id)})
     }
     onMount(async () => {
 
@@ -198,16 +167,6 @@
                     <div class="grow">
                         <UserInfo user={user}></UserInfo>
 
-                        <div class="border:rad">
-                            <div class="w-[150px] h-[150px] bg-cover  rounded-full mx-auto"
-                                 style="background-image: url( {user?.image_url ? `${user?.image_url}?${Date.now()}` : `image/default.png`} )">
-                            </div>
-                        </div>
-
-                        <div class="mt-5">
-                            <h1 class="text-lg">{user?.name || "loading.."}</h1>
-                            <small>#{user?.oauth_42_login || "loading.."}</small>
-                        </div>
                         {#if error.length > 0}
                             <div class="relative z-[100]" aria-labelledby="modal-title" role="dialog" aria-modal="true">
                                 <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
@@ -247,22 +206,20 @@
                             <UserStat userstats={userstats}></UserStat>
                         </div>
 
-                        <div class="mt-8"><Button width="w-52" name="Gold League" color="bg-yellow-400"  ></Button></div>
                         <div class="mt-12"><Button width="w-52" name="New Game" url="/"></Button></div>
 
                         <div class="md:flex justify-center mt-5">
 
-                        <div class="mt-7"><Button width="w-52" name="New Game" url="/game"></Button></div>
-                            <div class="m-2"><Button width="w-28" name="DM" url="/rooms/dms"></Button></div>
-                            <div class="m-2"><Button width="w-28" name="Channel" url="/rooms/channel"></Button></div>
+                            <div class="m-2"><Button width="w-28" name="DM" url="/rooms/dms/last"></Button></div>
+                            <div class="m-2"><Button width="w-28" name="Channel" url="/rooms/channel/last"></Button></div>
 
-                        <div class="mt-7"><Button width="w-52" name="Message" url="/chat"></Button></div>
+                        </div>
+
                     </div>
 
                 </div>
 
             </div>
-
             <div class="md:w-1/3 lg:w-1/4 md:flex md:flex-col">
 
                 <h2 class="text-left border-b-2 text-lg">Friends lists</h2>
@@ -279,7 +236,7 @@
                             <p>NO FRIEND</p>  <!-- CREATE THIS -->
                         {:else}
                             {#each friends as friend}
-                                <ItemName user={friend}></ItemName>
+                                <ItemName io={socket} user={friend}></ItemName>
                             {/each}
                         {/if}
                     {:else}
@@ -287,7 +244,7 @@
                             <p>no user found :/</p>  <!-- CREATE THIS -->
                         {:else}
                             {#each search as user}
-                                <ItemName user={user}></ItemName>
+                                <ItemName io={socket} user={user}></ItemName>
                             {/each}
                         {/if}
                     {/if}

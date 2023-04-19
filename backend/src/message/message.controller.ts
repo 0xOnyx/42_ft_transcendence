@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query, Request, UseGuards } from '@nestjs/common';
+import {Controller, Get, Param, Query, Req, Request, UseGuards} from '@nestjs/common';
 import { MessageServiceService } from "./message.service";
 import { AuthenticatedGuard } from "../auth/guards/authenticated.guard";
 import { ApiCookieAuth, ApiQuery, ApiOperation } from "@nestjs/swagger";
@@ -19,16 +19,14 @@ export class MessageController {
     @UseGuards(AuthenticatedGuard)
     @Get("getAllRooms")
     @ApiOperation({summary: "get all possible room"})
-    getAllroom(@Request() req: any)
-    {
+    getAllroom(@Request() req: any) {
         return this.messageServiceService.getAllRoom();
     }
 
     @UseGuards(AuthenticatedGuard)
     @Get("rooms")
     @ApiOperation({summary: "Get all rooms to the current user"})
-    getRoomUser(@Request() req: any)
-    {
+    getRoomUser(@Request() req: any) {
         return this.messageServiceService.getRoomUser(req.user.id);
     }
 
@@ -40,10 +38,28 @@ export class MessageController {
     getMessageRoom(@Param("id") id: string, @Request() req: any, @Query() queryList: {
         skip?: number,
         take?: number,
-    })
-    {
+    }) {
+        if (queryList.skip)
+            queryList.skip = Number(queryList.skip);
+        if (queryList.take)
+            queryList.take = Number(queryList.take);
         return this.messageServiceService.getMessageRoom(req.user.id, Number(id), queryList);
     }
 
+    @UseGuards(AuthenticatedGuard)
+    @Get("getDmUser/:id")
+    @ApiOperation({summary: "Get dm for a user by id"})
+    getDmUser(@Param("id") id: number, @Request() req: any)
+    {
+        return this.messageServiceService.getDmUser(req.user.id, Number(id));
+    }
+
+    @UseGuards(AuthenticatedGuard)
+    @Get('getAllDm')
+    @ApiOperation({summary: "get all dm the current user"})
+    getAllDm(@Request() req: any)
+    {
+        return this.messageServiceService.getAllDm(req.user.id);
+    }
 
 }

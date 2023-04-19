@@ -17,6 +17,7 @@ import { MessageService } from "../prisma/message.service";
 import { TypeRoom, RoleUser, Log, Status, TypeMessage, Friend, Rooms, RoomUser, User } from "@prisma/client"
 import sessionMiddleware from '../sessions'
 import * as passport from "passport";
+import {Messages} from ".prisma/client";
 
 const wrap = (middleware: any) => (
     socket: Socket,
@@ -146,6 +147,7 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
     ) {
       if (!client.request.user)
         throw new WsException("no user");
+      console.log(data);
       let user = await this.userService.userSelect({id: client.request.user.id}, {
         room_user: {
           include: {
@@ -171,7 +173,7 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
             await this.messageService.updateUser({id: data.room_id}, {id: client.request.user.id}, {mute: false});
         }
       }
-      if (!room_user || !room_user.ban || !room_user.mute || !room_user.room)
+      if (!room_user || room_user.ban || room_user.mute || !room_user.room)
       {
         throw new WsException("not permit");
       }
@@ -192,9 +194,9 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
       }
       else
           throw new WsException("bad message type");
-      await this.messageService.createMessage({id: client.request.user.id}, {id: data.room_id}, typeMessage, data.message)
-      const to_send_data: {send_user_id: number, room_id: number, message: string, message_type: string}
-      = {...data, send_user_id: client.request.user.id}
+      const message_db: (Messages & {user: User}) = await this.messageService.createMessage({id: client.request.user.id}, {id: data.room_id}, typeMessage, data.message)
+      const to_send_data: {send_user_id: number, room_id: number, message: Messages, message_type: string}
+      = {send_user_id: client.request.user.id, room_id: data.room_id, message: message_db, message_type: data.message_type}
       this.server.in(room_user.room.id.toString()).emit("message", to_send_data);
     }
 
@@ -265,7 +267,7 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
     if (dmUser)
     {
       if (dmUser.find((element: (Rooms & {user: RoomUser[]})) => {
-          return !!element.user.find((element: RoomUser) => element.user_id == Number(data.user_id))}))
+          return !!element.user.find((element: RoomUser) => (element.user_id == Number(data.user_id)))}))
           throw new WsException("dm already exist");
     }
     const block_user = await this.userService.getBlockUser({id: client.request.user.id}, {id: Number(data.user_id)});
@@ -274,9 +276,10 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
     const room = await this.messageService.createDm({id: client.request.user.id}, {id: data.user_id})
     if (!room)
       throw new WsException("current user");
-    this.server.in(room.id.toString()).emit("updateRoom", room);
     this.server.in(client.request.user.id.toString()).socketsJoin(room.id.toString());
     this.server.in(data.user_id.toString()).socketsJoin(room.id.toString());
+    this.server.in(room.id.toString()).emit("updateRoom", room);
+    return (room);
   }
 
   @SubscribeMessage('leftDm')

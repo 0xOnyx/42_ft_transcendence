@@ -9,7 +9,7 @@
 <div>
     <div class="border:rad">
         <div class="w-[150px] h-[150px] bg-cover  rounded-full mx-auto"
-            style="background-image: url( {user?.image_url || `image/default.png`} )">
+             style="background-image: url( /{user?.image_url ? `${user?.image_url}?${Date.now()}` : `image/default.png`} )">
         </div>
     </div>
 

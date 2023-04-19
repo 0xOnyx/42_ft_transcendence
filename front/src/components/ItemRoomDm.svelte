@@ -1,35 +1,45 @@
 <script lang="ts">
 
-    import type {Room, RoomUser} from '../types/room';
+    import type {Rooms, RoomUser} from '../types/room';
 	import type { User } from '../types/user';
+    import {PUBLIC_API_URI} from "$env/static/public";
+    import {onMount} from "svelte";
+    import {goto} from "$app/navigation";
 
     //bg-green-600
-    export let room : Room;
+    export let room : (Rooms & {user: RoomUser[]});
     export let user : User;
+
+    let roomUserDm: RoomUser = room?.user.find((element: RoomUser) => element.user_id != Number(user.id));
+    let userDm: User;
+
+    onMount(async ()=>{
+        let res: Response = await fetch(`${PUBLIC_API_URI}/user/id/${roomUserDm.user_id}`, {
+            method: 'GET',
+            credentials: 'include'
+        });
+        userDm = await res.json();
+    })
+
+    async function getRoom()
+    {
+        await goto(`/rooms/dms/${room.id}`);
+    }
+
+
 
 </script>
 
-{#if room.users}
-    {#each room.users as u}
-        {#if u.user && user.id != u.user.id}
+<div on:click={getRoom} class="cursor-pointer rounded-xl bg-color5 p-5 flex items-center mt-1">
 
-        <div class="rounded-xl bg-color5 p-5 flex items-center mt-1">
-
-            <div class="mx-2 flex-shrink">
-
-
-                    <div class="w-[40px] h-[40px] bg-cover  rounded-full mx-auto"
-                        style="background-image: url( {u.user?.image_url || `image/default.png`} )">
-                    </div>
-
-
-            </div>
-
-            <div class="mx-2 flex-grow text-left">
-                {u.user?.name}
-            </div>
-
+    <div class="mx-2 flex-shrink">
+        <div class="w-[40px] h-[40px] bg-cover  rounded-full mx-auto"
+             style="background-image: url( /{userDm?.image_url || 'image/default.png'} )">
         </div>
-        {/if}
-    {/each}
-{/if}
+    </div>
+
+    <div class="mx-2 flex-grow text-left">
+        {userDm?.name || "loading.."}
+    </div>
+
+</div>

@@ -108,8 +108,8 @@ model	Rooms {
 	password				String?
 	messages				Messages[]	@relation("message")
 	user						RoomUser[]
-	last_message_id	Int					@unique
-	last_message		Messages?		@relation("last_message", fields: [last_message_id], references: [id])
+	//last_message_id	Int?
+	//last_message		Messages?		@relation("last_message", fields: [last_message_id], references: [id])
 	count_messages	Int					@default(0)
 }
 
@@ -128,8 +128,8 @@ model Messages {
 	message_type			TypeMessage
 	content						String
 	create_at					DateTime	@default(now())
-	last_message_user	RoomUser[]
-	last_message			Rooms?		@relation("last_message")
+	//last_message_user	RoomUser[]
+	//last_message			Rooms?		@relation("last_message")
 }
 
 enum	RoleUser {
@@ -147,8 +147,8 @@ model	RoomUser {
 	ban										Boolean		@default(false)
 	mute									Boolean		@default(false)
 	term_penalty					DateTime	@default(now())
-	last_message_read_id	Int?
-	last_message					Messages?	@relation(fields: [last_message_read_id], references: [id])
+	//last_message_read_id	Int?
+	//last_message					Messages?	@relation(fields: [last_message_read_id], references: [id])
 	count_read_messages		Int				@default(0)
 }
 

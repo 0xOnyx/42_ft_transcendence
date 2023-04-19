@@ -13,18 +13,11 @@
 
     </div>
 
-    <div class="">
-
-        {#if user.image_url}
-            <img class="h-8" src={user.image_url} alt="logo">
-        {/if}
-
-    </div>
-
+        <div class="w-8 h-8 bg-cover  rounded-full mx-auto"
+             style="background-image: url( /{user?.image_url || 'image/default.png'} )">
+        </div>
     <div class="flex-grow text-left px-2">
-
-        {user.name}
-
+ds        {user?.name || "LOADING.."}
     </div>
 
     <div class="">

@@ -64,6 +64,7 @@ export class MessageService {
         take?: number;
         where?: Prisma.MessagesWhereInput;
         orderBy?: Prisma.MessagesOrderByWithRelationInput
+        include?: Prisma.MessagesInclude
     }) {
         return this.prisma.messages.findMany(params);
     }
@@ -79,8 +80,9 @@ export class MessageService {
             room: {connect: room},
             user: {connect: where},
         }
-        await this.prisma.messages.create({
-            data
+        return this.prisma.messages.create({
+            data,
+            include : {user: true}
         })
     }
 
@@ -152,7 +154,7 @@ export class MessageService {
     {
         return this.prisma.rooms.create({
             data: {
-                type: TypeRoom.PUBLIC_ROOM,
+                type: TypeRoom.SINGLE_CHAT,
                 owner: {
                     connect: user_where
                 },
