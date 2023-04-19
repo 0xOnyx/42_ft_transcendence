@@ -12,6 +12,44 @@
     import {io, Socket} from "socket.io-client";
 	import UserStat from "../../components/UserStat.svelte";
 	import UserInfo from "../../components/UserInfo.svelte";
+	import Popup from "../../components/Popup.svelte";
+    import Popup_modify from "../../components/Popup_modify_username.svelte";
+    import Popup_modify_username from "../../components/Popup_modify_username.svelte";
+    import Popup_modify_picture from "../../components/Popup_modify_picture.svelte";
+    interface UserStats {
+        played: number,
+        ratio: number,
+        level: number,
+    }
+
+    let Status: {
+        ONLINE: 'ONLINE',
+        OFFLINE: 'OFFLINE',
+        HIDDEN: 'HIDDEN'
+    };
+    type Status = (typeof Status)[keyof typeof Status]
+    type hUser =
+    {
+        id: number,
+        name?: string,
+        email?: string,
+        first_name?: string,
+        last_name?: string,
+        image_url?: string,
+        oauth_42_login?: string,
+        oauth_42_id?: number,
+        last_login?: Date,
+        online_status?: Status,
+    }
+    type Friend = {
+        id: number
+        user_id: number
+        friend_id: number
+        request_at: Date
+        accept_at: Date | null
+    }
+
+
 
     let search_value: string = "";
     let search : User[] = [];
@@ -20,11 +58,13 @@
     let connectedWs: Boolean = false;
     let socket: Socket ;
 
+
     let userstats : UserStats = {
         played : 42,
         ratio: 84,
         level: 21
     }
+
 
     async function searchUser()
     {
@@ -84,11 +124,46 @@
         })
 
         socket.on("FriendStatusUdpate", (data: {id: number, status: Status})=>{
-            const index = friends.findIndex((element: User)=> element.id == data.id)
+            const index = friends.findIndex((element: Friend)=> element.id == data.id)
             friends[index].online_status = data.status;
         })
 
     })
+
+    let openUpdate: boolean = false;
+    let openFile: boolean = false;
+
+    const closeUpdate = () => {
+        openUpdate = false;
+    }
+
+    const closeFile = ()=>{
+        openFile = false;
+    }
+    let error : string = ""
+    async function updateUser(value)
+    {
+        if (value.level <= 0)
+            return ;
+        const res: Response = await fetch(`${PUBLIC_API_URI}/user/me`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({name: value})
+        });
+        if (res.status != 201)
+        {
+            error = (await res.json()).message;
+            return ;
+        }
+        else
+        {
+            user = await res.json();
+            openUpdate = false;
+        }
+    }
 
 
     //export let data: PageData;
@@ -111,7 +186,7 @@
     </script>
 </svelte:head>
 
-<div class="h-full container md:py-10 xl:py-20 mx-auto">
+<div class="h-full relative container md:py-10 xl:py-20 mx-auto">
 
     <div class="h-full bg-color3 self-center md:border-4 border-black rounded p-1 pb-3 xl:p-8">
 
