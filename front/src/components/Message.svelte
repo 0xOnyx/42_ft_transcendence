@@ -12,8 +12,6 @@
     export let socket: Socket;
     export let message:  (Messages & {user: User})[];
 
-    console.log(message)
-
 </script>
 
 {#if message.length <= 0}
