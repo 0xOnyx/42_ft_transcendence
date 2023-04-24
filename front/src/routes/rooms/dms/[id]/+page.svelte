@@ -31,6 +31,7 @@
     let user : User;
     let socket: Socket;
     let connectedWs: Boolean = false;
+	let chatbox : HTMLDivElement;
 
     let userstats : UserStats = {
         played : 42,
@@ -85,12 +86,15 @@
 
         current_room_user = await res.json();
         console.log(id_room);
+		chatbox.scrollTop = chatbox.scrollHeight;
+
     }
 
 
 
     beforeNavigate(loadValue)
     onMount(async ()=>{
+		
         loadValue();
 
 
@@ -143,6 +147,7 @@
             message_type: MessageRole.MESSAGE,
         })
     }
+
 
 </script>
 
@@ -202,7 +207,7 @@
 
             <div class="bg-color5 grow justify-around md:flex md:flex-col my-5 md:my-0 md:mx-5 xl:mx-8 overflow-auto rounded-xl">
 
-                <div class="overflow-auto mt-3 flex-grow">
+                <div bind:this={chatbox} class="overflow-auto mt-3 flex-grow">
 
                     {#if connectedWs}
                         <MessageItem io={io} user={user} message={room_message}></MessageItem>
