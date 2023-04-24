@@ -1,61 +1,34 @@
 # ft_transcendence
 pong project with react nest and typescript
 
+## Running locally (docker)
 
-## Running locally
-
-### Prerequisites
-
-- Node.js 16.x
-- npm >= 7.10.x
-- postgresql >= 14.x
-
-### front
-
-to install the front :
-
-```bash
-cd front
-npm install 
+To run the whole project with docker :
+- Create an application on the 42 Intranet. Redirect on http://localhost/api/auth/callback
+- Create the following file `backend/.env`
 ```
-
-to run the dev environnement :
-
-```bash
-npm run dev
+DATABASE_URL="postgresql://postgres:mysecretpassword@postgres:5432/transcendence?schema=public&connect_timeout=1000"
+API_OAUTH2=https://api.intra.42.fr/
+CLIENT_ID={42_APP_CLIENT_ID}
+CLIENT_SECRET={42_APP_CLIENT_SECRET}
+HOST=http://localhost/api
+PHOTO_PATH=image
+SECRET_COOKIE={SECRET_COOKIE}
+REDIRECT=/portal
 ```
-### back
+- `cd docker`
+- `docker compose up --build`
 
-to install the front :
+### Available services
 
-```bash
-cd backend
-npm install 
-```
-
-to run the dev environnement :
-
-```bash
-npm run start:dev
-```
-
-
-##### Browser support
+While the project is running, you have a postgres database at your disposal, with a pgadmin client on localhost:8080
+## Browser support
 
 ft_transcendence works in the latest versions of Chrome and Firefox.
-
-## Docker
-
-### build the image
-
-    not yet in function !
 
 ```bash
 make run 
 ```
-
-
-
 
 ### Database structure
 
