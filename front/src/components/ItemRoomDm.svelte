@@ -9,6 +9,7 @@
     //bg-green-600
     export let room : (Rooms & {user: RoomUser[]});
     export let user : User;
+    export let current: boolean;
 
     let roomUserDm: RoomUser = room?.user.find((element: RoomUser) => element.user_id != Number(user.id));
     let userDm: User;
@@ -30,7 +31,7 @@
 
 </script>
 
-<div on:click={getRoom} class="cursor-pointer rounded-xl bg-color5 p-5 flex items-center mt-1">
+<div on:click={getRoom} class="border-color2  border-2 cursor-pointer rounded-xl {current ? 'bg-color2' : 'bg-color5'} p-5 flex items-center mt-1">
 
     <div class="mx-2 flex-shrink">
         <div class="w-[40px] h-[40px] bg-cover  rounded-full mx-auto"

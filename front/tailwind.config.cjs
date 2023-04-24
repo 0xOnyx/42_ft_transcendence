@@ -15,6 +15,7 @@ export default {
             'color3' : '#6356AF',
             'color4' : '#2A2358',
             'color5' : '#001329',
+            'color6' : '#002047',
 			'gold' : {
 				'100' : '#e0c56e',
 				'200' : '#d4af37',

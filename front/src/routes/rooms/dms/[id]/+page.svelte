@@ -37,6 +37,7 @@
         ratio: 84,
         level: 21
     }
+    let id_room: number;
 
     let loadValue = async ()=>{
         console.log("LOAD VALUE");
@@ -61,7 +62,7 @@
         })
         rooms = await res.json();
 
-        let id_room: number;
+
         if ($page.params.id == "last")
             id_room = rooms[0].id;
         else
@@ -152,8 +153,8 @@
 
                 <div class="mt-2 flex mb-5">
 
-                    <div class="mt-2 md:w-1/2 md:pr-2"><Button width="w-full" color="bg-color5 text-white border-2 border-color2" name="DM" url="/rooms/dms/last"></Button></div>
-                    <div class="mt-2 md:w-1/2 md:pl-2"><Button width="w-full" name="Channel" url="/rooms/channel/last"></Button></div>
+                    <div class="mt-2 md:w-1/2 md:pr-2"><Button width="w-full"  name="DM" url="/rooms/dms/last"></Button></div>
+                    <div class="mt-2 md:w-1/2 md:pl-2"><Button width="w-full"  color="bg-color5 text-white border-2 border-color2" name="Channel" url="/rooms/channel/last"></Button></div>
 
                 </div>
 
@@ -176,7 +177,7 @@
                                 <p>NO DM</p>  <!-- CREATE THIS -->
                             {:else}
                                 {#each rooms as room}
-                                    <ItemRoomDm user={user} room={room}></ItemRoomDm>
+                                    <ItemRoomDm current={room.id === id_room} user={user} room={room}></ItemRoomDm>
                                 {/each}
                             {/if}
                         {/if}
@@ -208,7 +209,7 @@
 
                 <div class="flex items-center border-1 p-8">
 
-                    <input  bind:value={message_value} type="text" class="border border-white bg-color5 rounded-md w-full p-2 pr-12 focus:outline-none" />
+                    <input  bind:value={message_value} type="text" class="border border-color2 bg-color5 rounded-md w-full p-2 pr-12 focus:outline-none" />
                     <div class="relative">
                         <button on:click={sendMessage} class="-top-4 -left-10 absolute bg-color2 p-0 m-0 rounded-xl"><Icon icon="send" css="inline p-0 h-8 stroke-color2 fill-white"></Icon></button>
                     </div>
@@ -232,10 +233,14 @@
                         <UserInfo user={current_room_user}></UserInfo>
 
                         <div>
-
                             <UserStat userstats={current_room_user}></UserStat>
-
                         </div>
+
+
+                        <div>
+<!--                            <RequestFriend user={current_room_user}></RequestFriend>-->
+                        </div>
+
 
                     </div>
 
