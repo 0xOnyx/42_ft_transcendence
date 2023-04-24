@@ -21,6 +21,7 @@
     import {io, Socket} from "socket.io-client";
     let id;
 
+	const MAX_MESSAGE = 20
     let room_message: (Messages & {user: User})[]= [];
     let search_value: string = "";
     let message_value: string = "";
@@ -63,10 +64,14 @@
 
 
         if ($page.params.id == "last")
+		{
+			if (!rooms || rooms.length <= 0)
+				return ;
             id_room = rooms[0].id;
+		}
         else
             id_room = Number($page.params.id);
-        res = await fetch(`${PUBLIC_API_URI}/message/message/${id_room}?skip=0&take=7`, {
+        res = await fetch(`${PUBLIC_API_URI}/message/message/${id_room}?skip=0&take=${MAX_MESSAGE}`, {
             method: 'GET',
             credentials: 'include'
         })
@@ -95,12 +100,13 @@
 
         socket.on("connection", (data) => {
             connectedWs = true;
+			console.log("CONNECTED");
         })
 
         socket.on("message", (data: {send_user_id: number, room_id: number, message: (Messages & {user: User}), message_type: string})=>{
             console.log(data);
             room_message.push(data.message);
-            if (room_message.length > 7)
+            if (room_message.length > MAX_MESSAGE)
                 room_message.shift();
             room_message = room_message;
         })
@@ -169,7 +175,7 @@
                 <div class="overflow-auto mt-3">
 
                     {#if search_value.length <= 0}
-                        {#if rooms.length <= 0}
+                        {#if !connectedWs}
                             <p>Loading..</p>
                         {:else}
                             {#if rooms.length <= 0}
@@ -185,7 +191,7 @@
                             <p>no user found :/</p>  <!-- CREATE THIS -->
                         {:else}
                             {#each search as user}
-                                <ItemName socket={socket} user={user}></ItemName>
+                                <ItemName io={socket} user={user}></ItemName>
                             {/each}
                         {/if}
                     {/if}
