@@ -10,7 +10,7 @@ export type Rooms =
     last_message_id?: number,
     count_messages?: number,
     users?: Array<RoomUser>,
-    messages?: Array<Message>,
+    messages?: Array<Messages>,
 }
 
 export enum RoomType

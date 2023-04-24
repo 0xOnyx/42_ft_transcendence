@@ -8,8 +8,7 @@
 
     import type {User} from '../../../../types/user';
     import type {UserStats} from '../../../../types/user';
-    import type {Messages, RoomType, Rooms, RoomUser} from '../../../../types/room';
-    import {UserRole} from '../../../../types/room';
+    import type {Messages, Rooms, RoomUser} from '../../../../types/room';
     import {MessageRole} from '../../../../types/room';
 	import UserNotification from '../../../../components/UserNotification.svelte';
 	import UserStat from '../../../../components/UserStat.svelte';
@@ -186,7 +185,7 @@
                             <p>no user found :/</p>  <!-- CREATE THIS -->
                         {:else}
                             {#each search as user}
-                                <ItemName io={socket} user={user}></ItemName>
+                                <ItemName socket={socket} user={user}></ItemName>
                             {/each}
                         {/if}
                     {/if}
@@ -200,7 +199,7 @@
                 <div class="overflow-auto mt-3 flex-grow">
 
                     {#if connectedWs}
-                        <MessageItem user={user} message={room_message}></MessageItem>
+                        <MessageItem io={io} user={user} message={room_message}></MessageItem>
                     {:else}
                         <p>CONNECTING WS..</p>
                     {/if}
