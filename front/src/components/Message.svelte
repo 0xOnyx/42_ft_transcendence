@@ -9,7 +9,7 @@
 
     //bg-green-600
     export let user : User;
-    export let io: Socket;
+    export let socket: Socket;
     export let message:  (Messages & {user: User})[];
 
     console.log(message)
@@ -25,7 +25,7 @@
             {#if current_message.message_type === MessageRole.MESSAGE}
                 <MessageContent current_message={current_message} user={user}></MessageContent>
             {:else if current_message.message_type === MessageRole.ADD_FRIEND}
-                <MessageInvite current_message={current_message} user={user} io={io}></MessageInvite>
+                <MessageInvite current_message={current_message} user={user} socket={socket}></MessageInvite>
             {:else if current_message.message_type === MessageRole.INVITE_GAME}
 
             {/if}

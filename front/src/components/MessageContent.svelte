@@ -1,6 +1,6 @@
 <script lang="ts">
-    import {Messages} from "../types/room";
-    import {User} from "../types/user";
+    import type {Messages} from "../types/room";
+    import type {User} from "../types/user";
     import DateElement from "./DateElement.svelte";
 
     export let current_message: (Messages & {user: User});
