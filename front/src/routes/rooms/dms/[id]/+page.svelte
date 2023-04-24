@@ -4,8 +4,6 @@
     import MessageItem from '../../../../components/Message.svelte';
     import Icon from '../../../../components/Icon.svelte';
 
-    import type { PageData } from '../../dms/$types';
-
     import type {User} from '../../../../types/user';
     import type {Friend} from '../../../../types/friend'
     import type {UserStats} from '../../../../types/user';
@@ -20,6 +18,7 @@
     import {PUBLIC_API_URI} from "$env/static/public";
     import {goto, beforeNavigate} from "$app/navigation";
     import {io, Socket} from "socket.io-client";
+    import RequestFriend from "../../../../components/RequestFriend.svelte";
     let id;
 
 	const MAX_MESSAGE = 20
@@ -33,6 +32,8 @@
     let friends : User[] = [];
     let socket: Socket;
     let connectedWs: Boolean = false;
+    let iscurrentFriend: Boolean = false;
+    let roomUserDm: RoomUser;
 	let chatbox : HTMLDivElement;
 
     let userstats : UserStats = {
@@ -102,8 +103,8 @@
             credentials: 'include'
         })
         room_message = await res.json();
-        current_room = rooms.find((item: (Rooms & {user: RoomUser[]}))=>{return (item.id === id_room)})
-        let roomUserDm: RoomUser = current_room?.user.find((element: RoomUser) => element.user_id != Number(user.id));
+        current_room = rooms.find((item: (Rooms & {user: RoomUser[]}))=>{return (item.id === id_room)}) as (Rooms & {user: RoomUser[]});
+        roomUserDm = current_room?.user.find((element: RoomUser) => element.user_id != Number(user.id));
         res = await fetch(`${PUBLIC_API_URI}/user/id/${roomUserDm.user_id}`, {
             method: 'GET',
             credentials: 'include'
@@ -119,7 +120,7 @@
 
     beforeNavigate(loadValue)
     onMount(async ()=>{
-		
+
         loadValue();
 
 
@@ -275,7 +276,9 @@
 
 
                             <div>
-    <!--                            <RequestFriend user={current_room_user}></RequestFriend>-->
+                                {#if !friends.find(item => {item.id === roomUserDm.user_id}) }
+                                    <RequestFriend room={current_room} socket={socket} user={current_room_user}></RequestFriend>
+                                {/if}
                             </div>
 
                         {/if}

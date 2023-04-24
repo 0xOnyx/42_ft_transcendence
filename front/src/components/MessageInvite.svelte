@@ -5,6 +5,7 @@
 	import Button from "./Button.svelte"
     export let current_message: (Messages & {user: User});
     export let user: User;
+
 </script>
 
 
@@ -56,7 +57,7 @@
 
 			<div class="flex-none mx-5"><Button name="Accept" width="w-45"></Button></div>
 			<div class="flex-none mx-5"><Button name="Decline" width="w-45"></Button></div>
-			
+
         </div>
 
         <div class="text-right pr-5">

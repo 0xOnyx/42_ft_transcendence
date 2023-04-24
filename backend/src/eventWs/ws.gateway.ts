@@ -147,7 +147,6 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
     ) {
       if (!client.request.user)
         throw new WsException("no user");
-      console.log(data);
       let user = await this.userService.userSelect({id: client.request.user.id}, {
         room_user: {
           include: {
