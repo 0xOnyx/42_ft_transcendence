@@ -33,6 +33,7 @@
     let friends : User[] = [];
     let socket: Socket;
     let connectedWs: Boolean = false;
+	let chatbox : HTMLDivElement;
 
     let userstats : UserStats = {
         played : 42,
@@ -110,12 +111,15 @@
 
         current_room_user = await res.json();
         console.log(id_room);
+		chatbox.scrollTop = chatbox.scrollHeight;
+
     }
 
 
 
     beforeNavigate(loadValue)
     onMount(async ()=>{
+		
         loadValue();
 
 
@@ -169,6 +173,7 @@
         })
     }
 
+
 </script>
 
 
@@ -220,14 +225,12 @@
                             {/each}
                         {/if}
                     {/if}
-
                 </div>
-
             </div>
 
             <div class="bg-color5 grow justify-around md:flex md:flex-col my-5 md:my-0 md:mx-5 xl:mx-8 overflow-auto rounded-xl">
 
-                <div class="overflow-x-hidden overflow-y-scroll scroll-smooth mt-3 flex-grow">
+                <div bind:this={chatbox} class="overflow-x-hidden overflow-y-scroll scroll-smooth mt-3 flex-grow [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
 
                     {#if connectedWs}
                         <MessageItem io={io} user={user} message={room_message}></MessageItem>
