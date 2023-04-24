@@ -1,3 +1,44 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+	.login-button {
+		@apply relative font-arial content-center h-20 w-20 rounded-full grid
+		bg-gradient-to-tr from-thread-blue from-15% to-process-green
+		text-2xl text-white leading-none;
+	}
+
+	.login-hover {
+		@apply scale-110 font-bold;
+	}
+
+	.main-title {
+		@apply text-7xl p-4 text-center font-bold bg-gradient-to-tr from-process-green from-25% to-thread-blue to-75% bg-clip-text text-transparent;
+	}
+
+	.gold-league {
+		@apply bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-gold-100 from-35% via-gold-500 to-gold-300 to-95%;
+	}
+
+	.copper-league {
+		@apply bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-copper-100 from-35% via-copper-400 to-copper-300 to-95%;
+	}
+
+	.silver-league {
+		@apply bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-silver-100 from-35% via-silver-200 to-silver-300 to-95%;
+	}
+
+	.diamant-league {
+		@apply bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-blue-200 from-35% via-blue-500 to-blue-600 text-white to-95%;
+	}
+}
+
+@layer utilities {
+	.animation-delay-2000 {
+		animation-delay: 2s;
+	},
+	.animation-delay-4000 {
+		animation-delay: 4s;
+	}
+}
