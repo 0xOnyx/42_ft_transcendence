@@ -7,6 +7,7 @@
     import type { PageData } from '../../dms/$types';
 
     import type {User} from '../../../../types/user';
+    import type {Friend} from '../../../../types/friend'
     import type {UserStats} from '../../../../types/user';
     import type {Messages, Rooms, RoomUser} from '../../../../types/room';
     import {MessageRole} from '../../../../types/room';
@@ -29,6 +30,7 @@
     let current_room: (Rooms & {user: RoomUser[]});
     let current_room_user: User;
     let user : User;
+    let friends : User[] = [];
     let socket: Socket;
     let connectedWs: Boolean = false;
 	let chatbox : HTMLDivElement;
@@ -50,12 +52,35 @@
         if (!res)
             await goto("/");
 
+        res = await fetch(`${PUBLIC_API_URI}/user/friend`, {
+            method: 'GET',
+            credentials: 'include'
+        });
+
+        const friends_list: Friend[] = (await res.json()).friend;
+
         res = await fetch(`${PUBLIC_API_URI}/user/id/me`, {
             method: 'GET',
             credentials: 'include'
         })
 
         user = await res.json();
+
+        for (const item of friends_list) {
+            try {
+                let id =  item.friend_id === user.id ? item.user_id : item.friend_id
+                const res: Response = await fetch(`${PUBLIC_API_URI}/user/id/${id}`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                const new_friend: User = (await res.json());
+                friends.push(new_friend)
+            }
+            catch (err)
+            {
+                console.error(err);
+            }
+        }
 
         res = await fetch(`${PUBLIC_API_URI}/message/getAllDm`, {
             method: 'GET',
@@ -207,7 +232,7 @@
 
             <div class="bg-color5 grow justify-around md:flex md:flex-col my-5 md:my-0 md:mx-5 xl:mx-8 overflow-auto rounded-xl">
 
-                <div bind:this={chatbox} class="overflow-auto mt-3 flex-grow">
+                <div bind:this={chatbox} class="overflow-x-hidden overflow-y-scroll scroll-smooth mt-3 flex-grow">
 
                     {#if connectedWs}
                         <MessageItem io={io} user={user} message={room_message}></MessageItem>
@@ -240,18 +265,21 @@
 
                 <div class="overflow-auto mt-3 bg-color5 flex-grow  rounded-xl">
                     <div class="mt-20">
-                        <UserInfo user={current_room_user}></UserInfo>
+                        {#if rooms.length <= 0}
+                            <p>NO DM</p>
+                        {:else}
+                            <UserInfo user={current_room_user}></UserInfo>
 
-                        <div>
-                            <UserStat userstats={current_room_user}></UserStat>
-                        </div>
-
-
-                        <div>
-<!--                            <RequestFriend user={current_room_user}></RequestFriend>-->
-                        </div>
+                            <div>
+                                <UserStat userstats={current_room_user}></UserStat>
+                            </div>
 
 
+                            <div>
+    <!--                            <RequestFriend user={current_room_user}></RequestFriend>-->
+                            </div>
+
+                        {/if}
                     </div>
 
 
