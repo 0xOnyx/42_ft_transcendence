@@ -24,4 +24,5 @@ export type UserStats = {
     played: number,
     ratio: number,
     level: number,
+	league: string,
 }
