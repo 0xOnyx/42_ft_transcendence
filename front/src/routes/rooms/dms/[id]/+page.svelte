@@ -151,6 +151,16 @@
             rooms = rooms;
         })
 
+        socket.on("NewFriend", (user: User)=>{
+            friends = [...friends, user];
+        })
+
+        socket.on("LostFriend", (data: {id: number})=>{
+            friends = friends.filter((item: User)=>{
+                return (item.id === Number(data.id))
+            })
+        })
+
 
     })
 
@@ -235,7 +245,7 @@
                 <div bind:this={chatbox} class="overflow-x-hidden overflow-y-scroll scroll-smooth mt-3 flex-grow [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
 
                     {#if connectedWs}
-                        <MessageItem io={io} user={user} message={room_message}></MessageItem>
+                        <MessageItem socket={socket} user={user} message={room_message}></MessageItem>
                     {:else}
                         <p>CONNECTING WS..</p>
                     {/if}
@@ -276,7 +286,7 @@
 
 
                             <div>
-                                {#if !friends.find(item => {item.id === roomUserDm.user_id}) }
+                                {#if roomUserDm && !friends.find(item => {item.id === roomUserDm.user_id}) }
                                     <RequestFriend room={current_room} socket={socket} user={current_room_user}></RequestFriend>
                                 {/if}
                             </div>

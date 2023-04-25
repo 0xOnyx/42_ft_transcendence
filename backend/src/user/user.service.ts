@@ -12,27 +12,18 @@ export class UserServiceService {
         return this.userService.user({id: id})
     }
 
-    getFriend(id: number) {
-        return this.userService.userSelect({id: id}, {
+    async getFriend(id: number) {
+        const friend: any = await this.userService.userSelect({id: id}, {
             id: true,
             friend: true,
+            symetric_friend: true,
         })
-    }
-
-    async addFriend(user_id: number, id: number)
-    {
-        const friend: Friend  | null= await this.userService.getFriend({id: id});
-        if (!friend || friend.friend_id != user_id || friend.accept_at == null)
-            return ;
-        const to_change: Prisma.FriendUpdateInput = {
-            accept_at : new Date()
+        if (!friend)
+            return {};
+        return {
+            id: friend.id,
+            friend: [...friend.friend, ...friend.symetric_friend]
         }
-        await this.userService.updateFriend({id: id}, to_change);
-    }
-
-    deleteFriend(id: number, to_delete: number)
-    {
-        return this.userService.deleteFriend({id: id}, {id: to_delete})
     }
 
     getSearch(queryList: {
