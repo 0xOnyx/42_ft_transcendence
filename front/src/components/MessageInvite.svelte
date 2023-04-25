@@ -64,7 +64,7 @@
 			<div class="flex-1">You accepted the friend request</div>
 			<!-- {current_message.content} -->
 
-			<div on:click={acceptFriend} class="flex-none mx-5"><Button name="Accept" width="w-45"></Button></div>
+			<!-- <div on:click={acceptFriend} class="flex-none mx-5"><Button name="Accept" width="w-45"></Button></div> -->
 			<!-- <div class="flex-none mx-5"><Button name="Decline" width="w-45"></Button></div> -->
 
 		</div>
@@ -127,7 +127,7 @@
                 <!-- {current_message.content} -->
 
                 <div on:click={acceptFriend} class="flex-none mx-5"><Button name="Accept" width="w-45"></Button></div>
-                <div class="flex-none mx-5"><Button name="Decline" width="w-45"></Button></div>
+                <!-- <div class="flex-none mx-5"><Button name="Decline" width="w-45"></Button></div> -->
 
             </div>
 
