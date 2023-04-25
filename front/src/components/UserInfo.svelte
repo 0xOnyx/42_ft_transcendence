@@ -20,9 +20,9 @@
 <div>
 	<div class="relative border:rad">
 		<div class="w-[150px] h-[150px] bg-cover border-red border-5 border-solid rounded-full mx-auto"
-			 style="background-image: url( {user?.image_url || `image/default.png`} )">
+			 style="background-image: url( /{user?.image_url || `image/default.png`} )">
 			 {#if update}
-			 <div class="absolute inset-0 flex justify-center items-center"> 
+			 <div class="absolute inset-0 flex justify-center items-center">
 				<button on:click={()=>{update("file") }} class="group bg-gray-300/0 hover:bg-gray-300/50 border-0 hover:border-4 w-[150px] h-[150px] rounded-full flex items-center justify-center transition-all">
 					<Icon icon="modify" width="64" height="64" css="scale-0 group-hover:scale-100 transition-all" />
 				</button>
