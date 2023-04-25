@@ -182,6 +182,7 @@
             message: message_value,
             message_type: MessageRole.MESSAGE,
         })
+		message_value = "";
     }
 
 
@@ -254,7 +255,7 @@
 
                 <div class="flex items-center border-1 p-8">
 
-                    <input  bind:value={message_value} type="text" class="border border-color2 bg-color5 rounded-md w-full p-2 pr-12 focus:outline-none" />
+                    <input autofocus on:keydown={(e)=>{e.key == "Enter" && sendMessage()}} bind:value={message_value} type="text" class="border border-color2 bg-color5 rounded-md w-full p-2 pr-12 focus:outline-none" />
                     <div class="relative">
                         <button on:click={sendMessage} class="-top-4 -left-10 absolute bg-color2 p-0 m-0 rounded-xl"><Icon icon="send" css="inline p-0 h-8 stroke-color2 fill-white"></Icon></button>
                     </div>
