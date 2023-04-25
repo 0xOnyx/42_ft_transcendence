@@ -181,6 +181,11 @@ export class MessageService {
                 room: room_where
             }
         })
+        await this.prisma.roomUser.deleteMany({
+            where:{
+                room: room_where
+            }
+        })
         await this.prisma.rooms.delete({
             where: room_where
         })
