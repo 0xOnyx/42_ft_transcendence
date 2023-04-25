@@ -31,6 +31,7 @@
 
 </script>
 
+<!-- svelte-ignore a11y-click-events-have-key-events -->
 <div on:click={getRoom} class="border-color2  border-2 cursor-pointer rounded-xl {current ? 'bg-color2' : 'bg-color5'} p-5 flex items-center mt-1">
 
     <div class="mx-2 flex-shrink">
@@ -42,5 +43,10 @@
     <div class="mx-2 flex-grow text-left">
         {userDm?.name || "loading.."}
     </div>
-
+	{#if room.count_messages}
+  <span class="sr-only">Notifications</span>
+  <span class="inline-flex items-center justify-center px-2 mw-6 h-6 ml-2 text-xs font-bold text-white bg-red-500 rounded-full">
+    {room.count_messages}0
+  </span>
+  {/if}
 </div>
