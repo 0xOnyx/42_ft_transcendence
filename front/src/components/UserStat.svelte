@@ -1,21 +1,22 @@
 
 <script lang="ts">
 	import type { UserStats } from "../types/user";
+	import LeagueBadge from "./LeagueBadge.svelte";
 
     export let userstats : UserStats;
 </script>
 
 
-<div>
+<div class="flex flex-col gap-2">
 
-    <p>Statistics</p>
+	<p class="">Game played : <span>{userstats?.played || "loading.."}</span></p>
 
-    <p class="mt-5">Game played : <span>{userstats?.played || "loading.."}</span></p>
+	<p class="">Win ratio : <span>{userstats?.ratio || "loading.."}%</span></p>
 
-    <p>Win ratio : <span>{userstats?.ratio || "loading.."}%</span></p>
+	<p class="">Rank : <span>{userstats?.level || "loading.."}</span></p>
 
-    <p>Rank : <span>{userstats?.level || "loading.."}</span></p>
-
-    <div class="mt-5 py-2 inline-block bg-yellow-400 rounded-full w-52 text-black">Gold League</div>
+	<div class="flex justify-center">
+		<LeagueBadge league={userstats?.league || "gold"} /> <!-- remove '|| "gold"' once userstats.league ok -->
+	</div>
 
 </div>

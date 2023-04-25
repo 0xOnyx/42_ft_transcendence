@@ -116,10 +116,11 @@
 
 </script>
 
+<NavBar user={user} />
 
-<div class="h-full container md:py-10 xl:py-20 mx-auto">
+<div class="h-full container md:py-5 xl:py-10 mx-auto">
 
-    <div class="h-full bg-color3 self-center md:border-4 border-black rounded p-1 pb-3 xl:p-8">
+    <div class="h-[85%] bg-color3 self-center md:border-4 border-black rounded p-1 pb-3 xl:p-8">
 
         <div class="md:flex h-full text-center align-middle m-1">
 

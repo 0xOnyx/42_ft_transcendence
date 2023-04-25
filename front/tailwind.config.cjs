@@ -4,7 +4,7 @@ export default {
   theme: {
     extend: {
 		animation: {
-			'idle': "idle 8s infinite",
+			'idle': "idle 12s infinite",
 			'halo-idle': "halo-idle halo-pulse-idle pulse 20s infinite",
 			'spin-slow' : "spin 5s linear infinite",
 			'pulse-slow' : "pulse 2s infinite"

@@ -29,8 +29,38 @@
 		@apply bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-silver-100 from-35% via-silver-200 to-silver-300 to-95%;
 	}
 
-	.diamant-league {
-		@apply bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-blue-200 from-35% via-blue-500 to-blue-600 text-white to-95%;
+	
+	.screen {
+		border: 3px solid rgba(0, 0, 0, 0.5);
+		
+	}
+
+	.screen-overlay {
+		background: linear-gradient(
+			rgba(0,0,0,0.1),
+			rgba(0,0,0,0.1) 2px,
+			transparent 2px,
+			transparent 4px
+		);
+		height: 100%;
+		width: 100%;
+		overflow: hidden;
+		background-size: 100% 4px;
+		animation: pan-overlay 84s infinite linear;
+	}
+
+	.nav-bar {
+		display: flex;
+		justify-self: center;
+		justify-content: space-between;
+	}
+	
+	.nav-bar li:nth-of-type(1) {
+		padding-left: 2%;
+	}
+
+	.nav-bar li:nth-of-type(2) {
+		padding-right: 2%;
 	}
 }
 
@@ -41,4 +71,14 @@
 	.animation-delay-4000 {
 		animation-delay: 4s;
 	}
+}
+
+@keyframes pan-overlay {
+	from {
+		background-position: 0% 0%;
+	}
+	to {
+		background-position: 0% -100%;
+	}
+	
 }

@@ -9,6 +9,7 @@
 	import UserNotification from '../../../components/UserNotification.svelte';
 	import UserStat from '../../../components/UserStat.svelte';
 	import UserInfo from '../../../components/UserInfo.svelte';
+	import NavBar from '../../../components/NavBar.svelte';
 
     import Pong from '../../../pong/classic/pong';
 
@@ -116,8 +117,9 @@
 
 </script>
 
+<NavBar user={user} />
 
-<div class="h-full container md:py-10 xl:py-20 mx-auto">
+<div class="h-[85%] container md:py-10 xl:py-20 mx-auto">
 
     <div class="h-full bg-color3 self-center md:border-4 border-black rounded p-1 pb-3 xl:p-8">
 
