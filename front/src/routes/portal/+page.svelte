@@ -132,6 +132,8 @@
         })
 
         socket.on("NewFriend", (user: User)=>{
+            console.log("NEW FRIEND ")
+            console.log(user);
             friends = [...friends, user];
         })
 

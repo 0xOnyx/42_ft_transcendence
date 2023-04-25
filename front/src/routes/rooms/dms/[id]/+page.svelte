@@ -35,6 +35,7 @@
     let iscurrentFriend: Boolean = false;
     let roomUserDm: RoomUser;
 	let chatbox : HTMLDivElement;
+    let unread_message: Number = 0;
 
     let userstats : UserStats = {
         played : 42,
@@ -134,8 +135,11 @@
         })
 
         socket.on("message", (data: {send_user_id: number, room_id: number, message: (Messages & {user: User}), message_type: string})=>{
-            console.log(data);
-            room_message.push(data.message);
+            console.log("new message");
+            if (data.room_id === id_room)
+                room_message.push(data.message);
+            else
+                unread_message += 1;
             if (room_message.length > MAX_MESSAGE)
                 room_message.shift();
             room_message = room_message;
@@ -161,6 +165,14 @@
             })
         })
 
+        socket.on("updateMessage", (message: (Messages & {user: User}))=>{
+            console.log(message)
+            console.log(room_message);
+            const id = room_message.findIndex(item=>{return(item.id == message.id)});
+            console.log(id)
+            room_message[id] = message;
+        })
+
 
     })
 
@@ -177,6 +189,8 @@
 
     async function sendMessage()
     {
+        if (message_value.length <= 0)
+            return ;
         socket.emit("message", {
             room_id: current_room.id,
             message: message_value,

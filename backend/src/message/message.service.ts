@@ -51,12 +51,13 @@ export class MessageServiceService {
             includes) as Prisma.UserGetPayload<{ include: typeof includes }>
         if (!room_user.room_user.find(content => content.room_id == room_id))
             throw new HttpException("user in not in the room", HttpStatus.FORBIDDEN);
-        return this.messageService.getMessageFromRoom({
+        const res =  await this.messageService.getMessageFromRoom({
             ...params,
             where: {room_id: room_id},
-            orderBy: {create_at: "asc"},
+            orderBy: {create_at: "desc"},
             include : {user: true}
         });
+        return res.reverse();
     }
 
     async getAllRoom() {
@@ -86,4 +87,6 @@ export class MessageServiceService {
     {
         return this.messageService.getDmUser({id: user_id});
     }
+
+
 }

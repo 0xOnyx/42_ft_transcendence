@@ -205,4 +205,13 @@ export class MessageService {
             data: update
         })
     }
+
+    async   updateMessageInvite(message: Prisma.MessagesWhereUniqueInput, data: Prisma.MessagesUpdateInput)
+    {
+        return this.prisma.messages.update({
+            where: message,
+            data: data,
+            include  : { user: true}
+        })
+    }
 }
