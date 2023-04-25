@@ -311,6 +311,7 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
     await this.messageService.leftRoom({id: room.id}, {id: Number(data.user_id)});
     await this.messageService.deleteRoom({id: room.id});
     const user = await this.userService.user({id: data.user_id});
+    this.server.in(room.id.toString()).emit("leftRoom", room);
     if (user)
       this.server.in(user.oauth_42_id.toString()).socketsLeave(room.id.toString());
     this.server.in(client.request.user.oauth_42_id.toString()).socketsLeave(room.id.toString());
@@ -423,13 +424,8 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
     if (!dmUser || !(room = dmUser.find((element: (Rooms & {user: RoomUser[]})) => {
       return !!element.user.find((element: RoomUser) => element.user_id == Number(data.user_id))})))
       return ;
-    await this.messageService.leftRoom({id: room.id}, {id: client.request.user.id});
-    await this.messageService.leftRoom({id: room.id}, {id: Number(data.user_id)});
-    await this.messageService.deleteRoom({id: room.id});
-    this.server.in(client.request.user.oauth_42_id.toString()).socketsLeave(room.id.toString());
-    const user = await this.userService.user({id: data.user_id})
-    if (user)
-      this.server.in(user.oauth_42_id.toString()).socketsLeave(room.id.toString());
+    await this.deleteFriend(data, client);
+    await this.leftDm(data, client);
   }
 
   @SubscribeMessage('unblockUser')

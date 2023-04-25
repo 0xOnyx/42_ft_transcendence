@@ -175,13 +175,14 @@ export class MessageService {
 
     async deleteRoom(room_where: Prisma.RoomsWhereUniqueInput)
     {
-        await this.prisma.rooms.delete({
-            where: room_where
-        })
+
         await this.prisma.messages.deleteMany({
             where: {
                 room: room_where
             }
+        })
+        await this.prisma.rooms.delete({
+            where: room_where
         })
     }
 

@@ -27,16 +27,20 @@
             method: 'GET',
             credentials: 'include'
         });
-        let rooms: (Rooms & {user: RoomUser[]})  | undefined = await res.json();
-        if (!rooms || res.status != 200)
-        {
-            io.emit("createDm", {user_id: user.id}, (rooms)=>{
+        console.log(res.status)
+        let rooms: (Rooms & { user: RoomUser[] }) | undefined;
+        if (res.status == 200) {
+            rooms = await res.json();
+            if (rooms)
+                await goto(`/rooms/dms/${rooms.id}`);
+            console.log("NOT FOUND")
+            io.emit("createDm", {user_id: user.id}, (rooms) => {
+                console.log("RETURN")
+                console.log(rooms)
                 if (rooms)
                     goto(`/rooms/dms/${rooms.id}`);
             })
         }
-        else
-           await goto(`/rooms/dms/${rooms.id}`);
     }
 </script>
 
