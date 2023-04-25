@@ -196,7 +196,7 @@
                 </div>
 
 
-                <h2 class="text-left border-b-2 text-lg">MD lists</h2>
+                <h2 class="text-left border-b-2 text-lg">DM list</h2>
 
                 <div class="mt-2">
 

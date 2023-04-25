@@ -17,7 +17,7 @@
              style="background-image: url( /{user?.image_url || 'image/default.png'} )">
         </div>
     <div class="flex-grow text-left px-2">
-ds        {user?.name || "LOADING.."}
+       {user?.name || "LOADING.."}
     </div>
 
     <div class="">
