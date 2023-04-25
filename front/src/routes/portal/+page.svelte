@@ -12,14 +12,14 @@
     import {io, Socket} from "socket.io-client";
 	import UserStat from "../../components/UserStat.svelte";
 	import UserInfo from "../../components/UserInfo.svelte";
-	import Popup from "../../components/Popup.svelte";
-    import Popup_modify from "../../components/Popup_modify_username.svelte";
-    import Popup_modify_username from "../../components/Popup_modify_username.svelte";
-    import Popup_modify_picture from "../../components/Popup_modify_picture.svelte";
+	import PopUp from "../../components/PopUp.svelte"
+	import NavBar from "../../components/NavBar.svelte";
+
     interface UserStats {
         played: number,
         ratio: number,
         level: number,
+		league: string
     }
 
     let Status: {
@@ -62,7 +62,8 @@
     let userstats : UserStats = {
         played : 42,
         ratio: 84,
-        level: 21
+        level: 21,
+		league: "gold"
     }
 
 
@@ -201,13 +202,15 @@
     </script>
 </svelte:head>
 
-<div class="h-full relative container md:py-10 xl:py-20 mx-auto">
+<NavBar user={user} />
 
-    <div class="h-full bg-color3 self-center md:border-4 border-black rounded p-1 pb-3 xl:p-8">
+<div class="h-full container md:py-5 xl:py-10 mx-auto">
+
+    <div class="h-[85%] bg-transparent self-center p-1 mx-[2%[">
 
         <div class="md:flex h-full text-center align-middle m-1">
 
-            <div class="bg-color5 grow justify-around lg:flex mr-2 xl:mr-8 overflow-auto p-5 rounded-xl">
+            <div class="relative screen grow shadow-lg shadow-black/50 bg-black/25 justify-around overflow-auto lg:flex rounded-3xl">
 
                 <div class="flex items-center">
 
