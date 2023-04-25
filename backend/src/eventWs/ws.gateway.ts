@@ -176,8 +176,11 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
         throw new WsException("not permit");
       }
       let typeMessage: TypeMessage;
-      if (data.message_type == "MESSAGE")
-        typeMessage = TypeMessage.MESSAGE;
+      if (data.message_type == "MESSAGE") {
+		  typeMessage = TypeMessage.MESSAGE;
+		  if (data.message.length <= 0)
+		  	throw new WsException("empty message")
+	  }
       else if (data.message_type == "ADD_FRIEND") {
         typeMessage = TypeMessage.ADD_FRIEND;
         if (room_user.room.type !=  "SINGLE_CHAT")
