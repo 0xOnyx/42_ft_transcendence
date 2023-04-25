@@ -76,10 +76,10 @@ export class MessageServiceService {
         let room: Rooms & {user: RoomUser[]} | undefined;
 
         if (!dmUser)
-            throw new HttpException("no dm exit", HttpStatus.NOT_FOUND);
+            throw new HttpException("no dm exit", HttpStatus.NO_CONTENT);
         if (!(room = dmUser.find((element: (Rooms & {user: RoomUser[]})) => {
             return !!element.user.find((element: RoomUser) => element.user_id == Number(client_id))})))
-            throw new HttpException("no dm found", HttpStatus.NOT_FOUND);
+            throw new HttpException("no dm found", HttpStatus.NO_CONTENT);
         return room;
     }
 

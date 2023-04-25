@@ -44,9 +44,9 @@
         {userDm?.name || "loading.."}
     </div>
 	{#if room.count_messages}
-  <span class="sr-only">Notifications</span>
-  <span class="inline-flex items-center justify-center px-2 mw-6 h-6 ml-2 text-xs font-bold text-white bg-red-500 rounded-full">
-    {room.count_messages}0
-  </span>
-  {/if}
+      <span class="sr-only">Notifications</span>
+      <span class="inline-flex items-center justify-center px-2 mw-6 h-6 ml-2 text-xs font-bold text-white bg-red-500 rounded-full">
+        {room.count_messages}
+      </span>
+    {/if}
 </div>

@@ -20,6 +20,7 @@
     import {io, Socket} from "socket.io-client";
     import RequestFriend from "../../../../components/RequestFriend.svelte";
     import DeleteFriend from "../../../../components/DeleteFriend.svelte";
+    import BlockUser from "../../../../components/BlockUser.svelte";
     let id;
 
 	const MAX_MESSAGE = 20
@@ -87,11 +88,14 @@
             }
         }
 
-        res = await fetch(`${PUBLIC_API_URI}/message/getAllDm`, {
-            method: 'GET',
-            credentials: 'include'
-        })
-        rooms = await res.json();
+        if (rooms.length <= 0)
+        {
+            res = await fetch(`${PUBLIC_API_URI}/message/getAllDm`, {
+                method: 'GET',
+                credentials: 'include'
+            })
+            rooms = await res.json();
+        }
 
 
         if ($page.params.id == "last")
@@ -115,13 +119,10 @@
         });
 
         current_room_user = await res.json();
-        console.log(id_room);
-        console.log(friends)
-        console.log(roomUserDm)
-        console.log(friends.find(item => {return (item.id === roomUserDm.user_id)}))
 
+        const index = rooms.findIndex((item: (Rooms & {user: RoomUser[]}))=>{return (item.id === id_room)})
+        rooms[index].count_messages = 0;
 		chatbox.scrollTop = chatbox.scrollHeight;
-
     }
 
 
@@ -146,10 +147,15 @@
             if (data.room_id === id_room)
                 room_message.push(data.message);
             else
-                unread_message += 1;
+            {
+                const index = rooms.findIndex((item: (Rooms & {user: RoomUser[]}))=>{return (item.id === data.room_id)})
+                rooms[index].count_messages += 1;
+            }
             if (room_message.length > MAX_MESSAGE)
                 room_message.shift();
             room_message = room_message;
+            console.log(unread_message);
+
         })
 
 
@@ -160,6 +166,13 @@
             else
                 room[index] = room;
             rooms = rooms;
+        })
+
+        socket.on("leftRoom", (room: (Rooms & {user: RoomUser[]})) =>{
+            console.log(room)
+            rooms = rooms.filter(item=>{
+                return item.id != room.id
+            })
         })
 
         socket.on("NewFriend", (user: User)=>{
@@ -276,7 +289,7 @@
 
                 <div class="flex items-center border-1 p-8">
 
-                    <input autofocus on:keydown={(e)=>{e.key == "Enter" && sendMessage()}} bind:value={message_value} type="text" class="border border-color2 bg-color5 rounded-md w-full p-2 pr-12 focus:outline-none" />
+                    <input autofocus on:keydown={(e)=>{e.key === "Enter" && sendMessage()}} bind:value={message_value} type="text" class="border border-color2 bg-color5 rounded-md w-full p-2 pr-12 focus:outline-none" />
                     <div class="relative">
                         <button on:click={sendMessage} class="-top-4 -left-10 absolute bg-color2 p-0 m-0 rounded-xl"><Icon icon="send" css="inline p-0 h-8 stroke-color2 fill-white"></Icon></button>
                     </div>
@@ -288,7 +301,7 @@
             <div class="md:w-1/3 lg:w-1/4 md:flex md:flex-col">
 
                 {#if user}
-                    <UserNotification user={user}></UserNotification>
+                    <UserNotification rooms={rooms} user={user}></UserNotification>
                 {:else}
                     <p>LOADING..</p>
                 {/if}
@@ -316,6 +329,7 @@
                                     {:else}
                                         <DeleteFriend socket={socket} user={friends.find(item => item.id === roomUserDm.user_id )}></DeleteFriend>
                                     {/if}
+                                    <BlockUser socket={socket} user={current_room_user}></BlockUser>
                                 {/if}
                             </div>
 
