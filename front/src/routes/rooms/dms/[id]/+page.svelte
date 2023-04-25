@@ -19,6 +19,7 @@
     import {goto, beforeNavigate} from "$app/navigation";
     import {io, Socket} from "socket.io-client";
     import RequestFriend from "../../../../components/RequestFriend.svelte";
+    import DeleteFriend from "../../../../components/DeleteFriend.svelte";
     let id;
 
 	const MAX_MESSAGE = 20
@@ -71,12 +72,14 @@
         for (const item of friends_list) {
             try {
                 let id =  item.friend_id === user.id ? item.user_id : item.friend_id
+                if (item.accept_at == null)
+                    continue;
                 const res: Response = await fetch(`${PUBLIC_API_URI}/user/id/${id}`, {
                     method: 'GET',
                     credentials: 'include'
                 });
                 const new_friend: User = (await res.json());
-                friends.push(new_friend)
+                friends = [...friends, new_friend];
             }
             catch (err)
             {
@@ -113,6 +116,10 @@
 
         current_room_user = await res.json();
         console.log(id_room);
+        console.log(friends)
+        console.log(roomUserDm)
+        console.log(friends.find(item => {return (item.id === roomUserDm.user_id)}))
+
 		chatbox.scrollTop = chatbox.scrollHeight;
 
     }
@@ -161,7 +168,7 @@
 
         socket.on("LostFriend", (data: {id: number})=>{
             friends = friends.filter((item: User)=>{
-                return (item.id === Number(data.id))
+                return (item.id != Number(data.id))
             })
         })
 
@@ -301,8 +308,14 @@
 
 
                             <div>
-                                {#if roomUserDm && !friends.find(item => {item.id === roomUserDm.user_id}) }
-                                    <RequestFriend room={current_room} socket={socket} user={current_room_user}></RequestFriend>
+                                {#if !roomUserDm }
+                                    <p>LOADING..</p>
+                                {:else}
+                                    {#if !friends.find(item => item.id === roomUserDm.user_id ) }
+                                        <RequestFriend room={current_room} socket={socket} user={current_room_user}></RequestFriend>
+                                    {:else}
+                                        <DeleteFriend socket={socket} user={friends.find(item => item.id === roomUserDm.user_id )}></DeleteFriend>
+                                    {/if}
                                 {/if}
                             </div>
 

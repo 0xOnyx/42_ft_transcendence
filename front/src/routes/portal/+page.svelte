@@ -139,7 +139,7 @@
 
         socket.on("LostFriend", (data: {id: number})=>{
             friends = friends.filter((item: User)=>{
-                return (item.id === Number(data.id))
+                return (item.id != Number(data.id))
             })
         })
     })
