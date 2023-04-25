@@ -56,20 +56,6 @@ export class UserProviderController {
         return this.userServiceServer.getFriend(req.user.id);
     }
 
-    @UseGuards(AuthenticatedGuard)
-    @Post("friend/add/:id")
-    @ApiOperation({summary: "Accept friend request by id", description: "the id send by websocket"})
-    createFriend(@Param(":id") id: string, @Request() req: any) {
-        return this.userServiceServer.addFriend(req.user.id, Number(id));
-    }
-
-    @UseGuards(AuthenticatedGuard)
-    @Post("friend/delete/:id")
-    @ApiOperation({summary: "Delete friend by relation id"})
-    deleteFriend(@Param(":id") id: string, @Request() req: any) {
-        return this.userServiceServer.deleteFriend(req.user.id, Number(id));
-    }
-
     //usage exemple => /user/search?skip=0&take=1&element=name&value=salut
     @UseGuards(AuthenticatedGuard)
     @Get("search")

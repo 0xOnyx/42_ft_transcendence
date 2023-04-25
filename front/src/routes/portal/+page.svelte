@@ -28,7 +28,7 @@
         HIDDEN: 'HIDDEN'
     };
     type Status = (typeof Status)[keyof typeof Status]
-    type hUser =
+    type User =
     {
         id: number,
         name?: string,
@@ -99,8 +99,10 @@
         user = await res.json();
 
         for (const item of friends_list) {
+            let id = item.friend_id === user.id ? item.user_id : item.friend_id;
             try {
-                let id =  item.friend_id === user.id ? item.user_id : item.friend_id
+                if (item.accept_at == null)
+                    continue;
                 const res: Response = await fetch(`${PUBLIC_API_URI}/user/id/${id}`, {
                     method: 'GET',
                     credentials: 'include'
@@ -121,6 +123,7 @@
 
         socket.on("connection", (data) => {
             connectedWs = true;
+            console.log("CONNECTION OK");
         })
 
         socket.on("FriendStatusUdpate", (data: {id: number, status: Status})=>{
@@ -128,6 +131,15 @@
             friends[index].online_status = data.status;
         })
 
+        socket.on("NewFriend", (user: User)=>{
+            friends = [...friends, user];
+        })
+
+        socket.on("LostFriend", (data: {id: number})=>{
+            friends = friends.filter((item: User)=>{
+                return (item.id === Number(data.id))
+            })
+        })
     })
 
     let _openUpdate: boolean = false;

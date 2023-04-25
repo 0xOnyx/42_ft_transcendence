@@ -17,13 +17,13 @@
              style="background-image: url( /{user?.image_url || 'image/default.png'} )">
         </div>
     <div class="flex-grow text-left px-2">
-       {user?.name || "LOADING.."}
+           {user?.name || "LOADING.."}
     </div>
 
-    <div class="">
+    <a href="/api/auth/logout">
 
         <Icon icon="exit" css="inline m-3 h-8 stroke-none fill-white"></Icon>
 
-    </div>
+    </a>
 
 </div>

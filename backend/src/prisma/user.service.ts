@@ -104,12 +104,24 @@ export class UserService {
 		})
 	}
 
+
+	async getFriendAny(where: Prisma.UserWhereUniqueInput, add_id: Prisma.UserWhereUniqueInput)
+	{
+		return await this.prisma.friend.findMany({
+			where: {
+				OR: [
+					{ user_id: where.id, friend_id: add_id.id },
+					{ user_id: add_id.id, friend_id: where.id },
+				],
+			},
+		});
+	}
+
 	getFriend(where: Prisma.FriendWhereUniqueInput)
 	{
 		return this.prisma.friend.findUnique({
 			where: where
 		});
-
 	}
 
 	async createFriend(where: Prisma.UserWhereUniqueInput, add_id: Prisma.UserWhereUniqueInput)
@@ -136,7 +148,7 @@ export class UserService {
 
 	async updateFriend(where: Prisma.FriendWhereUniqueInput, data: Prisma.FriendUpdateInput)
 	{
-		await this.prisma.friend.update({
+		return await this.prisma.friend.update({
 			where,
 			data
 		})

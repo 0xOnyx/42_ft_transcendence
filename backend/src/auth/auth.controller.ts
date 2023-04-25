@@ -26,4 +26,12 @@ export class AuthController {
 	{
 		return req.isAuthenticated();
 	}
+
+	@Get("logout")
+	@ApiOperation({summary: "logout"})
+	async logout(@Request() req: any, @Res() res: any)
+	{
+		await req.session.destroy();
+		return res.redirect('/');
+	}
 }

@@ -3,8 +3,17 @@
     import type {User} from "../types/user";
     import DateElement from "./DateElement.svelte";
 	import Button from "./Button.svelte"
+    import {Socket} from "socket.io-client";
+
     export let current_message: (Messages & {user: User});
     export let user: User;
+    export let socket: Socket
+
+    async function acceptFriend()
+    {
+        console.log("acceptFriend");
+        socket.emit("acceptFriend", {id: Number(current_message.content)})
+    }
 
 </script>
 
@@ -14,7 +23,7 @@
     <div class="flex-grow">
 
         <div class="rounded-md mx-3 bg-color6 p-5 mt-1 text-right flex">
-			<div class="flex-1">You sent an invitation to play</div>
+			<div class="flex-1">You sent an invitation to friend</div>
             <!-- {current_message.content} -->
         </div>
 
@@ -52,10 +61,10 @@
     <div class="flex-grow">
 
         <div class="rounded-md mx-3 bg-color6 p-5 mt-1 text-right flex">
-			<div class="flex-1">You received an invitation to play</div>
+			<div class="flex-1">You received an invitation to friend</div>
             <!-- {current_message.content} -->
 
-			<div class="flex-none mx-5"><Button name="Accept" width="w-45"></Button></div>
+			<div on:click={acceptFriend} class="flex-none mx-5"><Button name="Accept" width="w-45"></Button></div>
 			<div class="flex-none mx-5"><Button name="Decline" width="w-45"></Button></div>
 
         </div>

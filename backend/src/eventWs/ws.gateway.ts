@@ -17,7 +17,7 @@ import { MessageService } from "../prisma/message.service";
 import { TypeRoom, RoleUser, Log, Status, TypeMessage, Friend, Rooms, RoomUser, User } from "@prisma/client"
 import sessionMiddleware from '../sessions'
 import * as passport from "passport";
-import {Messages} from ".prisma/client";
+import {Prisma, Messages} from ".prisma/client";
 
 const wrap = (middleware: any) => (
     socket: Socket,
@@ -66,7 +66,6 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
     })
   }
   async handleConnection(client: CustomSocket) {
-
     if (!client.request.user)
       throw new WsException("not user");
 
@@ -93,7 +92,7 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
       if (user && user.friend)
       {
         user.friend.forEach((friend: Friend) => {
-          if (!client.request.user)
+          if (!client.request.user || friend.accept_at == null)
             return ;
           let id =  friend.friend_id === client.request.user.id ? friend.user_id : friend.friend_id
           this.server.in(id.toString()).emit("FriendStatusUdpate", {id: client.request.user.id, status: Status.ONLINE})
@@ -184,7 +183,11 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
         if (room_user.room.type !=  "SINGLE_CHAT")
           throw new WsException("only in single chat");
         const add_id: RoomUser | undefined = room_user.room.user.find(element => element.user_id != client.request.user?.id)
-        let friend: Friend = await this.userService.createFriend({id: client.request.user.id}, {id: add_id?.user_id}, );
+        let friend: Friend | undefined = (await this.userService.getFriendAny({id: client.request.user.id}, {id: add_id?.user_id}))[0];
+        if (friend && friend?.accept_at != null)
+          throw new WsException("already friend");
+        if (!friend)
+          friend = await this.userService.createFriend({id: client.request.user.id}, {id: add_id?.user_id}, );
         data.message = friend.id.toString();
       }
       else if (data.message_type == "INVITE_GAME") {
@@ -420,5 +423,42 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
     if (block_users.length <= 0)
       throw new WsException("you have no block the user");
     await this.userService.unblockUser({id: client.request.user.id}, {id: Number(data.user_id)})
+  }
+
+  @SubscribeMessage('acceptFriend')
+  async createFriend(
+      @MessageBody() data: {id: number},
+      @ConnectedSocket() client: CustomSocket
+  )
+  {
+    if (!client.request.user)
+      throw new WsException("no user");
+    const friend: Friend  | null = await this.userService.getFriend({id: Number(data.id)});
+    if (!friend || friend.friend_id != client.request.user.id || friend?.accept_at != null)
+      return ;
+    const to_change: Prisma.FriendUpdateInput = {
+      accept_at : new Date()
+    }
+    const updateFriend: Friend = await this.userService.updateFriend({id: Number(data.id)}, to_change);
+
+    let id =  updateFriend.friend_id === client.request.user.id ? updateFriend.user_id : updateFriend.friend_id
+    const userFriend: User | null = await this.userService.user({id: id});
+    this.server.in(client.request.user.id.toString()).emit("NewFriend", userFriend);
+    const user: User | null = await this.userService.user({id: client.request.user.id})
+    this.server.in(id.toString()).emit("NewFriend", user);
+  }
+
+  @SubscribeMessage('deleteFriend')
+  async deleteFriend(
+      @MessageBody() data: {user_id: number},
+      @ConnectedSocket() client: CustomSocket
+  )
+  {
+    if (!client.request.user)
+      throw new WsException("no user");
+    await this.userService.deleteFriend({id: client.request.user.id }, {id: Number(data.user_id)})
+
+    this.server.in(client.request.user.id.toString()).emit("LostFriend", {id: data.user_id});
+    this.server.in(data.user_id.toString()).emit("LostFriend", {id: client.request.user.id});
   }
 }
