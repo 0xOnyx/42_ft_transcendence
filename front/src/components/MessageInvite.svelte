@@ -23,7 +23,7 @@
     <div class="flex-grow">
 
         <div class="rounded-md mx-3 bg-color6 p-5 mt-1 text-right flex">
-			<div class="flex-1">You sent an invitation to friend</div>
+			<div class="flex-1">You sent a friend request</div>
             <!-- {current_message.content} -->
         </div>
 
@@ -61,7 +61,7 @@
     <div class="flex-grow">
 
         <div class="rounded-md mx-3 bg-color6 p-5 mt-1 text-right flex">
-			<div class="flex-1">You received an invitation to friend</div>
+			<div class="flex-1">You received a friend request</div>
             <!-- {current_message.content} -->
 
 			<div on:click={acceptFriend} class="flex-none mx-5"><Button name="Accept" width="w-45"></Button></div>
