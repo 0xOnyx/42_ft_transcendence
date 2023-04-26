@@ -1,9 +1,12 @@
 <script lang="ts">
 	import type { User } from "../types/user";
 	import Icon from "./Icon.svelte";
-	import Button from "./Button.svelte";
+	
 
     export let user : User;
+	let totalDM : number = 3;
+	let totalCHAN : number = 5;
+	let total : number = totalDM + totalCHAN;
 </script>
 
 <!-- Nav Bar goes here -->
@@ -26,12 +29,27 @@
 							{user?.name || "LOADING.."}
 						</div>
 					</a>
-					<div class="relative group flex-col justify-stretch space-y-2 overflow-x-visible">
-						<button class="hover:scale-125"><Icon icon="chat" css="inline " height="30" width="30" /></button>
+					<div class="relative group flex-col justify-center space-y-2 overflow-x-visible">
+						<div class="relative flex justify-end items-end">
+							<button class="relative hover:scale-125"><Icon icon="chat" css="inline " height="30" width="30" /></button>
+							{#if total > 0}
+								<div class="absolute inline-flex justify-center items-center -bottom-1.5 -right-1.5 min-w-60 h-5 text-2xs px-1 font-bold text-white bg-red-500 border-2 border-white rounded-full dark:border-gray-900">{total > 99 ? "99+" : total}</div>
+							{/if}
+						</div>
 						<div class="absolute -translate-x-[35%] z-20 scale-0 group-hover:scale-100 flex flex-col duration-300 origin-top overflow-hidden text-xs">
 							<div class="bg-black/50 rounded-lg overflow-auto">
-								<a class="flex justify-center w-24 hover:bg-white/25 hover:scale-110 transition-all" href="/rooms/dms/last"><span class="m-1.5">DM</span></a>
-								<a class="flex justify-center hover:bg-white/25 hover:scale-110 transition-all" href="/rooms/channel/last"><span class="m-1.5" >Channels</span></a>
+								<a class="flex items-center justify-center w-24 hover:bg-white/25 hover:scale-110 transition-all" href="/rooms/dms/last">
+									<span class="m-1.5">DM</span> 
+									{#if totalDM > 0}
+										<div class="inline-flex items-center justify-center min-w-60 h-5 text-2xs px-1 font-bold text-white bg-red-500 border-2 border-white rounded-full dark:border-gray-900">{totalDM > 99 ? "99+" : totalDM}</div>
+									{/if}
+								</a>
+								<a class="flex items-center justify-center hover:bg-white/25 hover:scale-110 transition-all" href="/rooms/channel/last">
+									<span class="m-1.5" >CHAN</span> 
+									{#if totalCHAN > 0}
+										<div class="inline-flex items-center justify-center min-w-60 h-5 text-2xs px-1 font-bold text-white bg-red-500 border-2 border-white rounded-full dark:border-gray-900">{totalCHAN > 99 ? "99+" : totalCHAN}</div>
+									{/if}
+								</a>
 							</div>
 						</div>
 					</div>
