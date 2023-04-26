@@ -40,7 +40,10 @@
                 	</div>
 				</div>
             {:else}
-                <p>loading...</p>
+				<div class="flex justify-center items-center space-x-1">
+					<Icon icon="load" />
+					<p>loading...</p>
+				</div>
             {/if}
 
         </div>
