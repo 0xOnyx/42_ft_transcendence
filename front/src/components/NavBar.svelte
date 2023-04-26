@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { User } from "../types/user";
 	import Icon from "./Icon.svelte";
+	import Button from "./Button.svelte";
 
     export let user : User;
 </script>
@@ -18,16 +19,25 @@
 			</li>
 <!-- menu -->
 			<li class="flex items-center">
-				<div class="hidden md:flex items-center space-x-3 divide-x-2">
+				<div class="flex items-center space-x-3">
 					<a class="hover:scale-110 transition-all flex items-center space-x-2" href="/portal">
 						<div class="w-8 h-8 bg-cover rounded-full mx-auto"style="background-image: url( /{user?.image_url || 'image/default.png'} )"></div>
 						<div class="hidden md:flex flex-grow text-left">
 							{user?.name || "LOADING.."}
 						</div>
 					</a>
-					<a class="hover:scale-110 transition-all pl-2" href="/rooms/dms/last"><Icon icon="chat" css="inline " height="30" width="30" /></a>
-					<a class="hover:scale-125 transition-all pl-2" href="/api/auth/logout"><Icon icon="log" css="inline " height="30" width="30" /></a>
+					<div class="relative group flex-col justify-stretch space-y-2 overflow-x-visible">
+						<button class="hover:scale-125"><Icon icon="chat" css="inline " height="30" width="30" /></button>
+						<div class="absolute -translate-x-[35%] z-20 scale-0 group-hover:scale-100 flex flex-col duration-300 origin-top overflow-hidden text-xs">
+							<div class="bg-black/50 rounded-lg overflow-auto">
+								<a class="flex justify-center w-24 hover:bg-white/25 hover:scale-110 transition-all" href="/rooms/dms/last"><span class="m-1.5">DM</span></a>
+								<a class="flex justify-center hover:bg-white/25 hover:scale-110 transition-all" href="/rooms/channel/last"><span class="m-1.5" >Channels</span></a>
+							</div>
+						</div>
+					</div>
+					<a class="hover:scale-125 transition-all" href="/api/auth/logout"><Icon icon="log" css="inline " height="30" width="30" /></a>
 				</div>
+				<!-- scrolling menu
 				<div class="group flex-col items-center justify-center md:hidden transition-all duration-300 bg-black/50 rounded-full">
 					<button class="p-2"><Icon icon="menu" css="inline " height="30" width="30" /></button>
 					<div class="absolute p-2 space-y-2 z-20 scale-0 group-hover:scale-100 flex flex-col duration-300 origin-top bg-black/25 rounded-full">
@@ -37,6 +47,7 @@
 						<a class="hover:scale-125 transition-all" href="/api/auth/logout"><Icon icon="log" css="inline " height="30" width="30" /></a>
 					</div>
 				</div>
+				-->
 			</li>
 		</div>
 	</div>
