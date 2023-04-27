@@ -16,6 +16,7 @@
 	import NavBar from "../../components/NavBar.svelte";
 	import Icon from "../../components/Icon.svelte";
 	import Achievement from "../../components/Achievement.svelte";
+	import UserNotification from "../../components/UserNotification.svelte";
 
     interface UserStats {
         played: number,
@@ -53,11 +54,12 @@
     let userstats : UserStats = {
         played : 42,
 		win: 19,
-        ratio: 84,
+		ratio: 84,
         level: 21,
 		league: "gold"
     }
 
+	$: userstats.ratio = Math.round(userstats.win / userstats.played * 100);
 
     async function searchUser()
     {
@@ -90,6 +92,7 @@
             credentials: 'include'
         });
         user = await res.json();
+
 
         for (const item of friends_list) {
             let id = item.friend_id === user.id ? item.user_id : item.friend_id;
