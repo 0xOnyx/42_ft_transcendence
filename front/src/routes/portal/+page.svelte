@@ -15,9 +15,11 @@
     import PopUp from "../../components/PopUp.svelte";
 	import NavBar from "../../components/NavBar.svelte";
 	import Icon from "../../components/Icon.svelte";
+	import Achievement from "../../components/Achievement.svelte";
 
     interface UserStats {
         played: number,
+		win: number,
         ratio: number,
         level: number,
 		league: string
@@ -50,6 +52,7 @@
 
     let userstats : UserStats = {
         played : 42,
+		win: 19,
         ratio: 84,
         level: 21,
 		league: "gold"
@@ -241,10 +244,12 @@
 						<div class="grow">
 
 							<div class="">
-								<UserStat userstats={userstats}></UserStat>
+								<UserStat userstats={userstats} />
 							</div>
 
 							<div on:click={()=>{updatePopUp("newGame")}}  class="mt-5 xs:text-sm md:text-md"><Button color="bg-process-green border-2 border-black hover:border-process-green hover:bg-transparent hover:rounded-xl hover:text-process-green hover:scale-105 transition-all" width="w-30 sm:w-52" name="New Game" /></div>
+
+							<Achievement userstats={userstats} />
 
 						</div>
 					</div>

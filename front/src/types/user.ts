@@ -22,6 +22,7 @@ export enum Status {
 
 export type UserStats = {
     played: number,
+	win: number,
     ratio: number,
     level: number,
 	league: string,
