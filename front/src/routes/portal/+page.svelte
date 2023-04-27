@@ -267,7 +267,7 @@
                             <p>NO FRIEND</p>  <!-- CREATE THIS -->
                         {:else}
                             {#each friends as friend}
-                                <ItemName user={friend}></ItemName>
+                                <ItemName io={socket} user={friend}></ItemName>
                             {/each}
                         {/if}
                     {:else}
@@ -275,7 +275,7 @@
                             <p>no user found :/</p>  <!-- CREATE THIS -->
                         {:else}
                             {#each search as user}
-                                <ItemName user={user}></ItemName>
+                                <ItemName io={socket} user={user}></ItemName>
                             {/each}
                         {/if}
                     {/if}
