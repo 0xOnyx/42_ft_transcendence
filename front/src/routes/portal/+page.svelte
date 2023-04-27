@@ -12,7 +12,7 @@
     import {io, Socket} from "socket.io-client";
 	import UserStat from "../../components/UserStat.svelte";
 	import UserInfo from "../../components/UserInfo.svelte";
-    import PopUp from "../../components/PopUp.svelte";
+    import PopUp from "../../components/Popup.svelte";
 	import NavBar from "../../components/NavBar.svelte";
 	import Icon from "../../components/Icon.svelte";
 
