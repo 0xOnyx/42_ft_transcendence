@@ -24,7 +24,7 @@
 			<li class="flex items-center">
 				<div class="flex items-center space-x-3">
 					<a class="hover:scale-110 transition-all flex items-center space-x-2" href="/portal">
-						<div class="w-8 h-8 bg-cover rounded-full mx-auto"style="background-image: url( /{user?.image_url || 'image/default.png'}?{Date.now()} )"></div>
+						<div class="w-8 h-8 bg-cover rounded-full mx-auto"style="background-image: url( /{user?.image_url || 'image/default.png'} )"></div>
 						<div class="hidden md:flex flex-grow text-left">
 							{user?.name || "LOADING.."}
 						</div>
