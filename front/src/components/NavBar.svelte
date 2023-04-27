@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { User } from "../types/user";
 	import Icon from "./Icon.svelte";
-	
+
 
     export let user : User;
 	let totalDM : number = 3;
@@ -24,7 +24,7 @@
 			<li class="flex items-center">
 				<div class="flex items-center space-x-3">
 					<a class="hover:scale-110 transition-all flex items-center space-x-2" href="/portal">
-						<div class="w-8 h-8 bg-cover rounded-full mx-auto"style="background-image: url( /{user?.image_url || 'image/default.png'} )"></div>
+						<div class="w-8 h-8 bg-cover rounded-full mx-auto"style="background-image: url( /{user?.image_url || 'image/default.png'}?{Date.now()} )"></div>
 						<div class="hidden md:flex flex-grow text-left">
 							{user?.name || "LOADING.."}
 						</div>
@@ -39,13 +39,13 @@
 						<div class="absolute -translate-x-[35%] z-20 scale-0 group-hover:scale-100 flex flex-col duration-300 origin-top overflow-hidden text-xs">
 							<div class="bg-black/50 rounded-lg overflow-auto">
 								<a class="flex items-center justify-center w-24 hover:bg-white/25 hover:scale-110 transition-all" href="/rooms/dms/last">
-									<span class="m-1.5">DM</span> 
+									<span class="m-1.5">DM</span>
 									{#if totalDM > 0}
 										<div class="inline-flex items-center justify-center min-w-60 h-5 text-2xs px-1 font-bold text-white bg-red-500 border-2 border-white rounded-full dark:border-gray-900">{totalDM > 99 ? "99+" : totalDM}</div>
 									{/if}
 								</a>
 								<a class="flex items-center justify-center hover:bg-white/25 hover:scale-110 transition-all" href="/rooms/channel/last">
-									<span class="m-1.5" >CHAN</span> 
+									<span class="m-1.5" >CHAN</span>
 									{#if totalCHAN > 0}
 										<div class="inline-flex items-center justify-center min-w-60 h-5 text-2xs px-1 font-bold text-white bg-red-500 border-2 border-white rounded-full dark:border-gray-900">{totalCHAN > 99 ? "99+" : totalCHAN}</div>
 									{/if}
