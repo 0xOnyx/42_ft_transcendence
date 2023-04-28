@@ -3,13 +3,14 @@
     import ItemRoomDm from '../../../../components/ItemRoomDm.svelte';
     import MessageItem from '../../../../components/Message.svelte';
     import Icon from '../../../../components/Icon.svelte';
+    import WarningAsk from '../../../../components/warningAsk.svelte'
 
     import type {User} from '../../../../types/user';
     import type {Friend} from '../../../../types/friend'
     import type {UserStats} from '../../../../types/user';
     import type {Messages, Rooms, RoomUser} from '../../../../types/room';
     import {MessageRole} from '../../../../types/room';
-	import UserNotification from '../../../../components/UserNotification.svelte';
+	import UserNotification from '../../../../components/UserNotificationDM.svelte';
 	import UserStat from '../../../../components/UserStat.svelte';
 	import UserInfo from '../../../../components/UserInfo.svelte';
     import ItemName from '../../../../components/Itemname.svelte'
@@ -22,6 +23,9 @@
     import DeleteFriend from "../../../../components/DeleteFriend.svelte";
     import BlockUser from "../../../../components/BlockUser.svelte";
 	import NavBar from '../../../../components/NavBar.svelte';
+
+    import userservice from '../../../../services/UserService';
+
     let id;
 
 	const MAX_MESSAGE = 20
@@ -39,6 +43,7 @@
     let roomUserDm: RoomUser;
 	let chatbox : HTMLDivElement;
     let unread_message: Number = 0;
+    let error : string = ""
 
     let userstats : UserStats = {
         played : 42,
@@ -48,14 +53,15 @@
     let id_room: number;
 
     let loadValue = async ()=>{
+
+        let res: Response;
+
         console.log("LOAD VALUE");
-        let res: Response = await fetch(`${PUBLIC_API_URI}/auth/islogged`, {
-            method: 'GET',
-            credentials: 'include'
-        })
-        res = await res.json();
-        if (!res)
+
+        if (!await userservice.isLogged())
             await goto("/");
+
+        user = await userservice.getCurrentUser();
 
         res = await fetch(`${PUBLIC_API_URI}/user/friend`, {
             method: 'GET',
@@ -63,13 +69,6 @@
         });
 
         const friends_list: Friend[] = (await res.json()).friend;
-
-        res = await fetch(`${PUBLIC_API_URI}/user/id/me`, {
-            method: 'GET',
-            credentials: 'include'
-        })
-
-        user = await res.json();
 
         for (const item of friends_list) {
             try {
@@ -107,22 +106,32 @@
 		}
         else
             id_room = Number($page.params.id);
-        res = await fetch(`${PUBLIC_API_URI}/message/message/${id_room}?skip=0&take=${MAX_MESSAGE}`, {
-            method: 'GET',
-            credentials: 'include'
-        })
-        room_message = await res.json();
         current_room = rooms.find((item: (Rooms & {user: RoomUser[]}))=>{return (item.id === id_room)}) as (Rooms & {user: RoomUser[]});
-        roomUserDm = current_room?.user.find((element: RoomUser) => element.user_id != Number(user.id));
-        res = await fetch(`${PUBLIC_API_URI}/user/id/${roomUserDm.user_id}`, {
-            method: 'GET',
-            credentials: 'include'
-        });
+        if (!current_room && $page.params.id != "last")
+        {
+            await goto("/rooms/dms/last");
+        }
+        else if (current_room) {
+            res = await fetch(`${PUBLIC_API_URI}/message/message/${id_room}?skip=0&take=${MAX_MESSAGE}`, {
+                method: 'GET',
+                credentials: 'include'
+            })
+            room_message = await res.json();
+            roomUserDm = current_room?.user.find((element: RoomUser) => element.user_id != Number(user.id));
+            res = await fetch(`${PUBLIC_API_URI}/user/id/${roomUserDm.user_id}`, {
+                method: 'GET',
+                credentials: 'include'
+            });
 
-        current_room_user = await res.json();
+            current_room_user = await res.json();
 
-        const index = rooms.findIndex((item: (Rooms & {user: RoomUser[]}))=>{return (item.id === id_room)})
-        rooms[index].count_messages = 0;
+            const index = rooms.findIndex((item: (Rooms & { user: RoomUser[] })) => {
+                return (item.id === id_room)
+            })
+            rooms[index].count_messages = 0;
+        }
+        else
+            room_message = [];
 		chatbox.scrollTop = chatbox.scrollHeight;
     }
 
@@ -140,11 +149,9 @@
 
         socket.on("connection", (data) => {
             connectedWs = true;
-			console.log("CONNECTED");
         })
 
         socket.on("message", (data: {send_user_id: number, room_id: number, message: (Messages & {user: User}), message_type: string})=>{
-            console.log("new message");
             if (data.room_id === id_room)
                 room_message.push(data.message);
             else
@@ -155,8 +162,6 @@
             if (room_message.length > MAX_MESSAGE)
                 room_message.shift();
             room_message = room_message;
-            console.log(unread_message);
-
         })
 
 
@@ -170,7 +175,6 @@
         })
 
         socket.on("leftRoom", (room: (Rooms & {user: RoomUser[]})) =>{
-            console.log(room)
             rooms = rooms.filter(item=>{
                 return item.id != room.id
             })
@@ -190,10 +194,12 @@
             console.log(message)
             console.log(room_message);
             const id = room_message.findIndex(item=>{return(item.id == message.id)});
-            console.log(id)
             room_message[id] = message;
         })
 
+        socket.on("exception", (data: {status: string, message: string})=>{
+            error = data.message;
+        });
 
     })
 
@@ -221,9 +227,71 @@
     }
 
 
+    let closeWarningLeftDm = false;
+    let closeWarningBlockUser = false;
+    let closeWarningUnbanUser = -1;
+
+    async function acceptLeftDm()
+    {
+        await socket.emit("leftDm", {user_id: current_room_user.id})
+        closeWarningLeftDm = false;
+        room_message = [];
+        await goto("/rooms/dms/last")
+    }
+    async function BlockUserEvent()
+    {
+        await socket.emit("blockUser", {
+            user_id: current_room_user.id,
+        });
+        await goto("/rooms/dms/last")
+        closeWarningBlockUser = false;
+        room_message = [];
+    }
+    async function acceptUnbanUser()
+    {
+        await socket.emit("unblockUser", {
+            user_id: closeWarningUnbanUser
+        });
+        await goto("/rooms/dms/last")
+        closeWarningUnbanUser = -1;
+    }
+
 </script>
 
+{#if error.length > 0}
+    <div class="relative z-[100]" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+        <div class="fixed inset-0 overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-left sm:items-center sm:p-0">
+
+                <div class="bg-red-100 border border-red-400 text-red-700 px-60 py-3 rounded relative" role="alert">
+                    <strong class="font-bold">Error !</strong>
+                    <span class="block sm:inline">{error}</span>
+                    <span on:click={()=>{error=""}} class="absolute top-0 bottom-0 right-0 px-4 py-3">
+	    				<svg class="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/></svg>
+					</span>
+                </div>
+            </div>
+        </div>
+    </div>
+{/if}
+
+
+{#if closeWarningLeftDm}
+    <WarningAsk title="Delete direct message" message="You will lose all of your message with {current_room_user.name}. This action cannot be undone."
+        buttonAccecpt={acceptLeftDm} buttonDecline={()=>{closeWarningLeftDm = false}}></WarningAsk>
+{/if}
+{#if closeWarningBlockUser}
+    <WarningAsk title="Block user {current_room_user.name}" message="You block this user is lose all of your message with {current_room_user.name}. This action cannot be undone."
+                buttonAccecpt={BlockUserEvent} buttonDecline={()=>{closeWarningBlockUser = false}}></WarningAsk>
+{/if}
+{#if closeWarningUnbanUser > 0}
+    <WarningAsk title="Ublock user" message="Do you want to unban this user ?."
+                buttonAccecpt={acceptUnbanUser} buttonDecline={()=>{closeWarningUnbanUser = -1}}></WarningAsk>
+{/if}
+
 <NavBar user={user} />
+
 
 <div class="h-full container md:py-5 xl:py-10 mx-auto">
 
@@ -265,11 +333,11 @@
                             {/if}
                         {/if}
                     {:else}
-                        {#if  search.length <= 0}
+                        {#if search.length <= 0}
                             <p>no user found :/</p>  <!-- CREATE THIS -->
                         {:else}
                             {#each search as user}
-                                <ItemName io={socket} user={user}></ItemName>
+                                <ItemName requestBlock={()=>{closeWarningUnbanUser=user.id}} io={socket} user={user}></ItemName>
                             {/each}
                         {/if}
                     {/if}
@@ -303,7 +371,7 @@
             <div class="md:w-1/3 lg:w-1/4 md:flex md:flex-col">
 
                 {#if user}
-                    <UserNotification rooms={rooms} user={user}></UserNotification>
+                    <UserNotification openWarning={()=>{closeWarningLeftDm = true}} rooms={rooms} user={user}></UserNotification>
                 {:else}
                     <p>LOADING..</p>
                 {/if}
@@ -331,7 +399,7 @@
                                     {:else}
                                         <DeleteFriend socket={socket} user={friends.find(item => item.id === roomUserDm.user_id )}></DeleteFriend>
                                     {/if}
-                                    <BlockUser socket={socket} user={current_room_user}></BlockUser>
+                                    <BlockUser openWarning={()=>{closeWarningBlockUser = true}}></BlockUser>
                                 {/if}
                             </div>
 

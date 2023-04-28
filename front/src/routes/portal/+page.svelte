@@ -12,11 +12,13 @@
     import {io, Socket} from "socket.io-client";
 	import UserStat from "../../components/UserStat.svelte";
 	import UserInfo from "../../components/UserInfo.svelte";
-    import PopUp from "../../components/PopUp.svelte";
+    import PopUp from "../../components/Popup.svelte";
 	import NavBar from "../../components/NavBar.svelte";
 	import Icon from "../../components/Icon.svelte";
 	import Achievement from "../../components/Achievement.svelte";
 	import UserNotification from "../../components/UserNotification.svelte";
+	import userservice from "../../services/UserService";
+    import WarningAsk from '../../components/warningAsk.svelte'
 
     interface UserStats {
         played: number,
@@ -40,8 +42,6 @@
         request_at: Date
         accept_at: Date | null
     }
-
-
 
     let search_value: string = "";
     let search : User[] = [];
@@ -73,13 +73,12 @@
     }
     onMount(async () => {
 
-        let res: Response = await fetch(`${PUBLIC_API_URI}/auth/islogged`, {
-            method: 'GET',
-            credentials: 'include'
-        });
-        res = await res.json();
-        if (!res)
-            await goto("/")
+        let res: Response;
+
+        if(! await userservice.isLogged())
+            await goto("/");
+
+        user = await userservice.getCurrentUser();
 
         res = await fetch(`${PUBLIC_API_URI}/user/friend`, {
             method: 'GET',
@@ -87,14 +86,6 @@
         });
 
         const friends_list: Friend[] = (await res.json()).friend;
-
-
-        res = await fetch(`${PUBLIC_API_URI}/user/id/me`, {
-            method: 'GET',
-            credentials: 'include'
-        });
-        user = await res.json();
-
 
         for (const item of friends_list) {
             let id = item.friend_id === user.id ? item.user_id : item.friend_id;
@@ -140,6 +131,11 @@
                 return (item.id != Number(data.id))
             })
         })
+
+        socket.on("exception", (data: {status: string, message: string})=>{
+            error = data.message;
+        });
+
     })
 
     let _openUpdate: boolean = false;
@@ -177,6 +173,14 @@
             _openUpdate = false;
         }
     }
+    let closeWarningUnbanUser = -1;
+    async function acceptUnbanUser()
+    {
+        await socket.emit("unblockUser", {
+            user_id: closeWarningUnbanUser
+        });
+        closeWarningUnbanUser = -1;
+    }
 
 
     //export let data: PageData;
@@ -198,6 +202,11 @@
         };
     </script>
 </svelte:head>
+
+{#if closeWarningUnbanUser > 0}
+    <WarningAsk title="Ublock user" message="Do you want to unban this user ?."
+                buttonAccecpt={acceptUnbanUser} buttonDecline={()=>{closeWarningUnbanUser = -1}}></WarningAsk>
+{/if}
 
 <NavBar user={user} bind:leftHanded={leftHanded}/>
 
@@ -269,7 +278,7 @@
                             <p>NO FRIEND</p>  <!-- CREATE THIS -->
                         {:else}
                             {#each friends as friend}
-                                <ItemName user={friend}></ItemName>
+                                <ItemName requestBlock={()=>{closeWarningUnbanUser=friend.id}} io={socket} user={friend}></ItemName>
                             {/each}
                         {/if}
                     {:else}
@@ -277,7 +286,7 @@
                             <p>no user found :/</p>  <!-- CREATE THIS -->
                         {:else}
                             {#each search as user}
-                                <ItemName user={user}></ItemName>
+                                <ItemName requestBlock={()=>{closeWarningUnbanUser=user.id}} io={socket} user={user}></ItemName>
                             {/each}
                         {/if}
                     {/if}

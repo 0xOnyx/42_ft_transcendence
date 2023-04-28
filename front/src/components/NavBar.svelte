@@ -2,7 +2,7 @@
 	import type { User } from "../types/user";
 	import Switch from './Switch.svelte';
 	import Icon from "./Icon.svelte";
-	
+
 
     export let user : User;
 	let totalDM : number = 3;

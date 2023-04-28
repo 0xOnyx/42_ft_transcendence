@@ -2,11 +2,11 @@
     import Message from '../../../components/Message.svelte';
     import Icon from '../../../components/Icon.svelte';
 
-    import type {User} from '../../../types/user';
+    import {Status, type User} from '../../../types/user';
     import type {UserStats} from '../../../types/user';
-    import type {Messages, Rooms} from '../../../types/room';
+    import {MessageRole, type Messages, type Rooms} from '../../../types/room';
     import  {UserRole, RoomType} from '../../../types/room';
-	import UserNotification from '../../../components/UserNotification.svelte';
+	import UserNotification from '../../../components/UserNotificationDM.svelte';
 	import UserStat from '../../../components/UserStat.svelte';
 	import UserInfo from '../../../components/UserInfo.svelte';
 	import NavBar from '../../../components/NavBar.svelte';
@@ -24,9 +24,9 @@
             "id": 1,
             "room_id": 40,
             "user_id": 1,
-            "message_type": "MESSAGE",
+            "message_type": MessageRole.MESSAGE,
             "content": "asdf",
-            "create_at": "2023-04-18T14:50:05.942Z",
+            "created_at": "2023-04-18T14:50:05.942Z",
             "user": {
                 "id": 1,
                 "name": "jer",
@@ -37,16 +37,16 @@
                 "oauth_42_login": "jerdos-s",
                 "oauth_42_id": 116337,
                 "last_login": "2023-04-17T15:44:38.719Z",
-                "online_status": "ONLINE"
+                "online_status": Status.ONLINE
             }
         },
         {
             "id": 2,
             "room_id": 40,
             "user_id": 1,
-            "message_type": "MESSAGE",
+            "message_type": MessageRole.MESSAGE,
             "content": "asdf",
-            "create_at": "2023-04-18T14:50:06.709Z",
+            "created_at": "2023-04-18T14:50:06.709Z",
             "user": {
                 "id": 1,
                 "name": "jer",
@@ -57,7 +57,7 @@
                 "oauth_42_login": "jerdos-s",
                 "oauth_42_id": 116337,
                 "last_login": "2023-04-17T15:44:38.719Z",
-                "online_status": "ONLINE"
+                "online_status": Status.ONLINE
             }
         },
     ];
@@ -105,6 +105,7 @@
     let userstats : UserStats = {
         played : 42,
         ratio: 84,
+        league: '',
         level: 21
     }
 
@@ -113,6 +114,17 @@
         let pong : Pong = new Pong();
         pong.run();
 	});
+
+    let _openUpdate : boolean = false; 
+    let _openFile : boolean = false; 
+
+	const updatePopUp = ( _popup : string ) => {
+		if (_popup === "update") {
+			_openUpdate = !_openUpdate;
+		} else if ( _popup === "file" ) {
+			_openFile = !_openFile;
+		}
+	}
 
 
 </script>
@@ -131,7 +143,7 @@
 
                     <div  class="mt-20">
 
-                        <UserInfo user={user}></UserInfo>
+                        <UserInfo portal=true user={user} update={updatePopUp} />
                     </div>
 
                     <div>

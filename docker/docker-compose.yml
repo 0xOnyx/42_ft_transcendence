@@ -75,6 +75,7 @@ services:
       - postgres
     networks:
       - transcendence
+    restart: on-failure:5
 
 networks:
   transcendence:

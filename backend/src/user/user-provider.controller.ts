@@ -44,8 +44,6 @@ export class UserProviderController {
     @Get("id/:id")
     @ApiOperation({summary: "Get user by id"})
     getprofile(@Param("id") id: string, @Request() req: any) {
-        if (id == "me")
-            id = req.user.id;
         return this.userServiceServer.getUser(Number(id));
     }
 
@@ -112,6 +110,14 @@ export class UserProviderController {
     }
 
     @UseGuards(AuthenticatedGuard)
+    @Get("me")
+    @ApiOperation({summary: "get user information"})
+    @ApiBody({type: updateUser})
+    async getUser(@Request() req: any) {
+        return this.userServiceServer.getUser(Number(req.user.id));
+    }
+
+    @UseGuards(AuthenticatedGuard)
     @Post("me/image")
     @UseInterceptors(FileInterceptor('image', {
         storage: storage
@@ -136,10 +142,18 @@ export class UserProviderController {
                 new FileTypeValidator({ fileType: 'image/png' }),
             ],
         }),
-    ) file: Express.Multer.File, @Request() req: any, @Response() res: any)
-    {
+    ) file: Express.Multer.File, @Request() req: any, @Response() res: any) {
         return res.redirect(process.env.REDIRECT);
     }
+
+
+    @UseGuards(AuthenticatedGuard)
+    @Get("isBlockedByMe/:id")
+    @ApiOperation({summary: "Check is user id blocked by me"})
+    isBlockedByMe(@Param("id") id: string, @Request() req: any) {
+        return this.userServiceServer.isBlockedByMe(req.user.id, Number(id));
+    }
+
 
     /*
     @UseGuards(AuthenticatedGuard)

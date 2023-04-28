@@ -3,11 +3,13 @@
 	import Icon from "./Icon.svelte";
     import type {Rooms, RoomUser} from "../types/room";
 
+    export let openWarning: Function;
     export let user : User;
     export let rooms: (Rooms & {user: RoomUser[]})[];
 
-
     $: total = rooms.reduce((accumulator, currentValue) => accumulator + currentValue.count_messages, 0);
+
+
 </script>
 
 <div class="flex bg-color5 rounded-xl items-center">
@@ -29,10 +31,10 @@
            {user?.name || "LOADING.."}
     </div>
 
-    <a href="/api/auth/logout">
-
-        <Icon icon="exit" css="inline m-3 h-8 stroke-none fill-white"></Icon>
-
-    </a>
+    {#if rooms.length > 0}
+        <a on:click={openWarning} class="cursor-pointer">
+            <Icon icon="exit" css="inline m-3 h-8 stroke-none fill-white"></Icon>
+        </a>
+    {/if}
 
 </div>
