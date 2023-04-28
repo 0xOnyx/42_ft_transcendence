@@ -6,7 +6,7 @@
     import type {UserStats} from '../../../types/user';
     import type {Messages, Rooms} from '../../../types/room';
     import  {UserRole, RoomType} from '../../../types/room';
-	import UserNotification from '../../../components/UserNotification.svelte';
+	import UserNotification from '../../../components/UserNotificationDM.svelte';
 	import UserStat from '../../../components/UserStat.svelte';
 	import UserInfo from '../../../components/UserInfo.svelte';
 	import NavBar from '../../../components/NavBar.svelte';
