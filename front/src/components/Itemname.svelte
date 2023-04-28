@@ -10,6 +10,7 @@
     //bg-green-600
     export let user : User;
     export let io: Socket;
+    export let requestBlock: Function;
 
     function getColor(status: Status)
     {
@@ -31,11 +32,22 @@
         let rooms: (Rooms & { user: RoomUser[] }) | undefined;
         if (res.status == 204)
         {
-            io.emit("createDm", {user_id: user.id}, (rooms) => {
-                console.log(rooms)
-                if (rooms)
-                    goto(`/rooms/dms/${rooms.id}`);
-            })
+            let res: Response = await fetch(`${PUBLIC_API_URI}/user/isBlockedByMe/${user.id}`, {
+                method: 'GET',
+                credentials: 'include'
+            });
+            let status = await res.json();
+            if (status)
+            {
+                requestBlock(user.id);
+            }
+            else {
+                io.emit("createDm", {user_id: user.id}, (rooms) => {
+                    console.log(rooms)
+                    if (rooms)
+                        goto(`/rooms/dms/${rooms.id}`);
+                })
+            }
         }
         if (res.status == 200) {
             rooms = await res.json();

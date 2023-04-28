@@ -142,10 +142,18 @@ export class UserProviderController {
                 new FileTypeValidator({ fileType: 'image/png' }),
             ],
         }),
-    ) file: Express.Multer.File, @Request() req: any, @Response() res: any)
-    {
+    ) file: Express.Multer.File, @Request() req: any, @Response() res: any) {
         return res.redirect(process.env.REDIRECT);
     }
+
+
+    @UseGuards(AuthenticatedGuard)
+    @Get("isBlockedByMe/:id")
+    @ApiOperation({summary: "Check is user id blocked by me"})
+    isBlockedByMe(@Param("id") id: string, @Request() req: any) {
+        return this.userServiceServer.isBlockedByMe(req.user.id, Number(id));
+    }
+
 
     /*
     @UseGuards(AuthenticatedGuard)

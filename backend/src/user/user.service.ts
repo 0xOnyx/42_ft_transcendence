@@ -43,4 +43,10 @@ export class UserServiceService {
         return this.userService.updateUser({where: {id: id}, data: to_change});
     }
 
+    async isBlockedByMe(id_user: number, id_user_check: number)
+    {
+        const block_user = await this.userService.getBlockUser({id: id_user}, {id: id_user_check});
+        return (!!block_user.find(item=>{return(item.lock_user_id == id_user_check)}));
+    }
+
 }

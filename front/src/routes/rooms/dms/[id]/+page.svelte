@@ -43,6 +43,7 @@
     let roomUserDm: RoomUser;
 	let chatbox : HTMLDivElement;
     let unread_message: Number = 0;
+    let error : string = ""
 
     let userstats : UserStats = {
         played : 42,
@@ -107,7 +108,9 @@
             id_room = Number($page.params.id);
         current_room = rooms.find((item: (Rooms & {user: RoomUser[]}))=>{return (item.id === id_room)}) as (Rooms & {user: RoomUser[]});
         if (!current_room && $page.params.id != "last")
+        {
             await goto("/rooms/dms/last");
+        }
         else if (current_room) {
             res = await fetch(`${PUBLIC_API_URI}/message/message/${id_room}?skip=0&take=${MAX_MESSAGE}`, {
                 method: 'GET',
@@ -127,6 +130,8 @@
             })
             rooms[index].count_messages = 0;
         }
+        else
+            room_message = [];
 		chatbox.scrollTop = chatbox.scrollHeight;
     }
 
@@ -144,11 +149,9 @@
 
         socket.on("connection", (data) => {
             connectedWs = true;
-			console.log("CONNECTED");
         })
 
         socket.on("message", (data: {send_user_id: number, room_id: number, message: (Messages & {user: User}), message_type: string})=>{
-            console.log("new message");
             if (data.room_id === id_room)
                 room_message.push(data.message);
             else
@@ -159,8 +162,6 @@
             if (room_message.length > MAX_MESSAGE)
                 room_message.shift();
             room_message = room_message;
-            console.log(unread_message);
-
         })
 
 
@@ -174,7 +175,6 @@
         })
 
         socket.on("leftRoom", (room: (Rooms & {user: RoomUser[]})) =>{
-            console.log(room)
             rooms = rooms.filter(item=>{
                 return item.id != room.id
             })
@@ -197,6 +197,9 @@
             room_message[id] = message;
         })
 
+        socket.on("exception", (data: {status: string, message: string})=>{
+            error = data.message;
+        });
 
     })
 
@@ -222,24 +225,57 @@
         })
 		message_value = "";
     }
-    let error ;
+
 
     let closeWarningLeftDm = false;
     let closeWarningBlockUser = false;
+    let closeWarningUnbanUser = -1;
 
     async function acceptLeftDm()
     {
         await socket.emit("leftDm", {user_id: current_room_user.id})
-        await goto("/rooms/dms/last")
         closeWarningLeftDm = false;
+        room_message = [];
+        await goto("/rooms/dms/last")
     }
     async function BlockUserEvent()
     {
-        socket.emit("blockUser", {
+        await socket.emit("blockUser", {
             user_id: current_room_user.id,
-        })
+        });
+        await goto("/rooms/dms/last")
+        closeWarningBlockUser = false;
+        room_message = [];
     }
+    async function acceptUnbanUser()
+    {
+        await socket.emit("unblockUser", {
+            user_id: closeWarningUnbanUser
+        });
+        await goto("/rooms/dms/last")
+        closeWarningUnbanUser = -1;
+    }
+
 </script>
+
+{#if error.length > 0}
+    <div class="relative z-[100]" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+        <div class="fixed inset-0 overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-left sm:items-center sm:p-0">
+
+                <div class="bg-red-100 border border-red-400 text-red-700 px-60 py-3 rounded relative" role="alert">
+                    <strong class="font-bold">Error !</strong>
+                    <span class="block sm:inline">{error}</span>
+                    <span on:click={()=>{error=""}} class="absolute top-0 bottom-0 right-0 px-4 py-3">
+	    				<svg class="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/></svg>
+					</span>
+                </div>
+            </div>
+        </div>
+    </div>
+{/if}
+
 
 {#if closeWarningLeftDm}
     <WarningAsk title="Delete direct message" message="You will lose all of your message with {current_room_user.name}. This action cannot be undone."
@@ -248,6 +284,10 @@
 {#if closeWarningBlockUser}
     <WarningAsk title="Block user {current_room_user.name}" message="You block this user is lose all of your message with {current_room_user.name}. This action cannot be undone."
                 buttonAccecpt={BlockUserEvent} buttonDecline={()=>{closeWarningBlockUser = false}}></WarningAsk>
+{/if}
+{#if closeWarningUnbanUser > 0}
+    <WarningAsk title="Ublock user" message="Do you want to unban this user ?."
+                buttonAccecpt={acceptUnbanUser} buttonDecline={()=>{closeWarningUnbanUser = -1}}></WarningAsk>
 {/if}
 
 <NavBar user={user} />
@@ -297,7 +337,7 @@
                             <p>no user found :/</p>  <!-- CREATE THIS -->
                         {:else}
                             {#each search as user}
-                                <ItemName io={socket} user={user}></ItemName>
+                                <ItemName requestBlock={()=>{closeWarningUnbanUser=user.id}} io={socket} user={user}></ItemName>
                             {/each}
                         {/if}
                     {/if}
