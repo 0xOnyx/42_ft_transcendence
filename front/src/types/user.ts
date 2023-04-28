@@ -8,7 +8,7 @@ export type User =
     image_url?: string,
     oauth_42_login?: string,
     oauth_42_id?: number,
-    last_login?: Date,
+    last_login?: string,
     online_status?: Status,
 }
 

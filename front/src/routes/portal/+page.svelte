@@ -15,6 +15,7 @@
     import PopUp from "../../components/Popup.svelte";
 	import NavBar from "../../components/NavBar.svelte";
 	import Icon from "../../components/Icon.svelte";
+	import userservice from "../../services/UserService";
 
     interface UserStats {
         played: number,
@@ -37,8 +38,6 @@
         request_at: Date
         accept_at: Date | null
     }
-
-
 
     let search_value: string = "";
     let search : User[] = [];
@@ -66,13 +65,12 @@
     }
     onMount(async () => {
 
-        let res: Response = await fetch(`${PUBLIC_API_URI}/auth/islogged`, {
-            method: 'GET',
-            credentials: 'include'
-        });
-        res = await res.json();
-        if (!res)
-            await goto("/")
+        let res: Response;
+
+        if(! await userservice.isLogged())
+            await goto("/");
+
+        user = await userservice.getCurrentUser();
 
         res = await fetch(`${PUBLIC_API_URI}/user/friend`, {
             method: 'GET',
@@ -80,13 +78,6 @@
         });
 
         const friends_list: Friend[] = (await res.json()).friend;
-
-
-        res = await fetch(`${PUBLIC_API_URI}/user/id/me`, {
-            method: 'GET',
-            credentials: 'include'
-        });
-        user = await res.json();
 
         for (const item of friends_list) {
             let id = item.friend_id === user.id ? item.user_id : item.friend_id;
@@ -244,7 +235,7 @@
 								<UserStat userstats={userstats}></UserStat>
 							</div>
 
-							<div on:click={()=>{updatePopUp("newGame")}}  class="mt-5 xs:text-sm md:text-md"><Button color="bg-process-green border-2 border-black hover:border-process-green hover:bg-transparent hover:rounded-xl hover:text-process-green hover:scale-105 transition-all" width="w-30 sm:w-52" name="New Game" /></div>
+							<div class="mt-5 xs:text-sm md:text-md"><Button url="/games" color="bg-process-green border-2 border-black hover:border-process-green hover:bg-transparent hover:rounded-xl hover:text-process-green hover:scale-105 transition-all" width="w-30 sm:w-52" name="New Game" /></div>
 
 						</div>
 					</div>

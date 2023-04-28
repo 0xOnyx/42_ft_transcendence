@@ -57,5 +57,5 @@ export type Messages =
     user_id: number,
     message_type: MessageRole,
     content?: string,
-    created_at?: Date,
+    created_at?: string,
 }

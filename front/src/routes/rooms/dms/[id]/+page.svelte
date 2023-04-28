@@ -22,6 +22,9 @@
     import DeleteFriend from "../../../../components/DeleteFriend.svelte";
     import BlockUser from "../../../../components/BlockUser.svelte";
 	import NavBar from '../../../../components/NavBar.svelte';
+
+    import userservice from '../../../../services/UserService';
+
     let id;
 
 	const MAX_MESSAGE = 20
@@ -48,14 +51,15 @@
     let id_room: number;
 
     let loadValue = async ()=>{
+
+        let res: Response;
+
         console.log("LOAD VALUE");
-        let res: Response = await fetch(`${PUBLIC_API_URI}/auth/islogged`, {
-            method: 'GET',
-            credentials: 'include'
-        })
-        res = await res.json();
-        if (!res)
+
+        if (!await userservice.isLogged())
             await goto("/");
+
+        user = await userservice.getCurrentUser();
 
         res = await fetch(`${PUBLIC_API_URI}/user/friend`, {
             method: 'GET',
@@ -63,13 +67,6 @@
         });
 
         const friends_list: Friend[] = (await res.json()).friend;
-
-        res = await fetch(`${PUBLIC_API_URI}/user/id/me`, {
-            method: 'GET',
-            credentials: 'include'
-        })
-
-        user = await res.json();
 
         for (const item of friends_list) {
             try {
