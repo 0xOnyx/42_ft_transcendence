@@ -144,6 +144,7 @@
                     <div  class="mt-20">
 
                         <UserInfo portal=true user={user} update={updatePopUp} />
+
                     </div>
 
                     <div>
@@ -158,41 +159,20 @@
 
             <div class="bg-color5 grow justify-around md:flex md:flex-col my-5 md:my-0 md:mx-5 xl:mx-8 overflow-auto rounded-xl">
 
-                <canvas id="pong" width="800" height="500">
+                <canvas class="w-full" id="pong" width="800" height="500">
                 </canvas >
-
-                <div class="overflow-auto mt-3 flex-grow px-5">
-
-
-                    {#if connectedWs}
-                        <Message user={user} message={room_message}></Message>
-                    {:else}
-                        <p>CONNECTING WS..</p>
-                    {/if}
-
-
-                </div>
-
-                <div class="flex items-center border-1 p-8">
-
-                    <input type="text" class="border border-white bg-color5 rounded-md w-full p-2 pr-12 focus:outline-none" />
-                    <div class="relative">
-                        <button class="-top-4 -left-10 absolute bg-color2 p-0 m-0 rounded-xl"><Icon icon="send" css="inline p-0 h-8 stroke-color2 fill-white"></Icon></button>
-                    </div>
-
-                </div>
 
             </div>
 
             <div class="md:w-1/3 lg:w-1/4 md:flex md:flex-col">
 
-                <UserNotification user={user}></UserNotification>
 
                 <div class="overflow-auto mt-3 bg-color5 flex-grow rounded-xl">
 
                     <div class="mt-20">
-
-                        <UserInfo user={user}></UserInfo>
+                        
+                        <UserInfo portal=true user={user} update={updatePopUp} />
+                        
                     </div>
 
                     <div>
