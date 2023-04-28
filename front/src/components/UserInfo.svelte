@@ -9,7 +9,6 @@
 	export let update;
 
 	function handleClick( trigger : string ) {
-		console.log("Update: ", trigger);
 		if (update) {
 			update(trigger);
 		}

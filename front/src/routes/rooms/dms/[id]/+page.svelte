@@ -56,8 +56,6 @@
 
         let res: Response;
 
-        console.log("LOAD VALUE");
-
         if (!await userservice.isLogged())
             await goto("/");
 
@@ -132,7 +130,8 @@
         }
         else
             room_message = [];
-		chatbox.scrollTop = chatbox.scrollHeight;
+        if (chatbox)
+            chatbox.scrollTop = chatbox.scrollHeight;
     }
 
 
@@ -191,8 +190,6 @@
         })
 
         socket.on("updateMessage", (message: (Messages & {user: User}))=>{
-            console.log(message)
-            console.log(room_message);
             const id = room_message.findIndex(item=>{return(item.id == message.id)});
             room_message[id] = message;
         })
@@ -383,7 +380,7 @@
                         {#if rooms.length <= 0}
                             <p>NO DM</p>
                         {:else}
-                            <UserInfo user={current_room_user}></UserInfo>
+                            <UserInfo update={false} user={current_room_user}></UserInfo>
 
                             <div>
                                 <UserStat userstats={current_room_user}></UserStat>

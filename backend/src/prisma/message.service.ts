@@ -20,14 +20,16 @@ export class MessageService {
 
     async rooms(
         where: Prisma.UserWhereUniqueInput,
-        include?: Prisma.RoomsInclude) {
+        include?: Prisma.RoomsInclude,
+        type?: TypeRoom) {
         return this.prisma.rooms.findMany({
             where: {
                 user: {
                     some: {
                         user: where
                     }
-                }
+                },
+                type: type,
             },
             include: include
         });

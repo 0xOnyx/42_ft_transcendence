@@ -28,7 +28,6 @@
             method: 'GET',
             credentials: 'include'
         });
-        console.log(res.status)
         let rooms: (Rooms & { user: RoomUser[] }) | undefined;
         if (res.status == 204)
         {
@@ -43,7 +42,6 @@
             }
             else {
                 io.emit("createDm", {user_id: user.id}, (rooms) => {
-                    console.log(rooms)
                     if (rooms)
                         goto(`/rooms/dms/${rooms.id}`);
                 })

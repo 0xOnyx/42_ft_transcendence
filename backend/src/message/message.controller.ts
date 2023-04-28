@@ -25,7 +25,7 @@ export class MessageController {
 
     @UseGuards(AuthenticatedGuard)
     @Get("rooms")
-    @ApiOperation({summary: "Get all rooms to the current user"})
+    @ApiOperation({summary: "Get all channel to the current user"})
     getRoomUser(@Request() req: any) {
         return this.messageServiceService.getRoomUser(req.user.id);
     }

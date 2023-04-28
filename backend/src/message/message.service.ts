@@ -32,7 +32,7 @@ export class MessageServiceService {
     }
 
     async getRoomUser(user_id: number) {
-        let rooms = await this.messageService.rooms({id: user_id});
+        let rooms = await this.messageService.rooms({id: user_id}, {user: true}, TypeRoom.PUBLIC_ROOM);
 
         return rooms.map(item => {
             if (item.password && item.password?.length > 0)

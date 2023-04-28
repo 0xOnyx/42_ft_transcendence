@@ -7,18 +7,16 @@ export class UserService
 {
     constructor ()
     {
-       
+
     }
 
     /**
      * return the status of login
-     * 
+     *
      * @returns Promise<boolean> true if the user is logged
      */
     async isLogged() : Promise<boolean>
     {
-        console.log("isLogged start");
-
         let logged: boolean;
 
         let res: Response = await fetch(`${PUBLIC_API_URI}/auth/islogged`, {
@@ -37,8 +35,6 @@ export class UserService
 
     async getCurrentUser() : Promise<User>
     {
-        console.log("getCurrentUser start");
-
         let logged: boolean;
 
         let res: Response = await fetch(`${PUBLIC_API_URI}/user/me`, {
