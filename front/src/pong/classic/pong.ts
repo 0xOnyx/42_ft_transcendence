@@ -1,8 +1,8 @@
 import Keyboard from './keyboard.js';
-import Mesh from './mesh.js';
+import type Mesh from './mesh.js';
 import Rectangle from './rectangle.js';
 import Timer from './timer.js';
-import Vector from './vector.js';
+import type Vector from './vector.js';
 import Player from './player.js';
 import Ball from './ball.js';
 import Size from './size.js';
