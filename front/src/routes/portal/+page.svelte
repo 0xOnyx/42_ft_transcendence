@@ -172,7 +172,6 @@
         await socket.emit("unblockUser", {
             user_id: closeWarningUnbanUser
         });
-        await goto("/rooms/dms/last")
         closeWarningUnbanUser = -1;
     }
 
