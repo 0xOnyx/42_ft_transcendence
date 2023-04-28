@@ -16,6 +16,7 @@
 	import NavBar from "../../components/NavBar.svelte";
 	import Icon from "../../components/Icon.svelte";
 	import userservice from "../../services/UserService";
+    import WarningAsk from '../../components/warningAsk.svelte'
 
     interface UserStats {
         played: number,
@@ -123,6 +124,11 @@
                 return (item.id != Number(data.id))
             })
         })
+
+        socket.on("exception", (data: {status: string, message: string})=>{
+            error = data.message;
+        });
+
     })
 
     let _openUpdate: boolean = false;
@@ -160,6 +166,15 @@
             _openUpdate = false;
         }
     }
+    let closeWarningUnbanUser = -1;
+    async function acceptUnbanUser()
+    {
+        await socket.emit("unblockUser", {
+            user_id: closeWarningUnbanUser
+        });
+        await goto("/rooms/dms/last")
+        closeWarningUnbanUser = -1;
+    }
 
 
     //export let data: PageData;
@@ -181,6 +196,11 @@
         };
     </script>
 </svelte:head>
+
+{#if closeWarningUnbanUser > 0}
+    <WarningAsk title="Ublock user" message="Do you want to unban this user ?."
+                buttonAccecpt={acceptUnbanUser} buttonDecline={()=>{closeWarningUnbanUser = -1}}></WarningAsk>
+{/if}
 
 <NavBar user={user} />
 
@@ -258,7 +278,7 @@
                             <p>NO FRIEND</p>  <!-- CREATE THIS -->
                         {:else}
                             {#each friends as friend}
-                                <ItemName io={socket} user={friend}></ItemName>
+                                <ItemName requestBlock={()=>{closeWarningUnbanUser=friend.id}} io={socket} user={friend}></ItemName>
                             {/each}
                         {/if}
                     {:else}
@@ -266,7 +286,7 @@
                             <p>no user found :/</p>  <!-- CREATE THIS -->
                         {:else}
                             {#each search as user}
-                                <ItemName io={socket} user={user}></ItemName>
+                                <ItemName requestBlock={()=>{closeWarningUnbanUser=user.id}} io={socket} user={user}></ItemName>
                             {/each}
                         {/if}
                     {/if}
