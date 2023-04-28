@@ -6,7 +6,7 @@
 </script>
 
 
-<div class="flex items-center justify-center space-x-20 m-10">
+<div class="flex items-center justify-center space-x-20 scale-75 sm:scale-100">
 	<div class="flex items-center justify-center space-x-10">
 		{#if userstats.win >= 100}
 			<Badge badge="win" current={userstats.win} level="legend"/>
@@ -46,4 +46,4 @@
 		<Badge badge="played" level="bronze" />
 	</div>
 </div>
--->
+<!---->

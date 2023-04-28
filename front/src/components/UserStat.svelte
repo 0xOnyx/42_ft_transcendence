@@ -7,7 +7,7 @@
 </script>
 
 
-<div class="flex flex-col gap-2">
+<div class="flex flex-col gap-2 text-sm mobile-landscape:text-sm sm:text-base">
 
 	<p class="">Game played : <span>{userstats?.played || "loading.."}</span></p>
 
