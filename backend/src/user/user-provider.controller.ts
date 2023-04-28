@@ -44,8 +44,6 @@ export class UserProviderController {
     @Get("id/:id")
     @ApiOperation({summary: "Get user by id"})
     getprofile(@Param("id") id: string, @Request() req: any) {
-        if (id == "me")
-            id = req.user.id;
         return this.userServiceServer.getUser(Number(id));
     }
 
@@ -109,6 +107,14 @@ export class UserProviderController {
         {
             throw new ConflictException();
         }
+    }
+
+    @UseGuards(AuthenticatedGuard)
+    @Get("me")
+    @ApiOperation({summary: "get user information"})
+    @ApiBody({type: updateUser})
+    async getUser(@Request() req: any) {
+        return req.user;
     }
 
     @UseGuards(AuthenticatedGuard)
