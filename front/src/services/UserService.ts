@@ -49,11 +49,6 @@ export class UserService
         return await res.json();
     }
 
-    test()
-    {
-        loggedStorage.set(true);
-    }
-
 }
 
 // singleton
