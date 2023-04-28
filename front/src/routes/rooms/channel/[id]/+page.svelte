@@ -12,7 +12,7 @@
     import  {RoomType} from '../../../../types/room';
     import  {UserRole} from '../../../../types/room';
     import  {MessageRole} from '../../../../types/room';
-	import UserNotification from '../../../../components/UserNotification.svelte';
+	import UserNotification from '../../../../components/UserNotificationDM.svelte';
 	import UserStat from '../../../../components/UserStat.svelte';
 	import UserInfo from '../../../../components/UserInfo.svelte';
 	import ItemRoomUser from '../../../../components/ItemRoomUser.svelte';
