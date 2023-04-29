@@ -140,17 +140,18 @@
     let _openUpdate: boolean = false;
     let _openFile: boolean = false;
 
-	const updatePopUp = ( _popup : string ) => {
-		if (_popup === "update") {
+	const updatePopUp = ( e : CustomEvent ) => {
+		if (e.detail.text === "update") {
 			_openUpdate = !_openUpdate;
-		} else if ( _popup === "file" ) {
+		} else if ( e.detail.text === "file" ) {
 			_openFile = !_openFile;
 		}
 	}
 
     let error : string = ""
-    async function updateUser(value)
+    async function updateUser(e : CustomEvent)
     {
+		let value = e.detail.text;
         if (value.level <= 0)
             return ;
         const res: Response = await fetch(`${PUBLIC_API_URI}/user/me`, {
@@ -219,7 +220,7 @@
 				<div class="absolute screen-overlay"></div>
                 <div class="py-[3%] gap-y-3 h-full grid grid-cols-2 grid-rows-2 mobile-landscape:grid-cols-2 mobile-landscape:grid-rows-2 sm:grid-rows-none sm:grid-cols-1">
 					<div class="relative col-start-1 row-start-1 self-end sm:self-end">
-						<UserInfo portal=true user={user} on:updateUserInfo={(event) => updatePopUp(event.detail.text)} />
+						<UserInfo portal=true user={user} on:updateUserInfo={updatePopUp} />
 
 						{#if error.length > 0}
 							<div class="relative z-[100]" aria-labelledby="modal-title" role="dialog" aria-modal="true">
@@ -240,10 +241,10 @@
 						{/if}
 
 						{#if _openUpdate}
-							<PopUp id="update" on:confirmPopUp={(event) => { updateUser(event.detail.text) }} on:closePopUp={() => { updatePopUp("update") }} title="Modify username" placeholder="Username" />
+							<PopUp id="update" on:confirmPopUp={updateUser} on:closePopUp={updatePopUp} title="Modify username" placeholder="Username" />
 						{/if}
 						{#if _openFile}
-							<PopUp id="file" on:closePopUp={() => { updatePopUp("file") }} title="Modify profile picture" />
+							<PopUp id="file" on:closePopUp={updatePopUp} title="Modify profile picture" />
 						{/if}
 					</div>
 

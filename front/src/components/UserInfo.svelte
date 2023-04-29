@@ -30,7 +30,7 @@
 					</button>
 				</div>
 				<div class="absolute -bottom-1 -right-1 sm:hidden mobile-landscape:flex">
-					<button on:click={() => { handleClick("update") }} class="flex items-center justify-center border-gray-600 bg-white/75 h-6 w-6 border rounded-full hover:scale-125 transition-all">
+					<button on:click={() => { handleClick("file") }} class="flex items-center justify-center border-gray-600 bg-white/75 h-6 w-6 border rounded-full hover:scale-125 transition-all">
 						<Icon icon="modify" width="12" height="12" color="rgb(75, 85, 99)"/>
 					</button>
 				</div>
