@@ -88,7 +88,7 @@ export class MessageService {
         })
     }
 
-    async createRoom(type: TypeRoom, where: Prisma.UserWhereUniqueInput, data: { password?: string }) {
+    async createRoom(type: TypeRoom, where: Prisma.UserWhereUniqueInput, data: { name: string, password?: string }) {
         let passHash = null;
         if (data.password)
             passHash = bcrypt.hashSync(data.password, 8);
@@ -96,6 +96,7 @@ export class MessageService {
             data: {
                 type: type,
                 password: passHash || null,
+                name: data.name,
                 owner: {
                     connect: where
                 }

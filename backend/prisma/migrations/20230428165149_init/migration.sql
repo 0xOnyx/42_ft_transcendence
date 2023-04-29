@@ -91,6 +91,7 @@ CREATE TABLE "Rooms" (
     "type" "TypeRoom" NOT NULL,
     "password" TEXT,
     "count_messages" INTEGER NOT NULL DEFAULT 0,
+    "name" TEXT,
 
     CONSTRAINT "Rooms_pkey" PRIMARY KEY ("id")
 );

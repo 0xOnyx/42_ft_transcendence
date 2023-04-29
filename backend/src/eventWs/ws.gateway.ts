@@ -212,7 +212,7 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
 
   @SubscribeMessage('createRoomPublic')
   async createRoomPublic(
-      @MessageBody() data: {password?: string},
+      @MessageBody() data: {name: string, password?: string},
       @ConnectedSocket() client: CustomSocket,
   ) {
     if (!client.request.user)
