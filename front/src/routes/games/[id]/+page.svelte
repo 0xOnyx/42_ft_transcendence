@@ -143,7 +143,7 @@
 
                     <div  class="mt-20">
 
-                        <UserInfo portal=true user={user} update={updatePopUp} />
+                        <UserInfo portal=false user={user} />
                     </div>
 
                     <div>

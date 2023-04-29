@@ -2,6 +2,10 @@
     import {PUBLIC_API_URI} from "$env/static/public";
 	import { loop_guard } from "svelte/internal";
 
+	import { createEventDispatcher } from 'svelte';
+
+	const dispatch = createEventDispatcher();
+
     export let title : string = 'Modale Title';
 	export let description : string = 'Modale description';
     export let placeholder : string = 'Placeholder';
@@ -9,15 +13,20 @@
     let fileinput: HTMLInputElement;
     let files: string;
 
-    export let close;
 	export let id : string = "";
-	export let updateUser;
-	let value: string = ""
-    async function updateUserPicture(e)
-    {
-		close("file");
-    }
+	let value: string = "";
 
+	function closePopUp ( trigger : string) {
+		dispatch('closePopUp', {
+			text: trigger
+		});
+	}
+
+	function  confirmPopUp ( value : string ) {
+		dispatch('confirmPopUp', {
+			text: value
+		});
+	}
 
 </script>
 
@@ -90,11 +99,11 @@
 				</div>
                 <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
                     {#if title === "Modify profile picture"}
-						<button type="submit" form="image_update" class="inline-flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 sm:ml-3 sm:w-auto">Confirm</button>
+						<button  on:click={() => { closePopUp(id) }} type="submit" form="image_update" class="inline-flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 sm:ml-3 sm:w-auto">Confirm</button>
                     {:else if title === "Modify username"}
-						<button on:click={()=>{updateUser(value)}} disabled='{value.length <= 0}' type="button" class="inline-flex w-full justify-center rounded-md {value.length <= 0 ? 'bg-blue-300' : 'bg-blue-600 hover:bg-blue-500'} px-3 py-2 text-sm font-semibold text-white shadow-sm  sm:ml-3 sm:w-auto">Confirm</button>
+						<button on:click={() => { confirmPopUp(value) }} disabled='{value.length <= 0}' type="button" class="inline-flex w-full justify-center rounded-md {value.length <= 0 ? 'bg-blue-300' : 'bg-blue-600 hover:bg-blue-500'} px-3 py-2 text-sm font-semibold text-white shadow-sm  sm:ml-3 sm:w-auto">Confirm</button>
 					{/if}
-					<button on:click={close(id)} type="button" class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto">Cancel</button>
+					<button on:click={() => { closePopUp(id) }} type="button" class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto">Cancel</button>
 				</div>
 
 

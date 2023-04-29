@@ -28,6 +28,11 @@ export default {
 				'200' : '#aaa9ad',
 				'300' : '#87868c'
 			},
+			'bronze' : {
+				'100' : '#c5ab84',
+				'200' : '#b08d57',
+				'300' : '#8f7143'
+			},
 			'copper' : {
 				'100' : '#d09156',
 				'200' : '#b87333',
@@ -100,6 +105,24 @@ export default {
 			}
 		}
     },
+	screens: {
+		'sm': '640px',
+		// => @media (min-width: 640px) { ... }
+  
+		'md': '768px',
+		// => @media (min-width: 768px) { ... }
+  
+		'lg': '1024px',
+		// => @media (min-width: 1024px) { ... }
+  
+		'xl': '1280px',
+		// => @media (min-width: 1280px) { ... }
+  
+		'2xl': '1536px',
+		// => @media (min-width: 1536px) { ... }
+		'mobile-landscape' : {'raw' :'(max-height: 500px) and (orientation: landscape)'},
+	  },
   },
   plugins: [],
+
 }
