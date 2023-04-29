@@ -25,6 +25,7 @@
     import NavBar from '../../../../components/NavBar.svelte';
 
     import userservice from '../../../../services/UserService';
+    import PopUpCreateDm from "../../../../components/PopUpCreateDm.svelte";
 
     let id;
 
@@ -105,7 +106,6 @@
             await goto("/rooms/channel/last");
         }
         else if (current_room) {
-            console.log(current_room);
             res = await fetch(`${PUBLIC_API_URI}/message/message/${id_room}?skip=0&take=${MAX_MESSAGE}`, {
                 method: 'GET',
                 credentials: 'include'
@@ -186,8 +186,6 @@
         })
 
         socket.on("updateMessage", (message: (Messages & {user: User}))=>{
-            console.log(message)
-            console.log(room_message);
             const id = room_message.findIndex(item=>{return(item.id == message.id)});
             room_message[id] = message;
         })
@@ -225,6 +223,7 @@
     let closeWarningLeftDm = false;
     let closeWarningBlockUser = false;
     let closeWarningUnbanUser = -1;
+    let closePopupCreateRoom = false;
 
     async function acceptLeftDm()
     {
@@ -250,6 +249,7 @@
         await goto("/rooms/dms/last")
         closeWarningUnbanUser = -1;
     }
+
 
 </script>
 
@@ -283,6 +283,10 @@
 {#if closeWarningUnbanUser > 0}
     <WarningAsk title="Ublock user" message="Do you want to unban this user ?."
                 buttonAccecpt={acceptUnbanUser} buttonDecline={()=>{closeWarningUnbanUser = -1}}></WarningAsk>
+{/if}
+
+{#if closePopupCreateRoom}
+    <PopUpCreateDm close={()=>{closePopupCreateRoom = false}}/>
 {/if}
 
 <NavBar user={user} />
@@ -341,7 +345,7 @@
 
 
                 </div>
-                <div class="">
+                <div class="mb-9" on:click={()=>{closePopupCreateRoom = true}} >
                     <Button width="w-full" name="Create new Channel"></Button>
                 </div>
             </div>
@@ -390,7 +394,6 @@
                             <div>
                                 <UserStat userstats={current_room_user}></UserStat>
                             </div>
-
 
                             <div>
                                 {#if !roomUserDm }

@@ -105,7 +105,6 @@
 
         socket.on("connection", (data) => {
             connectedWs = true;
-            console.log("CONNECTION OK");
         })
 
         socket.on("FriendStatusUdpate", (data: {id: number, status: Status})=>{
@@ -114,8 +113,6 @@
         })
 
         socket.on("NewFriend", (user: User)=>{
-            console.log("NEW FRIEND ")
-            console.log(user);
             friends = [...friends, user];
         })
 
