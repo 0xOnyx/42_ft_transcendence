@@ -194,7 +194,7 @@
 
                 <div class="overflow-auto mt-3 bg-color5 flex-grow rounded-xl">
 
-                    <UserInfo user={user}></UserInfo>
+                    <UserInfo portal=false user={user}></UserInfo>
 
                     <div>
 
