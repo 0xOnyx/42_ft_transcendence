@@ -240,10 +240,10 @@
 						{/if}
 
 						{#if _openUpdate}
-							<PopUp id="update" updateUser={updateUser} close={updatePopUp} title="Modify username" placeholder="Username" />
+							<PopUp id="update" on:confirmPopUp={(event) => { updateUser(event.detail.text) }} on:closePopUp={() => { updatePopUp("update") }} title="Modify username" placeholder="Username" />
 						{/if}
 						{#if _openFile}
-							<PopUp id="file" close={updatePopUp} title="Modify profile picture" />
+							<PopUp id="file" on:closePopUp={() => { updatePopUp("file") }} title="Modify profile picture" />
 						{/if}
 					</div>
 
