@@ -383,7 +383,7 @@
                         {#if rooms.length <= 0}
                             <p>NO DM</p>
                         {:else}
-                            <UserInfo user={current_room_user}></UserInfo>
+                            <UserInfo portal=false user={current_room_user}></UserInfo>
 
                             <div>
                                 <UserStat userstats={current_room_user}></UserStat>

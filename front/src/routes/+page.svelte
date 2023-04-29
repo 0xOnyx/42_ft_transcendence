@@ -25,8 +25,8 @@
         <div class="text-center mb-5">
 
 			<div class="relative inline-block">
-				<h1 class=" bg-black uppercase blur-sm opacity-50 text-5xl md:text-7xl text-transparent p-4 inset-y-1.5 inset-x-0.75 font-bold bg-clip-text absolute italic">Transcendence</h1>
-				<h1 class="uppercase main-title text-5xl md:text-7xl relative italic">Transcendence</h1>
+				<h1 class=" bg-black uppercase blur-sm opacity-50 text-3xl sm:text-5xl md:text-7xl text-transparent p-4 inset-y-1.5 inset-x-0.75 font-bold bg-clip-text absolute italic">Transcendence</h1>
+				<h1 class="uppercase main-title text-3xl sm:text-5xl md:text-7xl relative italic">Transcendence</h1>
 			</div>
 
             {#if load}

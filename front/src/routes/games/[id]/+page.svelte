@@ -115,8 +115,8 @@
         pong.run();
 	});
 
-    let _openUpdate : boolean = false; 
-    let _openFile : boolean = false; 
+    let _openUpdate : boolean = false;
+    let _openFile : boolean = false;
 
 	const updatePopUp = ( _popup : string ) => {
 		if (_popup === "update") {
@@ -170,9 +170,9 @@
                 <div class="overflow-auto mt-3 bg-color5 flex-grow rounded-xl">
 
                     <div class="mt-20">
-                        
+
                         <UserInfo portal=true user={user} update={updatePopUp} />
-                        
+
                     </div>
 
                     <div>
