@@ -29,7 +29,7 @@ async function main()
         take: 1,
     })
     
-    let init_id = 100;
+    let init_id = 1000;
     if(Users.length) {
         init_id = Users[0].oauth_42_id + 1;
     }
@@ -39,7 +39,7 @@ async function main()
         email: faker.internet.email(),
         first_name: faker.name.firstName(),
         last_name: faker.name.lastName(),
-        image_url: faker.image.imageUrl(),
+        image_url: 'image/default.png',
         oauth_42_login: faker.word.adjective(),
         oauth_42_id: init_id,
         last_login: faker.date.between('2020-01-01T00:00:00.000Z', '2023-01-01T00:00:00.000Z'),
