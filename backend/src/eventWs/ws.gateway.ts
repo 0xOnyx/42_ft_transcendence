@@ -18,7 +18,6 @@ import { TypeRoom, RoleUser, Log, Status, TypeMessage, Friend, Rooms, RoomUser, 
 import sessionMiddleware from '../sessions'
 import * as passport from "passport";
 import {Prisma, Messages} from ".prisma/client";
-import {request} from "express";
 
 const wrap = (middleware: any) => (
     socket: Socket,
@@ -194,7 +193,7 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
         let friend: Friend | undefined = (await this.userService.getFriendAny({id: client.request.user.id}, {id: add_id?.user_id}))[0];
         console.log(friend);
         if (friend)
-          throw new WsException("already friend");
+          throw new WsException("already friend or your already request to be friend");
         if (!friend)
           friend = await this.userService.createFriend({id: client.request.user.id}, {id: add_id?.user_id}, );
         data.message = friend.id.toString();
@@ -283,7 +282,7 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
     }
     const block_user = await this.userService.getBlockUser({id: client.request.user.id}, {id: Number(data.user_id)});
     if (block_user.length > 0)
-      throw new WsException("your are blocked by the user or your are block the user");
+      throw new WsException("your are blocked by the user");
     const room = await this.messageService.createDm({id: client.request.user.id}, {id: data.user_id})
     if (!room)
       throw new WsException("current user");
