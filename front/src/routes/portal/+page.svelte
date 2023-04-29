@@ -16,7 +16,6 @@
 	import NavBar from "../../components/NavBar.svelte";
 	import Icon from "../../components/Icon.svelte";
 	import Achievement from "../../components/Achievement.svelte";
-	import UserNotification from "../../components/UserNotification.svelte";
 	import userservice from "../../services/UserService";
     import WarningAsk from '../../components/warningAsk.svelte'
 
@@ -220,7 +219,7 @@
 				<div class="absolute screen-overlay"></div>
                 <div class="py-[3%] gap-y-3 h-full grid grid-cols-2 grid-rows-2 mobile-landscape:grid-cols-2 mobile-landscape:grid-rows-2 sm:grid-rows-none sm:grid-cols-1">
 					<div class="relative col-start-1 row-start-1 self-end sm:self-end">
-						<UserInfo portal=true user={user} update={updatePopUp} />
+						<UserInfo portal=true user={user} on:updateUserInfo={(event) => updatePopUp(event.detail.text)} />
 
 						{#if error.length > 0}
 							<div class="relative z-[100]" aria-labelledby="modal-title" role="dialog" aria-modal="true">
