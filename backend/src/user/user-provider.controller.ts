@@ -64,7 +64,7 @@ export class UserProviderController {
     @ApiQuery({name: 'element', required: false, type: String})
     @ApiQuery({name: 'value', required: false, type: String})
     @ApiQuery({name: 'orderBy', required: false, type: String})
-    async searchUser(@Query() queryList: {
+    async searchUser(@Request() req: any, @Query() queryList: {
         skip?: number;
         take?: number;
         cursor?: Prisma.UserWhereUniqueInput;
@@ -92,7 +92,8 @@ export class UserProviderController {
             if (user.where)
                 user.where[queryList.element] = {contains: queryList.value};
         }
-        return this.userServiceServer.getSearch(user);
+        const res = await this.userServiceServer.getSearch(user);
+        return res.filter(item => item.id != req.user.id);
     }
 
     @UseGuards(AuthenticatedGuard)
