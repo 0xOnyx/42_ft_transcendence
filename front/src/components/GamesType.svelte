@@ -18,8 +18,13 @@
                 "checked" : false
             },
             {
-                "id": "classic",
-                "name" : "robot pong",
+                "id": "nuclear",
+                "name" : "Nuclear Pong",
+                "checked" : false
+            },
+            {
+                "id": "blackhole",
+                "name" : "Blackhole Pong",
                 "checked" : false
             }
 
@@ -64,7 +69,7 @@
 
 {#each games as game}
 
-    <div class="flex rounded-lg bg-color5 mb-4" on:click={() => select(game)} on:keypress={(event) => keySelect(event, game)}>
+    <div class="flex rounded-lg bg-color5 mb-4 cursor-pointer" on:click={() => select(game)} on:keypress={(event) => keySelect(event, game)}>
 
         <div class="flex items-center mx-3">
             <div class="bg-white w-8 h-8">
