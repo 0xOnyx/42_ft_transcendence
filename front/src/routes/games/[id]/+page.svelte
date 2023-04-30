@@ -1,12 +1,12 @@
 <script lang="ts">
-    import Message from '../../../components/Message.svelte';
-    import Icon from '../../../components/Icon.svelte';
+    import {PUBLIC_API_URI} from "$env/static/public";
+    import {io, Socket} from "socket.io-client";
+
 
     import {Status, type User} from '../../../types/user';
     import type {UserStats} from '../../../types/user';
     import {MessageRole, type Messages, type Rooms} from '../../../types/room';
     import  {UserRole, RoomType} from '../../../types/room';
-	import UserNotification from '../../../components/UserNotificationDM.svelte';
 	import UserStat from '../../../components/UserStat.svelte';
 	import UserInfo from '../../../components/UserInfo.svelte';
 	import NavBar from '../../../components/NavBar.svelte';
@@ -15,6 +15,14 @@
 
     import type { PageData } from './$types';
 	import { onMount } from 'svelte';
+
+    let socket : Socket = io('/events', {
+            path: "/api/gamews/"
+    });
+
+    //PageData.id;
+
+
 
 
     let search_value: string = "";
@@ -112,6 +120,7 @@
 
 	onMount(async () => {
         let pong : Pong = new Pong();
+
         pong.run();
 	});
 
