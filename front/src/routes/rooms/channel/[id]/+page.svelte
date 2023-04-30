@@ -1,6 +1,6 @@
 <script lang="ts">
     import Button from '../../../../components/Button.svelte';
-    import ItemRoomDm from '../../../../components/ItemRoomDm.svelte';
+    import ItemRoomChannel from '../../../../components/ItemRoomChannel.svelte';
     import MessageItem from '../../../../components/Message.svelte';
     import Icon from '../../../../components/Icon.svelte';
     import WarningAsk from '../../../../components/warningAsk.svelte'
@@ -13,7 +13,7 @@
     import UserNotification from '../../../../components/UserNotificationDM.svelte';
     import UserStat from '../../../../components/UserStat.svelte';
     import UserInfo from '../../../../components/UserInfo.svelte';
-    import ItemName from '../../../../components/Itemname.svelte'
+    import ItemNameChannel from '../../../../components/ItemNameChannel.svelte'
     import { page } from "$app/stores";
     import {onMount} from "svelte";
     import {PUBLIC_API_URI} from "$env/static/public";
@@ -26,6 +26,7 @@
 
     import userservice from '../../../../services/UserService';
     import PopUpCreateDm from "../../../../components/PopUpCreateDm.svelte";
+    import PopUpAskPassword from "../../../../components/PopUpAskPassword.svelte";
 
     let id;
 
@@ -111,13 +112,13 @@
                 credentials: 'include'
             })
             room_message = await res.json();
-            roomUserDm = current_room?.user.find((element: RoomUser) => element.user_id != Number(user.id));
-            res = await fetch(`${PUBLIC_API_URI}/user/id/${roomUserDm.user_id}`, {
-                method: 'GET',
-                credentials: 'include'
-            });
-
-            current_room_user = await res.json();
+            // roomUserDm = current_room?.user.find((element: RoomUser) => element.user_id != Number(user.id));
+            // res = await fetch(`${PUBLIC_API_URI}/user/id/${roomUserDm.user_id}`, {
+            //     method: 'GET',
+            //     credentials: 'include'
+            // });
+            //
+            // current_room_user = await res.json();
 
             const index = rooms.findIndex((item: (Rooms & { user: RoomUser[] })) => {
                 return (item.id === id_room)
@@ -196,15 +197,14 @@
 
     })
 
-    let search : User[] = [];
+    let search : Rooms[] = [];
     async function searchUser()
     {
-        const res: Response = await fetch(`${PUBLIC_API_URI}/user/search?skip=0&take=10&element=name&value=${search_value}`, {
+        const res: Response = await fetch(`${PUBLIC_API_URI}/message/search/room?skip=0&take=10&element=name&value=${search_value}`, {
             method: 'GET',
             credentials: 'include'
         });
         search = await res.json();
-        search = search.filter((item: User)=>{return (item.id != user.id)})
     }
 
     async function sendMessage()
@@ -224,6 +224,7 @@
     let closeWarningBlockUser = false;
     let closeWarningUnbanUser = -1;
     let closePopupCreateRoom = false;
+    let closeRequestPassword = -1;
 
     async function acceptLeftDm()
     {
@@ -250,6 +251,24 @@
         closeWarningUnbanUser = -1;
     }
 
+    async function createRoom(room_name: string, password: string)
+    {
+        let data: {name: string, password?: string} = {name: room_name};
+        if (password.length > 0)
+            data.password = password;
+        await socket.emit("createRoomPublic", data, (data)=>{
+            goto(`/rooms/channel/${data}`);
+        })
+        closePopupCreateRoom = false;
+    }
+
+    async function joinChannel(password)
+    {
+        socket.emit("joinRoomPublic", {room_id: closeRequestPassword, password: password}, (room)=>{
+            if (room)
+                goto(`/rooms/channel/${room.id}`)
+        })
+    }
 
 </script>
 
@@ -286,8 +305,14 @@
 {/if}
 
 {#if closePopupCreateRoom}
-    <PopUpCreateDm close={()=>{closePopupCreateRoom = false}}/>
+    <PopUpCreateDm createRoom={createRoom} close={()=>{closePopupCreateRoom = false}}/>
 {/if}
+
+{#if closeRequestPassword > 0}
+    <PopUpAskPassword title="Password" message="This room is blocked by password !"
+                buttonAccecpt={joinChannel} buttonDecline={()=>{closeRequestPassword = -1}}></PopUpAskPassword>
+{/if}
+
 
 <NavBar user={user} />
 
@@ -327,16 +352,16 @@
                                     <p>NO CHANNEL</p>  <!-- CREATE THIS -->
                                 {:else}
                                     {#each rooms as room}
-                                        <ItemRoomDm current={room.id === id_room} user={user} room={room}></ItemRoomDm>
+                                        <ItemRoomChannel current={room.id === id_room} room={room}></ItemRoomChannel>
                                     {/each}
                                 {/if}
                             {/if}
                         {:else}
                             {#if search.length <= 0}
-                                <p>no user found :/</p>  <!-- CREATE THIS -->
+                                <p>no channel found :/</p>  <!-- CREATE THIS -->
                             {:else}
-                                {#each search as user}
-                                    <ItemName requestBlock={()=>{closeWarningUnbanUser=user.id}} io={socket} user={user}></ItemName>
+                                {#each search as room}
+                                    <ItemNameChannel all_channels={rooms} requestPassword={(id)=>{closeRequestPassword = id}} io={socket} channel={room}></ItemNameChannel>
                                 {/each}
                             {/if}
                         {/if}
@@ -365,9 +390,9 @@
 
                 <div class="flex items-center border-1 p-8">
 
-                    <input autofocus on:keydown={(e)=>{e.key === "Enter" && sendMessage()}} bind:value={message_value} type="text" class="border border-color2 bg-color5 rounded-md w-full p-2 pr-12 focus:outline-none" />
+                    <input disabled={rooms.length <= 0} autofocus on:keydown={(e)=>{e.key === "Enter" && sendMessage()}} bind:value={message_value} type="text" class="disabled:border-zinc-500  border border-color2 bg-color5 rounded-md w-full p-2 pr-12 focus:outline-none" />
                     <div class="relative">
-                        <button on:click={sendMessage} class="-top-4 -left-10 absolute bg-color2 p-0 m-0 rounded-xl"><Icon icon="send" css="inline p-0 h-8 stroke-color2 fill-white"></Icon></button>
+                        <button disabled={rooms.length <= 0} on:click={sendMessage} class="-top-4 -left-10 absolute bg-color2 disabled:bg-zinc-500 p-0 m-0 rounded-xl"><Icon icon="send" css="inline p-0 h-8 {rooms.length <= 0 ? 'stroke-zinc-500' : 'stroke-color2' }  fill-white"></Icon></button>
                     </div>
 
                 </div>

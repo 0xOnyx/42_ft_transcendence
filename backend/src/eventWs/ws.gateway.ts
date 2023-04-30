@@ -221,6 +221,7 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
     await this.messageService.joinRoom({id: room.id}, {id: client.request.user.id}, RoleUser.ADMIN, data.password);
     this.server.in(client.request.user.oauth_42_id.toString()).socketsJoin(room.id.toString());
     this.server.in(room.id.toString()).emit("updateRoom", room);
+    return (room.id);
 }
 
   @SubscribeMessage('joinRoomPublic')
@@ -230,6 +231,7 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
   ){
     if (!client.request.user)
       throw new WsException("no user");
+    //TODO : add is ban;
     await this.messageService.joinRoom({id: Number(data.room_id)}, {id: client.request.user.id}, RoleUser.USER, data.password);
     const room = await this.messageService.room({
       where: {id: Number(data.room_id)},
@@ -237,6 +239,7 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
     })
     this.server.in(data.room_id.toString()).emit("updateRoom", room);
     this.server.in(client.request.user.oauth_42_id.toString()).socketsJoin(data.room_id.toString());
+    return (room);
   }
 
   @SubscribeMessage('leftRoomPublic')

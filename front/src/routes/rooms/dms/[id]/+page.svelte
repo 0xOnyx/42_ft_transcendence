@@ -7,7 +7,6 @@
 
     import type {User} from '../../../../types/user';
     import type {Friend} from '../../../../types/friend'
-    import type {UserStats} from '../../../../types/user';
     import type {Messages, Rooms, RoomUser} from '../../../../types/room';
     import {MessageRole} from '../../../../types/room';
 	import UserNotification from '../../../../components/UserNotificationDM.svelte';
@@ -39,17 +38,10 @@
     let friends : User[] = [];
     let socket: Socket;
     let connectedWs: Boolean = false;
-    let iscurrentFriend: Boolean = false;
     let roomUserDm: RoomUser;
 	let chatbox : HTMLDivElement;
-    let unread_message: Number = 0;
     let error : string = ""
 
-    let userstats : UserStats = {
-        played : 42,
-        ratio: 84,
-        level: 21
-    }
     let id_room: number;
 
     let loadValue = async ()=>{
@@ -356,9 +348,9 @@
 
                 <div class="flex items-center border-1 p-8">
 
-                    <input autofocus on:keydown={(e)=>{e.key === "Enter" && sendMessage()}} bind:value={message_value} type="text" class="border border-color2 bg-color5 rounded-md w-full p-2 pr-12 focus:outline-none" />
+                    <input disabled={rooms.length <= 0} autofocus on:keydown={(e)=>{e.key === "Enter" && sendMessage()}} bind:value={message_value} type="text" class="disabled:border-zinc-500  border border-color2 bg-color5 rounded-md w-full p-2 pr-12 focus:outline-none" />
                     <div class="relative">
-                        <button on:click={sendMessage} class="-top-4 -left-10 absolute bg-color2 p-0 m-0 rounded-xl"><Icon icon="send" css="inline p-0 h-8 stroke-color2 fill-white"></Icon></button>
+                        <button disabled={rooms.length <= 0} on:click={sendMessage} class="-top-4 -left-10 absolute bg-color2 disabled:bg-zinc-500 p-0 m-0 rounded-xl"><Icon icon="send" css="inline p-0 h-8 {rooms.length <= 0 ? 'stroke-zinc-500' : 'stroke-color2' }  fill-white"></Icon></button>
                     </div>
 
                 </div>

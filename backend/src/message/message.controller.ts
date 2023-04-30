@@ -2,6 +2,7 @@ import {Controller, Get, Param, Query, Req, Request, UseGuards} from '@nestjs/co
 import { MessageServiceService } from "./message.service";
 import { AuthenticatedGuard } from "../auth/guards/authenticated.guard";
 import { ApiCookieAuth, ApiQuery, ApiOperation } from "@nestjs/swagger";
+import { TypeRoom, Prisma } from '@prisma/client'
 
 @ApiCookieAuth()
 @Controller('message')
@@ -62,4 +63,43 @@ export class MessageController {
         return this.messageServiceService.getAllDm(req.user.id);
     }
 
+    @UseGuards(AuthenticatedGuard)
+    @Get("search/room")
+    @ApiOperation({summary: "Search room by name or other in db"})
+    @ApiQuery({name: 'skip', required: false, type: Number})
+    @ApiQuery({name: 'take', required: false, type: Number})
+    @ApiQuery({name: 'cursor', required: false, type: Number})
+    @ApiQuery({name: 'element', required: false, type: String})
+    @ApiQuery({name: 'value', required: false, type: String})
+    @ApiQuery({name: 'orderBy', required: false, type: String})
+    async searchUser(@Request() req: any, @Query() queryList: {
+        skip?: number;
+        take?: number;
+        cursor?: Prisma.RoomsWhereUniqueInput;
+        element?: keyof Prisma.RoomsWhereInput;
+        value?: any;
+        orderBy?: Prisma.RoomsOrderByWithRelationInput;
+    }) {
+        let rooms: {
+            skip?: number;
+            take?: number;
+            cursor?: Prisma.RoomsWhereUniqueInput;
+            where: Prisma.RoomsWhereInput;
+            orderBy?: Prisma.RoomsOrderByWithRelationInput;
+        } = {where: {type: TypeRoom.PUBLIC_ROOM}};
+        if (queryList.skip)
+            rooms.skip = Number(queryList.skip);
+        if (queryList.take)
+            rooms.take = Number(queryList.take);
+        if (queryList.cursor)
+            rooms.cursor = queryList.cursor;
+        if (queryList.element == "id")
+            queryList.value = Number(queryList.value)
+        if (queryList.element && queryList.value) {
+            rooms.where = {};
+            if (rooms.where)
+                rooms.where[queryList.element] = {contains: queryList.value};
+        }
+        return this.messageServiceService.getSearch(rooms);
+    }
 }

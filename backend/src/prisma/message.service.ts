@@ -61,6 +61,16 @@ export class MessageService {
         })
     }
 
+    async Rooms(params: {
+        skip?: number;
+        take?: number;
+        cursor?: Prisma.RoomsWhereUniqueInput;
+        where?: Prisma.RoomsWhereInput;
+        orderBy?: Prisma.RoomsOrderByWithRelationInput;
+    }): Promise<Rooms[]> {
+        return this.prisma.rooms.findMany(params)
+    }
+
     async getMessageFromRoom(params: {
         skip?: number;
         take?: number;
@@ -90,7 +100,7 @@ export class MessageService {
 
     async createRoom(type: TypeRoom, where: Prisma.UserWhereUniqueInput, data: { name: string, password?: string }) {
         let passHash = null;
-        if (data.password)
+        if (data.password && data.password.length > 0)
             passHash = bcrypt.hashSync(data.password, 8);
         return this.prisma.rooms.create({
             data: {

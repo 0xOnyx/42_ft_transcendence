@@ -1,8 +1,7 @@
 import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
 import {MessageService} from "../prisma/message.service";
 import {UserService} from "../prisma/user.service";
-import {Prisma, Rooms, RoomUser} from "@prisma/client";
-import {TypeRoom} from ".prisma/client";
+import {Prisma, TypeRoom, Rooms, RoomUser} from "@prisma/client";
 import {WsException} from "@nestjs/websockets";
 
 
@@ -88,5 +87,14 @@ export class MessageServiceService {
         return this.messageService.getDmUser({id: user_id});
     }
 
+    getSearch(queryList: {
+        skip?: number;
+        take?: number;
+        cursor?: Prisma.RoomsWhereUniqueInput;
+        where?: Prisma.RoomsWhereInput;
+        orderBy?: Prisma.RoomsOrderByWithRelationInput;
+    }): Promise<Rooms[]> {
+        return this.messageService.Rooms(queryList);
+    }
 
 }
