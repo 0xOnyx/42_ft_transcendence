@@ -7,15 +7,16 @@
     import type {User} from '../../types/user';
 
     import  userservice from '../../services/UserService';
-	import Button from "../../components/Button.svelte";
 	import Checkbox from "../../components/Checkbox.svelte";
 	import ItemName from "../../components/Itemname.svelte";
+	import GamesType from "../../components/GamesType.svelte";
 
     let user : User;
     let search_value : string = '';
     let friends : Array<User> = new Array;
     let search : Array<User> = new Array;
     let closeWarningUnbanUser = -1;
+    let join : boolean = false;
 
     onMount(async () => {
 
@@ -43,6 +44,16 @@
         search = await userservice.searchUser(search_value);
     }
 
+    function startGame()
+    {
+        document.location.href = "/games/1";
+    }
+
+    function joinGame()
+    {
+        join = !join;
+    }
+
 </script>
 
 
@@ -64,13 +75,17 @@
 							<h2 class="mt-10">Join server</h2>
                             <div class="lg:grow m-5 bg-color5">
 
-                                les trucs
+                                <div class="p-5">
+                                    Wait for a game...
+                                </div>
 
                             </div>
                             <div class="p-5">
 
-                                <button class="bg-color2 border-2 border-color2 px-8 py-1 w-full rounded-md inline-block text-black">
-                                    <Checkbox disable={true}></Checkbox> Join</button>
+                                <button  on:click={joinGame} class="bg-color2 border-2 border-color2 px-8 py-1 w-full rounded-md text-black flex">
+                                    <div class="flex items-center"><Checkbox disable={true} checked={join}></Checkbox></div>
+                                    <div class="flex-grow">Join</div>
+                                </button>
 
                             </div>
 						</div>
@@ -81,13 +96,26 @@
 
 						<div class="lg:flex lg:flex-col grow my-10 lg:mr-10 bg-thread-blue">
                             <h2 class="mt-10">New game</h2>
-                            <div class="lg:grow m-5">
+                            <div class="lg:grow m-5 grid grid-cols-2">
 
-                                <div>
+                                <div class="p-4">
 
                                     <h2 class="flex space-x-2 text-left border-b-2 text-lg">
                                         <Icon icon="friends" />
-                                        <span>Friends list</span>
+                                        <span>Game type</span>
+                                    </h2>
+
+                                    <div class="mt-2">
+                                        <GamesType></GamesType>
+                                    </div>
+
+                                </div>
+
+                                <div class="p-4">
+
+                                    <h2 class="flex space-x-2 text-left border-b-2 text-lg">
+                                        <Icon icon="friends" />
+                                        <span>Friends (optional)</span>
                                     </h2>
 
                                     <div class="mt-2">
@@ -115,13 +143,11 @@
                                     </div>
                                 </div>
 
-
-
                             </div>
+
                             <div class="p-5">
 
-
-                                <button class="bg-color2 border-2 border-color2 px-8 py-1 w-full rounded-md inline-block text-black">Start</button>
+                                <button on:click={startGame} class="bg-color2 border-2 border-color2 px-8 py-1 w-full rounded-md inline-block text-black">Start</button>
 
                             </div>
 
