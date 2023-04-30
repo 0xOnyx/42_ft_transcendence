@@ -31,7 +31,7 @@
     }
 </script>
 
-<div role="checkbox" aria-checked={checked} tabindex="0" class="w-5 h-5 bg-color5 inline-block rounded-md p-1" on:click={toggle} on:keyup={keyToggle}>
+<div role="checkbox" aria-checked="true" tabindex="0" class="w-5 h-5 bg-white inline-block rounded-md p-1" on:click={toggle} on:keyup={keyToggle}>
     {#if checked}
     <div class="bg-color3 h-full w-full rounded-sm"></div>
     {/if}
