@@ -8,6 +8,7 @@
 
     import  userservice from '../../services/UserService';
 	import Button from "../../components/Button.svelte";
+	import Checkbox from "../../components/Checkbox.svelte";
 
     let user : User;
 
@@ -22,12 +23,19 @@
 
             userservice.test();
 
-            console.log(await userservice.isLogged());        
+            console.log(await userservice.isLogged());
         }
 
         test();
 
     });
+
+
+
+    function alertme(event : CustomEvent)
+    {
+        alert(event.detail.checked);
+    }
 
 
 </script>
@@ -55,9 +63,9 @@
 
                             </div>
                             <div class="p-5">
-                                
+
                                 <button class="bg-color2 border-2 border-color2 px-8 py-1 w-full rounded-md inline-block text-black">
-                                    <div class="w-5 h-5 bg-white inline-block rounded-md p-1"><div class="bg-color3 h-full w-full rounded-sm"></div></div> Join</button>
+                                    <Checkbox disable={true}></Checkbox> Join</button>
 
                             </div>
 						</div>
@@ -75,7 +83,7 @@
                             </div>
                             <div class="p-5">
 
-                                
+
                                 <button class="bg-color2 border-2 border-color2 px-8 py-1 w-full rounded-md inline-block text-black">Start</button>
 
                             </div>
