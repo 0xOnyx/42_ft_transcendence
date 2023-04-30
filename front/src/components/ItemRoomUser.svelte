@@ -1,6 +1,7 @@
 <script lang="ts">
 
-    import type {Room, RoomUser} from '../types/room';
+    import { imageUrl } from '../services/Utilities';
+import type {Room, RoomUser} from '../types/room';
 	import type { User } from '../types/user';
 
     //bg-green-600
@@ -19,7 +20,7 @@
 
 
                     <div class="w-[40px] h-[40px] bg-cover  rounded-full mx-auto"
-                        style="background-image: url( {u.user?.image_url || `image/default.png`} )">
+                        style="background-image: url( {imageUrl(u.user?.image_url)} )">
                     </div>
 
 

@@ -2,6 +2,7 @@
 	import type { User } from "../types/user";
 	import Switch from './Switch.svelte';
 	import Icon from "./Icon.svelte";
+	import { imageUrl } from "../services/Utilities";
 
 
     export let user : User;
@@ -23,7 +24,7 @@
 <div class="absolute h-full w-full flex items-end mobile-landscape:items-center {leftHanded ? 'justify-start' : 'justify-end'} sm:hidden mobile-landscape:flex">
 	<div class="bg-gradient-to-t from-black/25 to-transparent grid grid-cols-3 w-full h-20 mobile-landscape:grid-cols-1 mobile-landscape:grid-rows-6 mobile-landscape:w-20 mobile-landscape:h-full mobile-landscape:bg-gradient-to-l {leftHanded ? 'mobile-landscape:from-transparent mobile-landscape:to-black/25' : ''}">
 		<a class="hidden mobile-landscape:flex items-center" href="/portal">
-			<div class="w-8 h-8 bg-cover rounded-full mx-auto"style="background-image: url( /{user?.image_url || 'image/default.png'} )"></div>
+			<div class="w-8 h-8 bg-cover rounded-full mx-auto"style="background-image: url( {imageUrl(user?.image_url)} )"></div>
 		</a>
 		<a class=" hover:scale-110 transition-all flex flex-col justify-center items-center" href="/games">
 			<Icon icon="game" height="40" width="40" />
@@ -125,7 +126,7 @@
 			<li class="relative flex items-center justify-center mobile-landscape:hidden">
 				<div class="flex flex-col items-center group">
 					<button class="flex relative items-center justify-center" on:click={handleClick}>
-						<div class="w-8 h-8 bg-cover rounded-full mx-auto"style="background-image: url( /{user?.image_url || 'image/default.png'} )"></div>
+						<div class="w-8 h-8 bg-cover rounded-full mx-auto"style="background-image: url( {imageUrl(user?.image_url)} )"></div>
 						<div class="hidden pl-1 md:flex flex-grow text-left">
 							{user?.name || "LOADING.."}
 						</div>

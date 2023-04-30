@@ -5,6 +5,7 @@
     import {PUBLIC_API_URI} from "$env/static/public";
     import {onMount} from "svelte";
     import {goto} from "$app/navigation";
+	import { imageUrl } from '../services/Utilities';
 
     //bg-green-600
     export let room : (Rooms & {user: RoomUser[]});
@@ -36,7 +37,7 @@
 
     <div class="mx-2 flex-shrink">
         <div class="w-[40px] h-[40px] bg-cover  rounded-full mx-auto"
-             style="background-image: url( /{userDm?.image_url || 'image/default.png'} )">
+             style="background-image: url(  {imageUrl(userDm?.image_url)} )">
         </div>
     </div>
 
