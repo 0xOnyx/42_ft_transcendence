@@ -59,7 +59,9 @@ export class UserService
             credentials: 'include'
         });
 
-        const friends_list: Friend[] = await res.json();
+        const friends_list: Array<Friend> = (await res.json()).friend;
+
+        console.log (friends_list);
 
         for (const item of friends_list) {
             let id = item.friend_id;
@@ -81,6 +83,16 @@ export class UserService
 
         return Promise.resolve(users);
 
+    }
+
+    async searchUser(value : string) : Promise<Array<User>>
+    {
+        const res: Response = await fetch(`${PUBLIC_API_URI}/user/search?skip=0&take=10&element=name&value=` + value, {
+            method: 'GET',
+            credentials: 'include'
+        });
+
+        return await res.json();
     }
 
 

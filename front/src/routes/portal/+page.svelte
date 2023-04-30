@@ -64,12 +64,9 @@
 
     async function searchUser()
     {
-        const res: Response = await fetch(`${PUBLIC_API_URI}/user/search?skip=0&take=10&element=name&value=${search_value}`, {
-            method: 'GET',
-            credentials: 'include'
-        });
-        search = await res.json();
+        search = await userservice.searchUser(search_value);
     }
+
     onMount(async () => {
 
         let res: Response;

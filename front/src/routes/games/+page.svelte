@@ -12,8 +12,10 @@
 	import ItemName from "../../components/Itemname.svelte";
 
     let user : User;
-    let search_value : string;
+    let search_value : string = '';
     let friends : Array<User> = new Array;
+    let search : Array<User> = new Array;
+    let closeWarningUnbanUser = -1;
 
     onMount(async () => {
 
@@ -31,13 +33,15 @@
 
     });
 
-
-
     function alertme(event : CustomEvent)
     {
         alert(event.detail.checked);
     }
 
+    async function searchUser()
+    {
+        search = await userservice.searchUser(search_value);
+    }
 
 </script>
 
@@ -77,7 +81,7 @@
 
 						<div class="lg:flex lg:flex-col grow my-10 lg:mr-10 bg-thread-blue">
                             <h2 class="mt-10">New game</h2>
-                            <div class="lg:grow m-5 bg-color5">
+                            <div class="lg:grow m-5">
 
                                 <div>
 
@@ -96,7 +100,7 @@
                                                 <p>NO FRIEND</p>  <!-- CREATE THIS -->
                                             {:else}
                                                 {#each friends as friend}
-                                                    <ItemName requestBlock={()=>{closeWarningUnbanUser=friend.id}} io={socket} user={friend}></ItemName>
+                                                    <ItemName requestBlock={()=>{closeWarningUnbanUser=friend.id}} user={friend}></ItemName>
                                                 {/each}
                                             {/if}
                                         {:else}
@@ -104,7 +108,7 @@
                                                 <p>no user found :/</p>  <!-- CREATE THIS -->
                                             {:else}
                                                 {#each search as user}
-                                                    <ItemName requestBlock={()=>{closeWarningUnbanUser=user.id}} io={socket} user={user}></ItemName>
+                                                    <ItemName requestBlock={()=>{closeWarningUnbanUser=user.id}} user={user}></ItemName>
                                                 {/each}
                                             {/if}
                                         {/if}
