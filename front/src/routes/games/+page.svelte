@@ -9,19 +9,20 @@
     import  userservice from '../../services/UserService';
 	import Button from "../../components/Button.svelte";
 	import Checkbox from "../../components/Checkbox.svelte";
+	import ItemName from "../../components/Itemname.svelte";
 
     let user : User;
+    let search_value : string;
+    let friends : Array<User> = new Array;
 
     onMount(async () => {
 
         user = await userservice.getCurrentUser();
-
+        friends = await userservice.getFriends();
 
         async function test() {
 
             console.log(await userservice.isLogged());
-
-            userservice.test();
 
             console.log(await userservice.isLogged());
         }
@@ -78,7 +79,39 @@
                             <h2 class="mt-10">New game</h2>
                             <div class="lg:grow m-5 bg-color5">
 
-                                les trucs
+                                <div>
+
+                                    <h2 class="flex space-x-2 text-left border-b-2 text-lg">
+                                        <Icon icon="friends" />
+                                        <span>Friends list</span>
+                                    </h2>
+
+                                    <div class="mt-2">
+                                        <input class="w-full rounded-2xl py-1 px-3 bg-color5 focus:outline-none" type="text" bind:value={search_value} placeholder="Search" on:keyup={searchUser}>
+                                    </div>
+
+                                    <div class="overflow-auto mt-3">
+                                        {#if search_value.length <= 0}
+                                            {#if friends.length <= 0}
+                                                <p>NO FRIEND</p>  <!-- CREATE THIS -->
+                                            {:else}
+                                                {#each friends as friend}
+                                                    <ItemName requestBlock={()=>{closeWarningUnbanUser=friend.id}} io={socket} user={friend}></ItemName>
+                                                {/each}
+                                            {/if}
+                                        {:else}
+                                            {#if  search.length <= 0}
+                                                <p>no user found :/</p>  <!-- CREATE THIS -->
+                                            {:else}
+                                                {#each search as user}
+                                                    <ItemName requestBlock={()=>{closeWarningUnbanUser=user.id}} io={socket} user={user}></ItemName>
+                                                {/each}
+                                            {/if}
+                                        {/if}
+                                    </div>
+                                </div>
+
+
 
                             </div>
                             <div class="p-5">
