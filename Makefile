@@ -30,4 +30,3 @@ run:
 
 s: 
 	sudo service docker start
-s: run
