@@ -98,20 +98,20 @@
                             <h2 class="mt-10">New game</h2>
                             <div class="lg:grow m-5 grid grid-cols-2">
 
-                                <div class="p-4">
+                                <div class="p-4 flex flex-col">
 
                                     <h2 class="flex space-x-2 text-left border-b-2 text-lg">
                                         <Icon icon="friends" />
                                         <span>Game type</span>
                                     </h2>
 
-                                    <div class="mt-2">
+                                    <div class="mt-2 overflow-auto">
                                         <GamesType></GamesType>
                                     </div>
 
                                 </div>
 
-                                <div class="p-4">
+                                <div class="p-4 flex flex-col">
 
                                     <h2 class="flex space-x-2 text-left border-b-2 text-lg">
                                         <Icon icon="friends" />

@@ -140,53 +140,63 @@
 
 <NavBar user={user} />
 
-<div class="h-[85%] container md:py-10 xl:py-20 mx-auto">
 
-    <div class="h-full bg-color3 self-center md:border-4 border-black rounded p-1 pb-3 xl:p-8">
+<div class="h-full py-7 lg:py-10 xl:py-10">
 
-        <div class="md:flex h-full text-center align-middle m-1">
+    <div class="lg:h-[85%] mx-[2%] self-center py-1">
 
-            <div class="md:w-1/3 lg:w-1/4 md:flex md:flex-col">
+        <div class="grid lg:grid-cols-12 h-full text-center align-middle m-1">
 
-                <div class="overflow-auto bg-color5 flex-grow rounded-xl">
-
-                    <div  class="mt-20">
-
-                        <UserInfo portal=true user={user} update={updatePopUp} />
-
-                    </div>
-
-                    <div>
-
-                        <UserStat userstats={userstats}></UserStat>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-            <div class="bg-color5 grow justify-around md:flex md:flex-col my-5 md:my-0 md:mx-5 xl:mx-8 overflow-auto rounded-xl">
-
-                <canvas class="w-full" id="pong" width="800" height="500">
-                </canvas >
-
-            </div>
-
-            <div class="md:w-1/3 lg:w-1/4 md:flex md:flex-col">
+            <div class="relative lg:col-start-2 lg:col-span-10 screen shadow-lg shadow-black/50 bg-black/25 lg:overflow-auto rounded-3xl">
+				<div class="absolute screen-overlay"></div>
+                <div class="h-full flex flex-col lg:flex-row">
 
 
-                <div class="overflow-auto mt-3 bg-color5 flex-grow rounded-xl">
+                    <div class="lg:w-1/4 lg:flex lg:flex-col">
 
-                    <div class="mt-20">
+                        <div class="overflow-auto bg-color5 flex-grow rounded-xl">
 
-                        <UserInfo portal=true user={user} update={updatePopUp} />
+                            <div  class="mt-20">
+
+                                <UserInfo portal=true user={user} update={updatePopUp} />
+
+                            </div>
+
+                            <div>
+
+                                <UserStat userstats={userstats}></UserStat>
+
+                            </div>
+
+                        </div>
 
                     </div>
 
-                    <div>
+                    <div class=" grow justify-around lg:flex lg:flex-col my-5 lg:my-0 lg:mx-5 xl:mx-8 overflow-auto rounded-xl -order-1 lg:order-none">
 
-                        <UserStat userstats={userstats}></UserStat>
+                        <canvas class="w-full" id="pong" width="800" height="500">
+                        </canvas >
+
+                    </div>
+
+                    <div class="lg:w-1/4 lg:flex lg:flex-col">
+
+
+                        <div class="overflow-auto bg-color5 flex-grow rounded-xl">
+
+                            <div class="mt-20">
+
+                                <UserInfo portal=true user={user} update={updatePopUp} />
+
+                            </div>
+
+                            <div>
+
+                                <UserStat userstats={userstats}></UserStat>
+
+                            </div>
+
+                        </div>
 
                     </div>
 
