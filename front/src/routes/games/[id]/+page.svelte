@@ -1,12 +1,12 @@
 <script lang="ts">
-    import Message from '../../../components/Message.svelte';
-    import Icon from '../../../components/Icon.svelte';
+    import {PUBLIC_API_URI} from "$env/static/public";
+    import {io, Socket} from "socket.io-client";
+
 
     import {Status, type User} from '../../../types/user';
     import type {UserStats} from '../../../types/user';
     import {MessageRole, type Messages, type Rooms} from '../../../types/room';
     import  {UserRole, RoomType} from '../../../types/room';
-	import UserNotification from '../../../components/UserNotificationDM.svelte';
 	import UserStat from '../../../components/UserStat.svelte';
 	import UserInfo from '../../../components/UserInfo.svelte';
 	import NavBar from '../../../components/NavBar.svelte';
@@ -15,6 +15,14 @@
 
     import type { PageData } from './$types';
 	import { onMount } from 'svelte';
+
+    let socket : Socket = io('/events', {
+            path: "/api/gamews/"
+    });
+
+    //PageData.id;
+
+
 
 
     let search_value: string = "";
@@ -112,11 +120,12 @@
 
 	onMount(async () => {
         let pong : Pong = new Pong();
+
         pong.run();
 	});
 
-    let _openUpdate : boolean = false; 
-    let _openFile : boolean = false; 
+    let _openUpdate : boolean = false;
+    let _openFile : boolean = false;
 
 	const updatePopUp = ( _popup : string ) => {
 		if (_popup === "update") {
@@ -131,73 +140,63 @@
 
 <NavBar user={user} />
 
-<div class="h-[85%] container md:py-10 xl:py-20 mx-auto">
 
-    <div class="h-full bg-color3 self-center md:border-4 border-black rounded p-1 pb-3 xl:p-8">
+<div class="h-full py-7 lg:py-10 xl:py-10">
 
-        <div class="md:flex h-full text-center align-middle m-1">
+    <div class="lg:h-[85%] mx-[2%] self-center py-1">
 
-            <div class="md:w-1/3 lg:w-1/4 md:flex md:flex-col">
+        <div class="grid lg:grid-cols-12 h-full text-center align-middle m-1">
 
-                <div class="overflow-auto bg-color5 flex-grow rounded-xl">
+            <div class="relative lg:col-start-2 lg:col-span-10 screen shadow-lg shadow-black/50 bg-black/25 lg:overflow-auto rounded-3xl">
+				<div class="absolute screen-overlay"></div>
+                <div class="h-full flex flex-col lg:flex-row">
 
-                    <div  class="mt-20">
 
-                        <UserInfo portal=true user={user} update={updatePopUp} />
+                    <div class="lg:w-1/4 lg:flex lg:flex-col">
+
+                        <div class="overflow-auto bg-color5 flex-grow rounded-xl">
+
+                            <div  class="mt-20">
+
+                                <UserInfo portal=true user={user} update={updatePopUp} />
+
+                            </div>
+
+                            <div>
+
+                                <UserStat userstats={userstats}></UserStat>
+
+                            </div>
+
+                        </div>
+
                     </div>
 
-                    <div>
+                    <div class=" grow justify-around lg:flex lg:flex-col my-5 lg:my-0 lg:mx-5 xl:mx-8 overflow-auto rounded-xl -order-1 lg:order-none">
 
-                        <UserStat userstats={userstats}></UserStat>
+                        <canvas class="w-full" id="pong" width="800" height="500">
+                        </canvas >
 
                     </div>
 
-                </div>
-
-            </div>
-
-            <div class="bg-color5 grow justify-around md:flex md:flex-col my-5 md:my-0 md:mx-5 xl:mx-8 overflow-auto rounded-xl">
-
-                <canvas id="pong" width="800" height="500">
-                </canvas >
-
-                <div class="overflow-auto mt-3 flex-grow px-5">
+                    <div class="lg:w-1/4 lg:flex lg:flex-col">
 
 
-                    {#if connectedWs}
-                        <Message user={user} message={room_message}></Message>
-                    {:else}
-                        <p>CONNECTING WS..</p>
-                    {/if}
+                        <div class="overflow-auto bg-color5 flex-grow rounded-xl">
 
+                            <div class="mt-20">
 
-                </div>
+                                <UserInfo portal=true user={user} update={updatePopUp} />
 
-                <div class="flex items-center border-1 p-8">
+                            </div>
 
-                    <input type="text" class="border border-white bg-color5 rounded-md w-full p-2 pr-12 focus:outline-none" />
-                    <div class="relative">
-                        <button class="-top-4 -left-10 absolute bg-color2 p-0 m-0 rounded-xl"><Icon icon="send" css="inline p-0 h-8 stroke-color2 fill-white"></Icon></button>
-                    </div>
+                            <div>
 
-                </div>
+                                <UserStat userstats={userstats}></UserStat>
 
-            </div>
+                            </div>
 
-            <div class="md:w-1/3 lg:w-1/4 md:flex md:flex-col">
-
-                <UserNotification user={user}></UserNotification>
-
-                <div class="overflow-auto mt-3 bg-color5 flex-grow rounded-xl">
-
-                    <div class="mt-20">
-
-                        <UserInfo user={user}></UserInfo>
-                    </div>
-
-                    <div>
-
-                        <UserStat userstats={userstats}></UserStat>
+                        </div>
 
                     </div>
 

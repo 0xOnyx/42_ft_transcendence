@@ -15,11 +15,13 @@
     import PopUp from "../../components/Popup.svelte";
 	import NavBar from "../../components/NavBar.svelte";
 	import Icon from "../../components/Icon.svelte";
+	import Achievement from "../../components/Achievement.svelte";
 	import userservice from "../../services/UserService";
     import WarningAsk from '../../components/warningAsk.svelte'
 
     interface UserStats {
         played: number,
+		win: number,
         ratio: number,
         level: number,
 		league: string
@@ -47,23 +49,24 @@
     let connectedWs: Boolean = false;
     let socket: Socket ;
 
+	let leftHanded : boolean = false;
+
 
     let userstats : UserStats = {
         played : 42,
-        ratio: 84,
+		win: 19,
+		ratio: 84,
         level: 21,
 		league: "gold"
     }
 
+	$: userstats.ratio = Math.round(userstats.win / userstats.played * 100);
 
     async function searchUser()
     {
-        const res: Response = await fetch(`${PUBLIC_API_URI}/user/search?skip=0&take=10&element=name&value=${search_value}`, {
-            method: 'GET',
-            credentials: 'include'
-        });
-        search = await res.json();
+        search = await userservice.searchUser(search_value);
     }
+
     onMount(async () => {
 
         let res: Response;
@@ -72,32 +75,7 @@
             await goto("/");
 
         user = await userservice.getCurrentUser();
-
-        res = await fetch(`${PUBLIC_API_URI}/user/friend`, {
-            method: 'GET',
-            credentials: 'include'
-        });
-
-        const friends_list: Friend[] = (await res.json()).friend;
-
-        for (const item of friends_list) {
-            let id = item.friend_id === user.id ? item.user_id : item.friend_id;
-            try {
-                if (item.accept_at == null)
-                    continue;
-                const res: Response = await fetch(`${PUBLIC_API_URI}/user/id/${id}`, {
-                    method: 'GET',
-                    credentials: 'include'
-                });
-                const new_friend: User = (await res.json());
-                friends.push(new_friend)
-            }
-            catch (err)
-            {
-                console.error(err);
-            }
-        }
-
+        friends = await userservice.getFriends();
 
         socket = io('/events', {
             path: "/ws/"
@@ -131,17 +109,18 @@
     let _openUpdate: boolean = false;
     let _openFile: boolean = false;
 
-	const updatePopUp = ( _popup : string ) => {
-		if (_popup === "update") {
+	const updatePopUp = ( e : CustomEvent ) => {
+		if (e.detail.text === "update") {
 			_openUpdate = !_openUpdate;
-		} else if ( _popup === "file" ) {
+		} else if ( e.detail.text === "file" ) {
 			_openFile = !_openFile;
 		}
 	}
 
     let error : string = ""
-    async function updateUser(value)
+    async function updateUser(e : CustomEvent)
     {
+		let value = e.detail.text;
         if (value.level <= 0)
             return ;
         const res: Response = await fetch(`${PUBLIC_API_URI}/user/me`, {
@@ -198,69 +177,63 @@
                 buttonAccecpt={acceptUnbanUser} buttonDecline={()=>{closeWarningUnbanUser = -1}}></WarningAsk>
 {/if}
 
-<NavBar user={user} />
+<NavBar user={user} bind:leftHanded={leftHanded}/>
 
-<div class="h-full py-7 md:py-10 xl:py-10">
+<div class="h-full py-7 landscape:py-0 md:py-10 xl:py-10">
 
-    <div class="sm:h-[85%] mx-[2%] self-center py-1">
+    <div class="sm:h-[85%] w-full px-[2%] self-center py-1 grid">
 
-        <div class="grid sm:grid-cols-3 h-full text-center align-middle m-1">
+        <div class="grid mobile-landscape:grid-cols-2 gap-4 {leftHanded ? 'mobile-landscape:pl-[3.75rem]' : 'mobile-landscape:pr-[3.75rem]'} sm:grid-cols-3 h-full text-center align-middle m-1">
 
-            <div class="relative sm:col-span-2 screen shadow-lg shadow-black/50 bg-black/25 overflow-auto rounded-3xl">
+            <div class="relative info-user screen shadow-lg shadow-black/50 bg-black/25 overflow-auto rounded-3xl mobile-landscape:col-span-1 sm:col-span-2">
 				<div class="absolute screen-overlay"></div>
-                <div class="h-full grid grid-cols-2 sm:grid-cols-1">
+                <div class="py-[3%] gap-y-3 h-full grid grid-cols-2 grid-rows-2 mobile-landscape:grid-cols-2 mobile-landscape:grid-rows-2 sm:grid-rows-none sm:grid-cols-1">
+					<div class="relative col-start-1 row-start-1 self-end sm:self-end">
+						<UserInfo portal=true user={user} on:updateUserInfo={updatePopUp} />
 
-					<div class="flex items-center my-2.5 sm:items-end sm:mb-2.5">
+						{#if error.length > 0}
+							<div class="relative z-[100]" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+								<div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+								<div class="fixed inset-0 overflow-y-auto">
+									<div class="flex min-h-full items-center justify-center p-4 text-left sm:items-center sm:p-0">
 
-						<div class="grow">
-							<UserInfo portal=true user={user} update={updatePopUp} />
-
-							{#if error.length > 0}
-								<div class="relative z-[100]" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-									<div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
-									<div class="fixed inset-0 overflow-y-auto">
-										<div class="flex min-h-full items-center justify-center p-4 text-left sm:items-center sm:p-0">
-
-											<div class="bg-red-100 border border-red-400 text-red-700 px-60 py-3 rounded relative" role="alert">
-												<strong class="font-bold">ERROR SERVER !</strong>
-												<span class="block sm:inline">{error}</span>
-												<span on:click={()=>{error=""}} class="absolute top-0 bottom-0 right-0 px-4 py-3">
-													<svg class="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/></svg>
-												</span>
-											</div>
+										<div class="bg-red-100 border border-red-400 text-red-700 px-60 py-3 rounded relative" role="alert">
+											<strong class="font-bold">ERROR SERVER !</strong>
+											<span class="block sm:inline">{error}</span>
+											<span on:click={()=>{error=""}} class="absolute top-0 bottom-0 right-0 px-4 py-3">
+												<svg class="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/></svg>
+											</span>
 										</div>
 									</div>
 								</div>
-							{/if}
-
-							{#if _openUpdate}
-								<PopUp id="update" updateUser={updateUser} close={updatePopUp} title="Modify username" placeholder="Username" />
-							{/if}
-							{#if _openFile}
-								<PopUp id="file" close={updatePopUp} title="Modify profile picture" />
-							{/if}
-						</div>
-
-					</div>
-
-					<div class="relative flex content-center items-center justify-center my-2.5 sm:items-start">
-
-						<div class="grow">
-
-							<div class="">
-								<UserStat userstats={userstats}></UserStat>
 							</div>
+						{/if}
 
-							<div class="mt-5 xs:text-sm md:text-md"><Button url="/games" color="bg-process-green border-2 border-black hover:border-process-green hover:bg-transparent hover:rounded-xl hover:text-process-green hover:scale-105 transition-all" width="w-30 sm:w-52" name="New Game" /></div>
-
-						</div>
+						{#if _openUpdate}
+							<PopUp id="update" on:confirmPopUp={updateUser} on:closePopUp={updatePopUp} title="Modify username" placeholder="Username" />
+						{/if}
+						{#if _openFile}
+							<PopUp id="file" on:closePopUp={updatePopUp} title="Modify profile picture" />
+						{/if}
 					</div>
+
+					<div class="relative self-end sm:self-center col-start-2 row-start-1 mobile-landscape:col-start-2 mobile-landscape:row-start-1 sm:col-start-1 sm:row-start-2">
+						<UserStat userstats={userstats} />
+					</div>
+
+					<div class="relative col-start-1 col-span-2 row-start-2 mobile-landscape:col-span-2 mobile-landscape:row-start-2 sm:row-start-3 sm:col-span-1 self-center mobile-landscape:self-center sm:self-start">
+							<Achievement userstats={userstats} />
+					</div>
+
 				</div>
-            </div>
+			</div>
 
-            <div class="mt-5 ml-[2%] sm:ml-5 sm:mt-0 md:flex md:flex-col">
+            <div class="">
 
-                <h2 class="flex space-x-2 text-left border-b-2 text-lg"><Icon icon="friends" /> <span>Friends list</span></h2>
+                <h2 class="flex space-x-2 text-left border-b-2 text-lg">
+					<Icon icon="friends" />
+					<span>Friends list</span>
+				</h2>
 
 
 

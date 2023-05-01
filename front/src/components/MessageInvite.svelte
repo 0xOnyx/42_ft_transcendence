@@ -4,6 +4,7 @@
     import DateElement from "./DateElement.svelte";
 	import Button from "./Button.svelte"
     import {Socket} from "socket.io-client";
+	import { imageUrl } from "../services/Utilities";
 
     export let current_message: (Messages & {user: User});
     export let user: User;
@@ -41,7 +42,7 @@
 
 
 		<div class="w-10 h-10 bg-cover  rounded-full mx-auto"
-			style="background-image: url( /{user?.image_url || 'image/default.png'} )">
+			style="background-image: url( {imageUrl(user?.image_url)} )">
 		</div>
 
 	</div>
@@ -53,7 +54,7 @@
 
 
 		<div class="w-10 h-10 bg-cover  rounded-full mx-auto"
-			style="background-image: url( /{current_message?.user.image_url || 'image/default.png'} )">
+			style="background-image: url( {imageUrl(current_message?.user.image_url)} )">
 		</div>
 	</div>
 
@@ -103,7 +104,7 @@
 
 
             <div class="w-10 h-10 bg-cover  rounded-full mx-auto"
-                 style="background-image: url( /{user?.image_url || 'image/default.png'} )">
+                 style="background-image: url( {imageUrl(user?.image_url)} )">
             </div>
 
         </div>
@@ -115,7 +116,7 @@
 
 
             <div class="w-10 h-10 bg-cover  rounded-full mx-auto"
-                 style="background-image: url( /{current_message?.user.image_url || 'image/default.png'} )">
+                 style="background-image: url( {imageUrl(current_message?.user.image_url)} )">
             </div>
         </div>
 
