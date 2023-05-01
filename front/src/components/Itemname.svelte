@@ -5,13 +5,14 @@
     import {Status} from '../types/user';
     import {PUBLIC_API_URI} from "$env/static/public";
     import {goto} from "$app/navigation"
-    import {io, Socket} from "socket.io-client";
+    import {Socket} from "socket.io-client";
 	import { imageUrl } from '../services/Utilities';
 	import { onMount } from 'svelte';
 
     //bg-green-600
     export let user : User;
     export let requestBlock: Function;
+    export let socket: Socket;
     let socket: Socket;
 
     function getColor(status: Status)
@@ -58,15 +59,6 @@
 
         }
     }
-
-
-    onMount(async () => {
-
-        socket = io('/events', {
-            path: "/ws/"
-        });
-
-    });
 
 
 </script>
