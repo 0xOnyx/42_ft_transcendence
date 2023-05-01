@@ -50,6 +50,7 @@
     let socket: Socket ;
 
 	let leftHanded : boolean = false;
+	let blockedList : boolean = false;
 
 
     let userstats : UserStats = {
@@ -261,10 +262,21 @@
 
             <div class="">
 
-                <h2 class="flex space-x-2 text-left border-b-2 text-lg">
-					<Icon icon="friends" />
-					<span>Friends list</span>
-				</h2>
+				<div class="flex items-center justify-between border-b-2 ">
+					<button on:click={ () => { blockedList = !blockedList}}>
+						<h2 class="flex items-center space-x-2 text-left {blockedList ? "text-sm opacity-50" : "text-lg opacity-100"}">
+							<Icon icon="friends" />
+							<span>Friends list</span>
+						</h2>
+					</button>
+					<button on:click={ () => { blockedList = !blockedList}}>
+						<h2 class="flex items-center space-x-2 text-left {blockedList ? "text-lg opacity-100" : "text-sm opacity-50"}">
+							
+							<span>Blocked Users</span>
+							<Icon icon="user-block" />
+						</h2>
+					</button>
+				</div>
 
 
 
@@ -272,25 +284,47 @@
                     <input class="w-full rounded-2xl py-1 px-3 bg-color5 focus:outline-none" type="text" bind:value={search_value} placeholder="Search" on:keyup={searchUser}>
                 </div>
 
-                <div class="overflow-auto mt-3">
-                    {#if search_value.length <= 0}
-                        {#if friends.length <= 0}
-                            <p>NO FRIEND</p>  <!-- CREATE THIS -->
-                        {:else}
-                            {#each friends as friend}
-                                <ItemName requestBlock={()=>{closeWarningUnbanUser=friend.id}} io={socket} user={friend}></ItemName>
-                            {/each}
-                        {/if}
-                    {:else}
-                        {#if  search.length <= 0}
-                            <p>no user found :/</p>  <!-- CREATE THIS -->
-                        {:else}
-                            {#each search as user}
-                                <ItemName requestBlock={()=>{closeWarningUnbanUser=user.id}} io={socket} user={user}></ItemName>
-                            {/each}
-                        {/if}
-                    {/if}
-                </div>
+				<div class="relative flex justify-center">
+					<div class="absolute overflow-auto mt-3 flex justify-center origin-left {blockedList ? 'scale-0' : 'scale-100'} transition-all">
+						{#if search_value.length <= 0}
+							{#if friends.length <= 0}
+								<p>NO FRIEND</p>  <!-- CREATE THIS -->
+							{:else}
+								{#each friends as friend}
+									<ItemName requestBlock={()=>{closeWarningUnbanUser=friend.id}} io={socket} user={friend}></ItemName>
+								{/each}
+							{/if}
+						{:else}
+							{#if  search.length <= 0}
+								<p>no user found :/</p>  <!-- CREATE THIS -->
+							{:else}
+								{#each search as user}
+									<ItemName requestBlock={()=>{closeWarningUnbanUser=user.id}} io={socket} user={user}></ItemName>
+								{/each}
+							{/if}
+						{/if}
+					</div>
+
+					<div class="absolute overflow-auto mt-3 flex justify-center origin-right {blockedList ? 'scale-100' : 'scale-0'} transition-all">
+						{#if search_value.length <= 0}
+							{#if friends.length <= 0}
+								<p>NO BLOCKED USER</p>  <!-- CREATE THIS -->
+							{:else}
+								{#each friends as friend}
+									<ItemName requestBlock={()=>{closeWarningUnbanUser=friend.id}} io={socket} user={friend}></ItemName>
+								{/each}
+							{/if}
+						{:else}
+							{#if  search.length <= 0}
+								<p>no user found :/</p>  <!-- CREATE THIS -->
+							{:else}
+								{#each search as user}
+									<ItemName requestBlock={()=>{closeWarningUnbanUser=user.id}} io={socket} user={user}></ItemName>
+								{/each}
+							{/if}
+						{/if}
+					</div>
+				</div>
 
             </div>
 
