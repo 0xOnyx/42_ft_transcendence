@@ -2,6 +2,7 @@
 	import type { User } from "../types/user";
 	import Switch from './Switch.svelte';
 	import Icon from "./Icon.svelte";
+	import { imageUrl } from "../services/Utilities";
 
 
     export let user : User;
@@ -23,9 +24,9 @@
 <div class="absolute h-full w-full flex items-end mobile-landscape:items-center {leftHanded ? 'justify-start' : 'justify-end'} sm:hidden mobile-landscape:flex">
 	<div class="bg-gradient-to-t from-black/25 to-transparent grid grid-cols-3 w-full h-20 mobile-landscape:grid-cols-1 mobile-landscape:grid-rows-6 mobile-landscape:w-20 mobile-landscape:h-full mobile-landscape:bg-gradient-to-l {leftHanded ? 'mobile-landscape:from-transparent mobile-landscape:to-black/25' : ''}">
 		<a class="hidden mobile-landscape:flex items-center" href="/portal">
-			<div class="w-8 h-8 bg-cover rounded-full mx-auto"style="background-image: url( /{user?.image_url || 'image/default.png'} )"></div>
+			<div class="w-8 h-8 bg-cover rounded-full mx-auto"style="background-image: url( {imageUrl(user?.image_url)} )"></div>
 		</a>
-		<a class=" hover:scale-110 transition-all flex flex-col justify-center items-center" href="/portal">
+		<a class=" hover:scale-110 transition-all flex flex-col justify-center items-center" href="/games">
 			<Icon icon="game" height="40" width="40" />
 			<span class="text-2xs">Game</span>
 		</a>
@@ -77,16 +78,16 @@
 				<div class="hidden lg:flex items-center space-x-10 grow">
 						<!-- New Game-->
 
-					<a class="hover:scale-110 transition-all flex flex-col justify-center items-center" href="/portal">Game</a>
+					<a class="hover:scale-110 transition-all flex flex-col justify-center items-center" href="/games">Game</a>
 
 					<a class="relative flex items-center justify-center hover:scale-110 transition-all space-x-1" href="/rooms/dms/last">
-						<span>Direct Message</span> 
+						<span>Direct Message</span>
 						{#if totalDM > 0}
 							<div class="inline-flex items-center justify-center min-w-60 h-5 text-2xs px-1 font-bold text-white bg-red-500 border-2 border-white rounded-full dark:border-gray-900">{totalDM > 99 ? "99+" : totalDM}</div>
 						{/if}
 					</a>
 					<a class="relative flex items-center justify-center hover:scale-110 transition-all space-x-1" href="/rooms/channel/last">
-						<span>Chatrooms</span> 
+						<span>Chatrooms</span>
 						{#if totalCHAN > 0}
 							<div class="inline-flex items-center justify-center min-w-60 h-5 text-2xs -bottom-2 -right-2.5 px-1 font-bold text-white bg-red-500 border-2 border-white rounded-full dark:border-gray-900">{totalCHAN > 99 ? "99+" : totalCHAN}</div>
 						{/if}
@@ -122,10 +123,10 @@
 			</li>
 
 <!-- User settings -->
-			<li class="relative flex items-center justify-center mobile-landscape:hidden">	
+			<li class="relative flex items-center justify-center mobile-landscape:hidden">
 				<div class="flex flex-col items-center group">
-					<button class="flex relative items-center justify-center" on:click={handleClick}>	
-						<div class="w-8 h-8 bg-cover rounded-full mx-auto"style="background-image: url( /{user?.image_url || 'image/default.png'} )"></div>
+					<button class="flex relative items-center justify-center" on:click={handleClick}>
+						<div class="w-8 h-8 bg-cover rounded-full mx-auto"style="background-image: url( {imageUrl(user?.image_url)} )"></div>
 						<div class="hidden pl-1 md:flex flex-grow text-left">
 							{user?.name || "LOADING.."}
 						</div>

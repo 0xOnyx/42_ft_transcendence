@@ -1,6 +1,7 @@
 
 
 <script lang="ts">
+	import { imageUrl } from "../services/Utilities";
 	import type { User } from "../types/user";
 	import Icon from "./Icon.svelte";
 
@@ -22,7 +23,7 @@
 <div>
 	<div class="relative border:rad">
 		<div class="relative w-[75px] h-[75px] mobile-landscape:w-[75px] mobile-landscape:h-[75px] sm:w-[150px] sm:h-[150px] bg-cover rounded-full mx-auto"
-			 style="background-image: url( /{user?.image_url || `image/default.png`} )">
+			 style="background-image: url( {imageUrl(user?.image_url)} )">
 			 {#if portal}
 				<div class="hidden mobile-landscape:hidden absolute inset-0 sm:flex justify-center items-center">
 					<button on:click={() => { handleClick("file") }} class="group bg-gray-300/0 hover:bg-gray-300/50 border-0 hover:border-4 w-[150px] h-[150px] rounded-full flex items-center justify-center transition-all">

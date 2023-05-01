@@ -27,3 +27,6 @@ nestjs:
 run:
 	echo "start project"
 	cd docker && docker compose up --build
+
+s: 
+	sudo service docker start
