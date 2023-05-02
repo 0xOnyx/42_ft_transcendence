@@ -148,7 +148,8 @@
             else
             {
                 const index = rooms.findIndex((item: (Rooms & {user: RoomUser[]}))=>{return (item.id === data.room_id)})
-                rooms[index].count_messages += 1;
+                if (index >= 0)
+                    rooms[index].count_messages += 1;
             }
             if (room_message.length > MAX_MESSAGE)
                 room_message.shift();
@@ -158,10 +159,10 @@
 
         socket.on("updateRoom", (room: (Rooms & {user: RoomUser[]})) =>{
             let index: number;
-            if ((index = rooms.findIndex((item: (Rooms & {user: RoomUser[]}) ) => {item.id === room.id})) == -1)
+            if ((index = rooms.findIndex(item => item.id === room.id)) == -1)
                 rooms.push(room);
             else
-                room[index] = room;
+                rooms[index] = room;
             rooms = rooms;
         })
 

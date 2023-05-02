@@ -121,6 +121,8 @@ export class MessageService {
         });
         if (!room)
             throw new WsException("not room found");
+        if (room.user && (room.user.find((element: RoomUser) => element.user_id == user_where.id))?.ban)
+            throw new WsException("Your are ban to this room");
         if (room.user && room.user.find((element: RoomUser) => element.user_id == user_where.id))
             throw new WsException("already in room")
         if (room.password && !bcrypt.compareSync(password || "", room.password))
@@ -139,6 +141,15 @@ export class MessageService {
     }
 
     async leftRoom(room_where: Prisma.RoomsWhereUniqueInput, user_where: Prisma.UserWhereUniqueInput) {
+        const room: (Rooms & { user?: RoomUser[] }) | null = await this.room({
+            where: room_where,
+            include: {user: true}
+        });
+        if (!room || !room.user)
+            throw new WsException("not room found");
+        const roomUser = room.user.find(element=>element.user_id == user_where.id);
+        if ( roomUser && roomUser.role == RoleUser.ADMIN && (room.user.filter((element: RoomUser) => element.role == RoleUser.ADMIN)).length <= 1)
+            throw new WsException("Your are the last admin you don't leave this room");
         await this.prisma.roomUser.deleteMany({
             where: {
                 room: room_where,

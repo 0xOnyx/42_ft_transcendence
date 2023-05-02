@@ -191,7 +191,6 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
           throw new WsException("only in single chat");
         const add_id: RoomUser | undefined = room_user.room.user.find(element => element.user_id != client.request.user?.id)
         let friend: Friend | undefined = (await this.userService.getFriendAny({id: client.request.user.id}, {id: add_id?.user_id}))[0];
-        console.log(friend);
         if (friend)
           throw new WsException("already friend or your already request to be friend");
         if (!friend)
@@ -220,7 +219,7 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
     const room: Rooms = await this.messageService.createRoom(TypeRoom.PUBLIC_ROOM, {id: client.request.user.id}, data);
     await this.messageService.joinRoom({id: room.id}, {id: client.request.user.id}, RoleUser.ADMIN, data.password);
     this.server.in(client.request.user.oauth_42_id.toString()).socketsJoin(room.id.toString());
-    this.server.in(room.id.toString()).emit("updateRoom", room);
+    this.server.in(room.id.toString()).emit("updateRoom",  await this.messageService.room({where: {id: room.id}, include: {user: true}}));
     return (room.id);
 }
 
@@ -231,14 +230,15 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
   ){
     if (!client.request.user)
       throw new WsException("no user");
-    //TODO : add is ban;
     await this.messageService.joinRoom({id: Number(data.room_id)}, {id: client.request.user.id}, RoleUser.USER, data.password);
-    const room = await this.messageService.room({
+    let room = await this.messageService.room({
       where: {id: Number(data.room_id)},
       include: {user: true}
     })
-    this.server.in(data.room_id.toString()).emit("updateRoom", room);
+    if (room && room.password && room.password?.length > 0)
+      room.password = "lock";
     this.server.in(client.request.user.oauth_42_id.toString()).socketsJoin(data.room_id.toString());
+    this.server.in(data.room_id.toString()).emit("updateRoom", room);
     return (room);
   }
 
@@ -254,8 +254,9 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
       where: {id: Number(data.room_id)},
       include: {user: true}
     })
-    this.server.in(data.room_id.toString()).emit("updateRoom", room);
     this.server.in(client.request.user.oauth_42_id.toString()).socketsLeave(data.room_id.toString());
+    this.server.in(data.room_id.toString()).emit("updateRoom", room);
+    this.server.in(client.request.user.oauth_42_id.toString()).emit("leftRoom", room);
   }
 
   @SubscribeMessage('updateRoomPublic')

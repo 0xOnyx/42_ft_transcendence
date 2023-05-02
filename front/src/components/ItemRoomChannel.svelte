@@ -10,9 +10,6 @@
     export let current: boolean;
 
 
-    onMount(async ()=>{
-        console.log(room);
-    })
 
     async function getRoom()
     {

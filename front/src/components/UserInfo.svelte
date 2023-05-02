@@ -12,6 +12,7 @@
     export let user : User | null;
 	export let portal : boolean = false;
 
+    console.log(user);
 	function handleClick( trigger : string ) {
 		dispatch('updateUserInfo', {
 			text: trigger

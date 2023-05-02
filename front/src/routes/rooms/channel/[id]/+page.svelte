@@ -1,28 +1,27 @@
 <script lang="ts">
     import Button from '../../../../components/Button.svelte';
+    import ButtonElement from '../../../../components/ButtonElement.svelte';
     import ItemRoomChannel from '../../../../components/ItemRoomChannel.svelte';
     import MessageItem from '../../../../components/Message.svelte';
     import Icon from '../../../../components/Icon.svelte';
     import WarningAsk from '../../../../components/warningAsk.svelte'
 
-    import type {User} from '../../../../types/user';
-    import type {Friend} from '../../../../types/friend'
-    import type {UserStats} from '../../../../types/user';
+    import type { User } from '../../../../types/user';
+    import type { Friend } from '../../../../types/friend'
+    import { RoleUser } from '../../../../types/user'
     import type {Messages, Rooms, RoomUser} from '../../../../types/room';
-    import {MessageRole} from '../../../../types/room';
+    import { MessageRole } from '../../../../types/room';
     import UserNotification from '../../../../components/UserNotificationDM.svelte';
     import UserStat from '../../../../components/UserStat.svelte';
     import UserInfo from '../../../../components/UserInfo.svelte';
     import ItemNameChannel from '../../../../components/ItemNameChannel.svelte'
     import { page } from "$app/stores";
-    import {onMount} from "svelte";
-    import {PUBLIC_API_URI} from "$env/static/public";
-    import {goto, beforeNavigate} from "$app/navigation";
-    import {io, Socket} from "socket.io-client";
-    import RequestFriend from "../../../../components/RequestFriend.svelte";
-    import DeleteFriend from "../../../../components/DeleteFriend.svelte";
-    import BlockUser from "../../../../components/BlockUser.svelte";
+    import { onMount } from "svelte";
+    import { PUBLIC_API_URI } from "$env/static/public";
+    import { goto, beforeNavigate } from "$app/navigation";
+    import { io, Socket } from "socket.io-client";
     import NavBar from '../../../../components/NavBar.svelte';
+    import ItemRoomUserElement from '../../../../components/ItemRoomUserElement.svelte'
 
     import userservice from '../../../../services/UserService';
     import PopUpCreateDm from "../../../../components/PopUpCreateDm.svelte";
@@ -35,14 +34,14 @@
     let search_value: string = "";
     let message_value: string = "";
     let rooms :(Rooms & {user: RoomUser[]})[] = [];
-    let current_room: (Rooms & {user: RoomUser[]});
+    let current_room_id: Number;
     let current_room_user: User;
     let user : User;
     let friends : User[] = [];
     let socket: Socket;
     let connectedWs: Boolean = false;
     let iscurrentFriend: Boolean = false;
-    let roomUserDm: RoomUser;
+    let currentRoomUserSelect: User;
     let chatbox : HTMLDivElement;
     let unread_message: Number = 0;
     let error : string = ""
@@ -83,15 +82,18 @@
             }
         }
 
+        console.log("CURRENT VALUE")
+
         if (rooms.length <= 0)
         {
+            console.log("REFETCH");
             res = await fetch(`${PUBLIC_API_URI}/message/rooms`, {
                 method: 'GET',
                 credentials: 'include'
             })
             rooms = await res.json();
         }
-
+        console.log(rooms);
 
         if ($page.params.id == "last")
         {
@@ -101,12 +103,12 @@
         }
         else
             id_room = Number($page.params.id);
-        current_room = rooms.find((item: (Rooms & {user: RoomUser[]}))=>{return (item.id === id_room)}) as (Rooms & {user: RoomUser[]});
-        if (!current_room && $page.params.id != "last")
+        current_room_id = rooms.findIndex((item: (Rooms & {user: RoomUser[]}))=>{return (item.id === id_room)});
+        if (current_room_id == -1 && $page.params.id != "last")
         {
             await goto("/rooms/channel/last");
         }
-        else if (current_room) {
+        else if (current_room_id != -1) {
             res = await fetch(`${PUBLIC_API_URI}/message/message/${id_room}?skip=0&take=${MAX_MESSAGE}`, {
                 method: 'GET',
                 credentials: 'include'
@@ -153,7 +155,8 @@
             else
             {
                 const index = rooms.findIndex((item: (Rooms & {user: RoomUser[]}))=>{return (item.id === data.room_id)})
-                rooms[index].count_messages += 1;
+                if (index >= 0)
+                    rooms[index].count_messages += 1;
             }
             if (room_message.length > MAX_MESSAGE)
                 room_message.shift();
@@ -163,11 +166,14 @@
 
         socket.on("updateRoom", (room: (Rooms & {user: RoomUser[]})) =>{
             let index: number;
-            if ((index = rooms.findIndex((item: (Rooms & {user: RoomUser[]}) ) => {item.id === room.id})) == -1)
+            console.log("NEW UPDATE ROOM")
+            console.log(room);
+            if ((index = rooms.findIndex(item => item.id === room.id)) == -1)
                 rooms.push(room);
             else
-                room[index] = room;
+                rooms[index] = room;
             rooms = rooms;
+            console.log(rooms);
         })
 
         socket.on("leftRoom", (room: (Rooms & {user: RoomUser[]})) =>{
@@ -200,7 +206,7 @@
     let search : Rooms[] = [];
     async function searchUser()
     {
-        const res: Response = await fetch(`${PUBLIC_API_URI}/message/search/room?skip=0&take=10&element=name&value=${search_value}`, {
+        const res: Response = await fetch(`${PUBLIC_API_URI}/message/search/room?skip=0&take=8&element=name&value=${search_value}`, {
             method: 'GET',
             credentials: 'include'
         });
@@ -212,7 +218,7 @@
         if (message_value.length <= 0)
             return ;
         socket.emit("message", {
-            room_id: current_room.id,
+            room_id: rooms[current_room_id].id,
             message: message_value,
             message_type: MessageRole.MESSAGE,
         })
@@ -220,25 +226,32 @@
     }
 
 
-    let closeWarningLeftDm = false;
+    let closeWarningLeftChannel = false;
     let closeWarningBlockUser = false;
     let closeWarningUnbanUser = -1;
     let closePopupCreateRoom = false;
     let closeRequestPassword = -1;
 
-    async function acceptLeftDm()
+    let closeKickUser = false;
+    let closeBanUser = false;
+    let closeSetAdmin = false;
+    let closePassworRoom = false;
+    let closeDeleteRoom = false
+
+    async function acceptLeftChannel()
     {
-        await socket.emit("leftDm", {user_id: current_room_user.id})
-        closeWarningLeftDm = false;
+        await socket.emit("leftRoomPublic", {room_id: id_room})
+        closeWarningLeftChannel = false;
         room_message = [];
-        await goto("/rooms/dms/last")
+        current_room_id = -1;
+        await goto("/rooms/channel/last")
     }
     async function BlockUserEvent()
     {
         await socket.emit("blockUser", {
             user_id: current_room_user.id,
         });
-        await goto("/rooms/dms/last")
+        await goto("/rooms/channel/last")
         closeWarningBlockUser = false;
         room_message = [];
     }
@@ -247,7 +260,7 @@
         await socket.emit("unblockUser", {
             user_id: closeWarningUnbanUser
         });
-        await goto("/rooms/dms/last")
+        await goto("/rooms/channel/last")
         closeWarningUnbanUser = -1;
     }
 
@@ -264,9 +277,13 @@
 
     async function joinChannel(password)
     {
-        socket.emit("joinRoomPublic", {room_id: closeRequestPassword, password: password}, (room)=>{
+        socket.emit("joinRoomPublic", {room_id: closeRequestPassword, password: password}, async (room)=>{
             if (room)
-                goto(`/rooms/channel/${room.id}`)
+            {
+                closeRequestPassword = -1;
+                search_value = "";
+                await goto(`/rooms/channel/${room.id}`)
+            }
         })
     }
 
@@ -277,7 +294,6 @@
         <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
         <div class="fixed inset-0 overflow-y-auto">
             <div class="flex min-h-full items-center justify-center p-4 text-left sm:items-center sm:p-0">
-
                 <div class="bg-red-100 border border-red-400 text-red-700 px-60 py-3 rounded relative" role="alert">
                     <strong class="font-bold">Error !</strong>
                     <span class="block sm:inline">{error}</span>
@@ -290,10 +306,37 @@
     </div>
 {/if}
 
+{#if closePassworRoom}
 
-{#if closeWarningLeftDm}
-    <WarningAsk title="Delete direct message" message="You will lose all of your message with {current_room_user.name}. This action cannot be undone."
-                buttonAccecpt={acceptLeftDm} buttonDecline={()=>{closeWarningLeftDm = false}}></WarningAsk>
+
+{/if}
+
+
+{#if closeDeleteRoom}
+    <WarningAsk title="Delete this room ?" message="You will lose all of your message in the {rooms[current_room_id].name}. This action cannot be undone."
+                buttonAccecpt={()=>{}} buttonDecline={()=>{closeDeleteRoom = false}}></WarningAsk>
+{/if}
+
+{#if closeKickUser}
+    <WarningAsk title="Kick user ?" message="If your kick {currentRoomUserSelect.name}. This action cannot be undone."
+                buttonAccecpt={()=>{}} buttonDecline={()=>{closeKickUser = false}}></WarningAsk>
+{/if}
+{#if closeBanUser}
+    <WarningAsk title="Ban user ?" message="If your ban {currentRoomUserSelect.name}. This action cannot be undone."
+                buttonAccecpt={()=>{}} buttonDecline={()=>{closeBanUser = false}}></WarningAsk>
+{/if}
+{#if closeSetAdmin}
+    <WarningAsk title="Set admin user ?" message="If your set admin {currentRoomUserSelect.name}. he will have all the rights."
+                buttonAccecpt={()=>{}} buttonDecline={()=>{closeSetAdmin = false}}></WarningAsk>
+{/if}
+
+
+
+
+
+{#if closeWarningLeftChannel}
+    <WarningAsk title="Leave channel ?" message="You will lose all of your message with {rooms[current_room_id].name}. This action cannot be undone."
+                buttonAccecpt={acceptLeftChannel} buttonDecline={()=>{closeWarningLeftChannel = false}}></WarningAsk>
 {/if}
 {#if closeWarningBlockUser}
     <WarningAsk title="Block user {current_room_user.name}" message="You block this user is lose all of your message with {current_room_user.name}. This action cannot be undone."
@@ -309,8 +352,7 @@
 {/if}
 
 {#if closeRequestPassword > 0}
-    <PopUpAskPassword title="Password" message="This room is blocked by password !"
-                buttonAccecpt={joinChannel} buttonDecline={()=>{closeRequestPassword = -1}}></PopUpAskPassword>
+    <PopUpAskPassword joinChannel={joinChannel} close={()=>{closeRequestPassword = -1}}></PopUpAskPassword>
 {/if}
 
 
@@ -402,7 +444,7 @@
             <div class="md:w-1/3 lg:w-1/4 md:flex md:flex-col">
 
                 {#if user}
-                    <UserNotification openWarning={()=>{closeWarningLeftDm = true}} rooms={rooms} user={user}></UserNotification>
+                    <UserNotification openWarning={()=>{closeWarningLeftChannel = true}} rooms={rooms} user={user}></UserNotification>
                 {:else}
                     <p>LOADING..</p>
                 {/if}
@@ -410,29 +452,49 @@
 
 
                 <div class="overflow-auto mt-3 bg-color5 flex-grow  rounded-xl">
+                    {#if current_room_id >= 0 }
+                        <div class="mt-10">
+                            {#if currentRoomUserSelect}
+                                <button on:click={()=>{currentRoomUserSelect = null}}  class="bg-color2 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                                    ↩️ RETURN
+                                </button>
+                            {:else if rooms[current_room_id].user.find(element => element.role === RoleUser.ADMIN && element.user_id === user.id)}
+                                <ButtonElement title="Password room" on:clicker={()=>{closePassworRoom = true}}></ButtonElement>
+                                <ButtonElement title="Delete room" on:clicker={()=>{closeDeleteRoom = true}}></ButtonElement>
+                            {/if}
+                        </div>
+                    {/if}
+
                     <div class="mt-20">
-                        {#if rooms.length <= 0}
-                            <p>NO USER IN ROOMS</p>
-                        {:else}
-                            <UserInfo update={false} user={current_room_user}></UserInfo>
 
-                            <div>
-                                <UserStat userstats={current_room_user}></UserStat>
-                            </div>
+                        {#if current_room_id >= 0}
 
-                            <div>
-                                {#if !roomUserDm }
-                                    <p>LOADING..</p>
-                                {:else}
-                                    {#if !friends.find(item => item.id === roomUserDm.user_id ) }
-                                        <RequestFriend room={current_room} socket={socket} user={current_room_user}></RequestFriend>
-                                    {:else}
-                                        <DeleteFriend socket={socket} user={friends.find(item => item.id === roomUserDm.user_id )}></DeleteFriend>
+                            {#if currentRoomUserSelect}
+
+                                <UserInfo user={currentRoomUserSelect}></UserInfo>
+
+                                <div>
+                                    <UserStat userstats={currentRoomUserSelect}></UserStat>
+                                </div>
+
+                                <div>
+                                    {#if (rooms[current_room_id].user.find(item => item.user_id === currentRoomUserSelect.id))?.role != RoleUser.ADMIN
+                                    && rooms[current_room_id].user.find(element => element.role === RoleUser.ADMIN && element.user_id === user.id)
+                                    && rooms[current_room_id].owner_id != currentRoomUserSelect.id }
+                                        <ButtonElement title="Kick" on:clicker={()=>{closeKickUser = true}}></ButtonElement>
+                                        <ButtonElement title="BanUser" on:clicker={()=>{closeBanUser = true}}></ButtonElement>
+                                        <ButtonElement title="SetAdmin" on:clicker={()=>{closeSetAdmin = true}}></ButtonElement>
                                     {/if}
-                                    <BlockUser openWarning={()=>{closeWarningBlockUser = true}}></BlockUser>
-                                {/if}
-                            </div>
-
+                                </div>
+                            {:else if !rooms[current_room_id]?.user}
+                                <p>NO USER IN ROOMS</p>
+                            {:else if rooms[current_room_id].user.length > 0}
+                                {#each rooms[current_room_id].user as user}
+                                    <ItemRoomUserElement on:clicker={async ()=>{currentRoomUserSelect = await userservice.getUser(user.user_id)}} user={user}></ItemRoomUserElement>
+                                {/each}
+                            {/if}
+                        {:else}
+                            <p>NO CHANNEL SELECT</p>
                         {/if}
                     </div>
 

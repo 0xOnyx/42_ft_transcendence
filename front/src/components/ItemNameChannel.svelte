@@ -24,7 +24,6 @@
                 requestPassword(channel.id);
             }
             else {
-                console.log("JOIN CHANNEL");
                 io.emit("joinRoomPublic", {room_id: channel.id}, (rooms) => {
                     if (rooms)
                         goto(`/rooms/channel/${rooms.id}`);
