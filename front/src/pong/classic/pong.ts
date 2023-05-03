@@ -16,7 +16,6 @@ var pong : Pong;
 export default class Pong
 {
     context : CanvasRenderingContext2D;
-    canvas : HTMLCanvasElement;
     keyboard : Keyboard = new Keyboard();
     meshes : Array<Mesh> = [];
     colliders : Array<Mesh> = [];
@@ -26,45 +25,33 @@ export default class Pong
     bounds : Array<Bound> = [];
     ball : Ball;
     size : Size;
-    status : string = "wait";
+    status : string = "init";
     gutter : number = 20.0;
 
-    constructor()
+    constructor(_width : number, _height : number, _context : CanvasRenderingContext2D)
     {
-        let _canvas : HTMLCanvasElement|null = <HTMLCanvasElement> document.getElementById('pong');
-        if (!_canvas) {
-            throw "canvas pong is not present on page";
-        }
-        if (!_canvas.getContext) {
-            throw "The context cannot be initialized";
-        }
-        let _context : CanvasRenderingContext2D|null = _canvas.getContext('2d');
-        if (_context === null) {
-            throw "The context cannot be initialized";
-        }
-        this.canvas = _canvas;
         this.context = _context;
 
-        this.size = new Size(this.canvas.width, this.canvas.height);
+        this.size = new Size(_width, _height);
 
         this.ball = new Ball(this.size, this.timer);
 
         const rect_top : Rectangle = new Rectangle();
-        rect_top.setSize(this.canvas.width - 60.0, 10.0);
+        rect_top.setSize(_width - 60.0, 10.0);
         rect_top.setPosition(30.0, 10.0);
         rect_top.setColor('white');
 
         this.colliders.push(rect_top);
 
         const rect_bottom : Rectangle = new Rectangle();
-        rect_bottom.setSize(this.canvas.width - 60.0, 10.0);
+        rect_bottom.setSize(_width - 60.0, 10.0);
         rect_bottom.setPosition(30.0, this.size.h - 20.0);
         rect_bottom.setColor('white');
 
         this.colliders.push(rect_bottom);
 
         this.meshes.push(rect_top);
-        this.meshes.push(rect_bottom);   
+        this.meshes.push(rect_bottom);
         this.meshes.push(this.ball);
 
         this.controllers.push(new Controller('alpha', this.keyboard));
@@ -91,9 +78,9 @@ export default class Pong
             player.setColor('red');
         } else {
             player.setPosition(this.size.w - this.gutter - player.size.w, (this.size.h - player.size.h) / 2);
-            player.setColor('yellow');           
+            player.setColor('yellow');
         }
-  
+
         this.players.push(player);
         this.meshes.push(player);
         this.colliders.push(player);
@@ -104,13 +91,12 @@ export default class Pong
         console.log("run");
 
         this.init();
-        
+
         loop();
     }
 
     init() : void
     {
-        this.status = 'wait';
         this.ball.setPosition(this.size.w / 2, this.size.h / 2);
 
         for (let index = 0; index < this.players.length; index++) {
@@ -121,18 +107,23 @@ export default class Pong
                 player.setPosition(this.gutter, (this.size.h - player.size.h) / 2);
             } else {
                 player.setPosition(this.size.w - this.gutter - player.size.w, (this.size.h - player.size.h) / 2);
-            }            
-        }    
+            }
+        }
+        if(this.status == 'init')
+            this.status = 'wait';
+        else
+            this.status = 'run';
+
     }
 
     update () : void
     {
         this.timer.tick();
-        
+
         for (let index = 0; index < this.players.length; index++) {
             const player = this.players[index];
             player.update(this.controllers[index]);
-            
+
         }
 
         if (this.status === 'run')
@@ -144,9 +135,10 @@ export default class Pong
                 if(this.ball.getCollider().inBound(bound))
                 {
                     this.players[1-index].score++;
+                    this.status = 'loos'
                     this.init();
                 }
-                
+
             }
 
             for (let index = 0; index < this.colliders.length; index++) {
@@ -160,6 +152,11 @@ export default class Pong
         {
             if (this.keyboard.isKeyDown(' '))
                 this.status = 'run';
+        }
+
+        if (this.status === 'loos')
+        {
+            this.init();
         }
 
     }
@@ -182,12 +179,12 @@ export default class Pong
         }
     }
 
-    clear() : void 
+    clear() : void
     {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
-    draw () : void 
+    draw () : void
     {
 
         if (this.status === 'wait') {
@@ -203,7 +200,7 @@ export default class Pong
         for (let index = 0; index < this.meshes.length; index++) {
             const mesh = this.meshes[index];
             mesh.draw(this.context);
-        }    
+        }
     }
 }
 
