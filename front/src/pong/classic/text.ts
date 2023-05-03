@@ -20,8 +20,8 @@ export default class Text extends Mesh
     {
         context.fillStyle = this.color;
         context.font = this.font_size + 'px ' + this.font;
-        console.log(this.position);
-        context.fillText(this.content, this.position.x, this.position.y);
+        const textWidth : number = context.measureText(this.content).width;
+        context.fillText(this.content, this.position.x - (textWidth / 2), this.position.y);
     }
 
 }

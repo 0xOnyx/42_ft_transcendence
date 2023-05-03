@@ -6,6 +6,7 @@ import Bound from "./bound.js";
 export default class Mesh
 {
     position : Vector = new Vector();
+    origin : Vector = new Vector();
     size : Size = new Size();
     collider: Bound = new Bound();
     gravity : number = 20;
@@ -65,7 +66,7 @@ export default class Mesh
             pos = new Vector();
         }
 
-        let lefttop : Vector = this.position.copy().add(pos);
+        let lefttop : Vector = this.position.copy().sub(this.origin).add(pos);
         let rightbottom : Vector = lefttop.copy().add(this.size.toVector());
 
         return new Bound(lefttop,

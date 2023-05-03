@@ -17,7 +17,7 @@ export default class Rectangle extends Mesh
     draw(context : CanvasRenderingContext2D): void 
     {
         context.beginPath();
-        context.rect(this.position.x, this.position.y, this.size.w, this.size.h);
+        context.rect(this.position.x - this.origin.x, this.position.y - this.origin.y, this.size.w, this.size.h);
         context.closePath();
         context.fillStyle = this.color;
         context.fill();

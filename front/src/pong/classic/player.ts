@@ -29,13 +29,11 @@ export default class Player extends Rectangle
 
         if (controller.up()) {
             let value : number = this.speed * this.timer.delta;
-            console.log(this.timer.delta);
             new_pos.add((new Vector).up().scalarMulti(this.speed * this.timer.delta));
         }
 
         if (controller.down()) {
             let value : number = this.speed * this.timer.delta;
-            console.log(value);
             new_pos.add((new Vector).down().scalarMulti(this.speed * this.timer.delta));
         }
 

@@ -12,7 +12,6 @@ export default class Bound
 
         if ( (typeof _left) === 'object' && (typeof _top) === 'object')
         {
-            console.log(_left);
             this.left = (<Vector>_left).x;
             this.top = (<Vector>_left).y;
             this.right = (<Vector>_top).x;
