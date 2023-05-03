@@ -24,9 +24,6 @@
         friends = await userservice.getFriends();
 
         async function test() {
-
-            console.log(await userservice.isLogged());
-
             console.log(await userservice.isLogged());
         }
 
