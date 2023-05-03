@@ -242,21 +242,16 @@
 	<div class="flex py-2 landscape:py-0 md:py-10 xl:py-10">
 
 		<div class="h-[80vh] grow sm:h-screen mobile-landscape:h-screen w-full px-[5%] self-center py-1 grid overflow-hidden">
+			
+			<div class="flex flex-col sm:flex-row sm:max-h-[85%] gap-4 {leftHanded ? 'mobile-landscape:pl-[3.75rem]' : 'mobile-landscape:pr-[3.75rem]'} sm:grid-cols-3 text-center align-middle m-1 overflow-hidden">
 
-			<div class="flex flex-col sm:flex-row bg-red-200 sm:max-h-[85%] gap-4 {leftHanded ? 'mobile-landscape:pl-[3.75rem]' : 'mobile-landscape:pr-[3.75rem]'} sm:grid-cols-3 text-center align-middle m-1 overflow-hidden">
-
-				<!-- User screen -->
 				<div class="info-user screen grow h-1/3 sm:h-full sm:w-2/3 mobile-landscape:w-1/2 overflow-hidden flex shadow-lg shadow-black/50 bg-black/25 rounded-3xl mobile-landscape:col-span-1 sm:col-span-2">
-					<!-- Overlay -->
 					<div class="screen-overlay"></div>
-					<!-- User blocks -->
 					<div class="relative gap-3 flex flex-col p-3 grow m-auto">
-						<!-- User Infos and stats -->
 						<div class="flex sm:flex-col mobile-landscape:flex-row justify-center gap-3">
 							<UserInfo portal=true user={user} on:updateUserInfo={updatePopUp} />
 							<UserStat userstats={userstats} />
 						</div>
-						<!-- Achievements -->
 						<div class="max-h-32 overflow-scroll overscroll-contain">
 							<Achievement userstats={userstats} />
 						</div>

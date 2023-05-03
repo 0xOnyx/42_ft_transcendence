@@ -28,7 +28,7 @@
 
 </script>
 
-<div class="flex flex-col h-2/3 sm:h-full grow sm:w-1/3 mobile-landscape:w-1/2 bg-yellow-200  overflow-hidden">
+<div class="relative flex flex-col h-2/3 sm:h-full grow sm:w-1/3 mobile-landscape:w-1/2 overflow-hidden">
 	<div class="">
 		<div class="flex items-center justify-between border-b-2 ">
 			<button id="friend-list" on:click={ () => { blockedList = !blockedList}}>
@@ -48,10 +48,10 @@
 	</div>
 
 	<div class="mt-2">
-		<input class="w-full rounded-2xl py-1 px-3 bg-color5" autofocus type="text" bind:value={search_value} placeholder="Search" on:keyup={searchUser(search_value)}>
+		<input class="w-full z-30 rounded-2xl py-1 px-3 bg-color5" autofocus type="text" bind:value={search_value} placeholder="Search" on:keyup={searchUser(search_value)}>
 	</div>
 
-	<div class="h-[95%] bg-green-200 masked-overflow overscroll-contain">
+	<div class="h-[95%] masked-overflow overscroll-contain">
 
 		<div class="flex pt-5">
 			{#if !blockedList}
