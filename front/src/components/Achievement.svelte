@@ -6,30 +6,33 @@
 </script>
 
 
-<div class="flex items-center justify-center space-x-20 scale-75 sm:scale-100">
-	<div class="flex items-center justify-center space-x-10">
-		{#if userstats.win >= 100}
-			<Badge badge="win" current={userstats.win} level="legend"/>
-		{:else if userstats.win >= 50}
-			<Badge badge="win" current={userstats.win} level="gold"/>
-		{:else if userstats.win >= 20}
-			<Badge badge="win" current={userstats.win} level="silver"/>
-		{:else if userstats.win >= 10}
-			<Badge badge="win" current={userstats.win} level="bronze"/>
-		{/if}
-	</div>
-	<div class="flex items-center justify-center space-x-10">
-		{#if userstats.played >= 100}
-			<Badge badge="played" current={userstats.played} level="legend" />
-		{:else if userstats.played >= 50}
-			<Badge badge="played" current={userstats.played} level="gold" />
-		{:else if userstats.played >= 20}
-			<Badge badge="played" current={userstats.played} level="silver"/>
-		{:else if userstats.played >= 10}
-			<Badge badge="played" current={userstats.played} level="bronze" />
-		{/if}
+<div class="flex max-w-xl mx-auto items-center gap-2 overflow-x-auto">
+	<div class="flex justify-center grow">	
+		<div class="achievement_badge">
+			{#if userstats.win >= 100}
+				<Badge badge="win" current={userstats.win} level="legend"/>
+			{:else if userstats.win >= 50}
+				<Badge badge="win" current={userstats.win} level="gold"/>
+			{:else if userstats.win >= 20}
+				<Badge badge="win" current={userstats.win} level="silver"/>
+			{:else if userstats.win >= 10}
+				<Badge badge="win" current={userstats.win} level="bronze"/>
+			{/if}
+		</div>
+		<div class="achievement_badge">
+			{#if userstats.played >= 100}
+				<Badge badge="played" current={userstats.played} level="legend" />
+			{:else if userstats.played >= 50}
+				<Badge badge="played" current={userstats.played} level="gold" />
+			{:else if userstats.played >= 20}
+				<Badge badge="played" current={userstats.played} level="silver"/>
+			{:else if userstats.played >= 10}
+				<Badge badge="played" current={userstats.played} level="bronze" />
+			{/if}
+		</div>
 	</div>
 </div>
+
 
 <!-- To see all 
 <div class="grid grid-cols-2 items-center justify-center m-10">
