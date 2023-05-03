@@ -11,8 +11,8 @@ services:
       - "443:443"
     volumes:
       - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./congig/nginx/localhost.key:/certs/localhost.key
-      - ./congig/nginx/localhost.crt:/certs/localhost.crt
+      - ./config/nginx/localhost.key:/certs/localhost.key
+      - ./config/nginx/localhost.crt:/certs/localhost.crt
       - ../backend/image:/backend/image
       - ./ssl:/ssl/
     depends_on:
