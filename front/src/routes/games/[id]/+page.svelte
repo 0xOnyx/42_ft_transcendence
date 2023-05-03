@@ -2,7 +2,6 @@
     import {PUBLIC_API_URI} from "$env/static/public";
     import {io, Socket} from "socket.io-client";
 
-
     import {Status, type User} from '../../../types/user';
     import type {UserStats} from '../../../types/user';
     import {MessageRole, type Messages, type Rooms} from '../../../types/room';
@@ -22,9 +21,7 @@
 
     //PageData.id;
 
-
-
-
+    let canvas : HTMLCanvasElement;
     let search_value: string = "";
     let connectedWs: Boolean = true;
     let room_message: (Messages & {user: User})[]= [
@@ -117,11 +114,11 @@
         level: 21
     }
 
-
 	onMount(async () => {
-        let pong : Pong = new Pong();
 
+        let pong : Pong = new Pong(800, 500, canvas.getContext('2d'));
         pong.run();
+
 	});
 
     let _openUpdate : boolean = false;
@@ -174,8 +171,11 @@
 
                     <div class=" grow justify-around lg:flex lg:flex-col my-5 lg:my-0 lg:mx-5 xl:mx-8 overflow-auto rounded-xl -order-1 lg:order-none">
 
-                        <canvas class="w-full" id="pong" width="800" height="500">
-                        </canvas >
+                        <canvas class="w-full"
+                            bind:this={canvas}
+                            width={800}
+                            height={500}
+                        ></canvas>
 
                     </div>
 
