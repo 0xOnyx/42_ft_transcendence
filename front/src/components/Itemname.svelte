@@ -13,7 +13,6 @@
     export let user : User;
     export let requestBlock: Function;
     export let socket: Socket;
-    let socket: Socket;
 
     function getColor(status: Status)
     {
