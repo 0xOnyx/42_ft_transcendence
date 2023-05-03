@@ -4,7 +4,7 @@ pong project with react nest and typescript
 ## Running locally (docker)
 
 To run the whole project with docker :
-- Create an application on the 42 Intranet. Redirect on http://localhost/api/auth/callback
+- Create an application on the 42 Intranet. Redirect on http://localhost/api/auth/callback or similar url
 - Create the following file `backend/.env`
 ```
 DATABASE_URL="postgresql://postgres:mysecretpassword@postgres:5432/transcendence?schema=public&connect_timeout=1000"
@@ -16,8 +16,16 @@ PHOTO_PATH=image
 SECRET_COOKIE={SECRET_COOKIE}
 REDIRECT=/portal
 ```
+- Create the following file `front/.env`
+```
+PUBLIC_API_URI=/api
+```
+- change config in ./genCerts.sh and `chmod 777 genCerts.sh`
+- `./genCerts.sh`
 - `cd docker`
 - `docker compose up --build`
+
+PS: The dev docker environement will accept both http and https. The prod docker environement will redirect http to https.
 
 ### Available services
 
