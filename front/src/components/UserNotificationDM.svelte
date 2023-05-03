@@ -2,6 +2,7 @@
 	import type { User } from "../types/user";
 	import Icon from "./Icon.svelte";
     import type {Rooms, RoomUser} from "../types/room";
+	import { imageUrl } from "../services/Utilities";
 
     export let openWarning: Function;
     export let user : User;
@@ -25,7 +26,7 @@
     </div>
 
         <div class="w-8 h-8 bg-cover  rounded-full mx-auto"
-             style="background-image: url( /{user?.image_url || 'image/default.png'} )">
+             style="background-image: url( {imageUrl(user?.image_url)} )">
         </div>
     <div class="flex-grow text-left px-2">
            {user?.name || "LOADING.."}

@@ -68,13 +68,10 @@
 
     async function searchUser( e : CustomEvent)
     {
-		search_value = e.detail.text;
-        const res: Response = await fetch(`${PUBLIC_API_URI}/user/search?skip=0&take=10&element=name&value=${search_value}`, {
-            method: 'GET',
-            credentials: 'include'
-        });
-        search = await res.json();
+	      search_value = e.detail.text;
+        search = await userservice.searchUser(search_value);
     }
+
     onMount(async () => {
 
         let res: Response;
@@ -83,32 +80,7 @@
             await goto("/");
 
         user = await userservice.getCurrentUser();
-
-        res = await fetch(`${PUBLIC_API_URI}/user/friend`, {
-            method: 'GET',
-            credentials: 'include'
-        });
-
-        const friends_list: Friend[] = (await res.json()).friend;
-
-        for (const item of friends_list) {
-            let id = item.friend_id === user.id ? item.user_id : item.friend_id;
-            try {
-                if (item.accept_at == null)
-                    continue;
-                const res: Response = await fetch(`${PUBLIC_API_URI}/user/id/${id}`, {
-                    method: 'GET',
-                    credentials: 'include'
-                });
-                const new_friend: User = (await res.json());
-                friends.push(new_friend)
-            }
-            catch (err)
-            {
-                console.error(err);
-            }
-        }
-
+        friends = await userservice.getFriends();
 
         socket = io('/events', {
             path: "/ws/"
