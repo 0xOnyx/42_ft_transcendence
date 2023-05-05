@@ -1,10 +1,12 @@
 <script lang="ts">
     import Button from '../../../../components/Button.svelte';
     import ButtonElement from '../../../../components/ButtonElement.svelte';
+    import ButtonElementWarning from  '../../../../components/ButtonElementWarning.svelte';
     import ItemRoomChannel from '../../../../components/ItemRoomChannel.svelte';
     import MessageItem from '../../../../components/Message.svelte';
     import Icon from '../../../../components/Icon.svelte';
     import WarningAsk from '../../../../components/warningAsk.svelte'
+    import PopUpAskPasswordChange from '../../../../components/PopUpAskPasswordChange.svelte';
 
     import type { User } from '../../../../types/user';
     import type { Friend } from '../../../../types/friend'
@@ -26,6 +28,7 @@
     import userservice from '../../../../services/UserService';
     import PopUpCreateDm from "../../../../components/PopUpCreateDm.svelte";
     import PopUpAskPassword from "../../../../components/PopUpAskPassword.svelte";
+    import PopUpAskTime from "../../../../components/PopUpAskTime.svelte";
 
     let id;
 
@@ -34,7 +37,7 @@
     let search_value: string = "";
     let message_value: string = "";
     let rooms :(Rooms & {user: RoomUser[]})[] = [];
-    let current_room_id: Number;
+    let current_room_id: Number = -1;
     let current_room_user: User;
     let user : User;
     let friends : User[] = [];
@@ -94,16 +97,21 @@
             rooms = await res.json();
         }
         console.log(rooms);
-
+        console.log(current_room_id);
         if ($page.params.id == "last")
         {
-            if (!rooms || rooms.length <= 0)
-                return ;
+            if (!rooms || rooms.length <= 0) {
+                current_room_id = -1;
+                console.log("RETURN")
+                console.log(current_room_id)
+                return;
+            }
             id_room = rooms[0].id;
         }
         else
             id_room = Number($page.params.id);
         current_room_id = rooms.findIndex((item: (Rooms & {user: RoomUser[]}))=>{return (item.id === id_room)});
+        console.log(current_room_id);
         if (current_room_id == -1 && $page.params.id != "last")
         {
             await goto("/rooms/channel/last");
@@ -237,6 +245,8 @@
     let closeSetAdmin = false;
     let closePassworRoom = false;
     let closeDeleteRoom = false
+    let closeMuteUser = false;
+    let closeUnsetAdmin = false;
 
     async function acceptLeftChannel()
     {
@@ -287,6 +297,44 @@
         })
     }
 
+    async function changePassword(event)
+    {
+        socket.emit("updateRoomPublic", {room_id: rooms[current_room_id].id, password: event.detail});
+        closePassworRoom = false;
+    }
+
+    async function deleteRoom()
+    {
+        socket.emit("deleteRoomPublic", {room_id: rooms[current_room_id].id})
+        closeDeleteRoom = false;
+        await goto('/rooms/channel/last');
+    }
+
+    async function kickUser()
+    {
+        await socket.emit("kickUser", {room_id: rooms[current_room_id].id, user_id: currentRoomUserSelect.id});
+        closeKickUser = false;
+        currentRoomUserSelect = null;
+    }
+
+    async function banUser()
+    {
+        socket.emit()
+    }
+
+    async function setAdmin()
+    {
+        await socket.emit("setUserRole", {room_id: rooms[current_room_id].id, user_id: currentRoomUserSelect.id, role: RoleUser.ADMIN});
+        closeSetAdmin = false;
+        currentRoomUserSelect = null;
+    }
+
+    async function setUnsetAdmin()
+    {
+        await socket.emit("setUserRole", {room_id: rooms[current_room_id].id, user_id: currentRoomUserSelect.id, role: RoleUser.USER});
+        closeUnsetAdmin = false;
+        currentRoomUserSelect = null;
+    }
 </script>
 
 {#if error.length > 0}
@@ -307,29 +355,33 @@
 {/if}
 
 {#if closePassworRoom}
-
-
+    <PopUpAskPasswordChange on:changePassword={changePassword} on:close={()=>{closePassworRoom = false}}></PopUpAskPasswordChange>
 {/if}
-
 
 {#if closeDeleteRoom}
     <WarningAsk title="Delete this room ?" message="You will lose all of your message in the {rooms[current_room_id].name}. This action cannot be undone."
-                buttonAccecpt={()=>{}} buttonDecline={()=>{closeDeleteRoom = false}}></WarningAsk>
+                buttonAccecpt={deleteRoom} buttonDecline={()=>{closeDeleteRoom = false}}></WarningAsk>
 {/if}
 
 {#if closeKickUser}
     <WarningAsk title="Kick user ?" message="If your kick {currentRoomUserSelect.name}. This action cannot be undone."
-                buttonAccecpt={()=>{}} buttonDecline={()=>{closeKickUser = false}}></WarningAsk>
+                buttonAccecpt={kickUser} buttonDecline={()=>{closeKickUser = false}}></WarningAsk>
 {/if}
 {#if closeBanUser}
     <WarningAsk title="Ban user ?" message="If your ban {currentRoomUserSelect.name}. This action cannot be undone."
-                buttonAccecpt={()=>{}} buttonDecline={()=>{closeBanUser = false}}></WarningAsk>
+                buttonAccecpt={banUser} buttonDecline={()=>{closeBanUser = false}}></WarningAsk>
 {/if}
 {#if closeSetAdmin}
     <WarningAsk title="Set admin user ?" message="If your set admin {currentRoomUserSelect.name}. he will have all the rights."
-                buttonAccecpt={()=>{}} buttonDecline={()=>{closeSetAdmin = false}}></WarningAsk>
+                buttonAccecpt={setAdmin} buttonDecline={()=>{closeSetAdmin = false}}></WarningAsk>
 {/if}
-
+{#if closeUnsetAdmin}
+    <WarningAsk title="Set admin user ?" message="If your unset admin {currentRoomUserSelect.name}. he will lose all these rights."
+                buttonAccecpt={setUnsetAdmin} buttonDecline={()=>{closeUnsetAdmin = false}}></WarningAsk>
+{/if}
+{#if closeMuteUser}
+    <PopUpAskTime on:changePassword={()=>{}} on:close={()=>{closeMuteUser = false}}></PopUpAskTime>
+{/if}
 
 
 
@@ -458,9 +510,9 @@
                                 <button on:click={()=>{currentRoomUserSelect = null}}  class="bg-color2 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                                     ↩️ RETURN
                                 </button>
-                            {:else if rooms[current_room_id].user.find(element => element.role === RoleUser.ADMIN && element.user_id === user.id)}
+                            {:else if rooms[current_room_id]?.user.find(element => element.role === RoleUser.ADMIN && element.user_id === user.id)}
                                 <ButtonElement title="Password room" on:clicker={()=>{closePassworRoom = true}}></ButtonElement>
-                                <ButtonElement title="Delete room" on:clicker={()=>{closeDeleteRoom = true}}></ButtonElement>
+                                <ButtonElementWarning title="Delete room" on:clicker={()=>{closeDeleteRoom = true}}></ButtonElementWarning>
                             {/if}
                         </div>
                     {/if}
@@ -478,18 +530,22 @@
                                 </div>
 
                                 <div>
-                                    {#if (rooms[current_room_id].user.find(item => item.user_id === currentRoomUserSelect.id))?.role != RoleUser.ADMIN
-                                    && rooms[current_room_id].user.find(element => element.role === RoleUser.ADMIN && element.user_id === user.id)
-                                    && rooms[current_room_id].owner_id != currentRoomUserSelect.id }
+                                    {#if rooms[current_room_id]?.user.find(element => element.role === RoleUser.ADMIN && element.user_id === user.id)
+                                    && rooms[current_room_id]?.owner_id !== currentRoomUserSelect.id  && currentRoomUserSelect.id !== user.id}
                                         <ButtonElement title="Kick" on:clicker={()=>{closeKickUser = true}}></ButtonElement>
                                         <ButtonElement title="BanUser" on:clicker={()=>{closeBanUser = true}}></ButtonElement>
-                                        <ButtonElement title="SetAdmin" on:clicker={()=>{closeSetAdmin = true}}></ButtonElement>
+                                        {#if rooms[current_room_id]?.user.find(element => element.role === RoleUser.ADMIN && element.user_id === currentRoomUserSelect.id)}
+                                            <ButtonElement title="UnsetAdmin" on:clicker={()=>{closeUnsetAdmin = true}}></ButtonElement>
+                                        {:else}
+                                            <ButtonElement title="SetAdmin" on:clicker={()=>{closeSetAdmin = true}}></ButtonElement>
+                                        {/if}
+                                        <ButtonElement title="MuteUser" on:clicker={()=>{closeMuteUser = true}}></ButtonElement>
                                     {/if}
                                 </div>
                             {:else if !rooms[current_room_id]?.user}
                                 <p>NO USER IN ROOMS</p>
-                            {:else if rooms[current_room_id].user.length > 0}
-                                {#each rooms[current_room_id].user as user}
+                            {:else if rooms[current_room_id]?.user.length > 0}
+                                {#each rooms[current_room_id]?.user as user}
                                     <ItemRoomUserElement on:clicker={async ()=>{currentRoomUserSelect = await userservice.getUser(user.user_id)}} user={user}></ItemRoomUserElement>
                                 {/each}
                             {/if}

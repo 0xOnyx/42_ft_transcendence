@@ -97,6 +97,7 @@
         else
             id_room = Number($page.params.id);
         current_room = rooms.find((item: (Rooms & {user: RoomUser[]}))=>{return (item.id === id_room)}) as (Rooms & {user: RoomUser[]});
+        console.log(current_room);
         if (!current_room && $page.params.id != "last")
         {
             await goto("/rooms/dms/last");

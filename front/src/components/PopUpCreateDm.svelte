@@ -61,7 +61,11 @@
                                                     </div>
                                                     <!-- label -->
                                                     <div class="ml-3 text-gray-700 font-medium text-sm">
-                                                        Private
+                                                        {#if yes}
+                                                            Private
+                                                        {:else}
+                                                           Public
+                                                        {/if}
                                                     </div>
                                                 </label>
 
@@ -88,7 +92,7 @@
                     </div>
                 </div>
                 <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
-                    <button on:click={()=>{createRoom(room_name, password)}} disabled='{room_name.length <= 0 || yes && password.length <= 0}' type="button" class="inline-flex w-full justify-center rounded-md {room_name.length <= 0 || yes && password.length <= 0 ? 'bg-blue-300' : 'bg-blue-600 hover:bg-blue-500'} px-3 py-2 text-sm font-semibold text-white shadow-sm  sm:ml-3 sm:w-auto">Confirm</button>
+                    <button on:click={()=>{createRoom(room_name, password)}} disabled='{room_name.length <= 0 || yes && password.length <= 0}' type="button" class="inline-flex w-full justify-center rounded-md disabled:bg-blue-300 bg-blue-600 hover:bg-blue-500 px-3 py-2 text-sm font-semibold text-white shadow-sm  sm:ml-3 sm:w-auto">Confirm</button>
                     <button on:click={close()} type="button" class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto">Cancel</button>
                 </div>
 

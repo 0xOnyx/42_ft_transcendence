@@ -270,6 +270,21 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
     this.server.in(room.id.toString()).emit("updateRoom", room);
   }
 
+  @SubscribeMessage('deleteRoomPublic')
+  async deleteRoomPublic(
+      @MessageBody() data: {room_id: number},
+      @ConnectedSocket() client: CustomSocket
+  ) {
+    if (!client.request.user)
+      throw new WsException("no user");
+    const room = await this.messageService.room({where: {id: Number(data.room_id)}, include: {user: true}});
+    if (!room)
+      throw new WsException("no room user");
+    await this.messageService.deleteRoom({id: Number(data.room_id)});
+    this.server.in(data.room_id.toString()).emit("leftRoom", room);
+    this.server.in(data.room_id.toString()).socketsLeave(data.room_id.toString());
+  }
+
   @SubscribeMessage('createDm')
   async createDM(
       @MessageBody() data: {user_id: number},
@@ -405,7 +420,10 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
     })
     const user = await this.userService.user({id: data.user_id});
     if (user)
+    {
       this.server.in(user.oauth_42_id.toString()).socketsLeave(data.room_id.toString());
+      this.server.in(user.oauth_42_id.toString()).emit("leftRoom", room);
+    }
     this.server.in(data.room_id.toString()).emit("updateRoom", room);
   }
 

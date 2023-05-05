@@ -47,7 +47,8 @@ export class MessageService {
             where: where,
             data: {
                 password: passHash || null,
-            }
+            },
+            include: {user: true}
         })
     }
 
