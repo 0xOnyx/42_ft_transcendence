@@ -13,10 +13,13 @@ all:
 	@printf "\033[m"
 	@printf "\nfor start developpement environment of svelte, type 'make svelte'\n\n"
 
-svelte:
+svelte2:
 	echo "Start front (svelte)"
 	$(DOCKER) build -t front docker/front
 	$(DOCKER) run -p 3000:3000 -v $(PWD)/front:/app --name front front
+
+svelte:
+	$(DOCKER) exec -ti frontend bash
 
 postgres:
 	$(DOCKER) exec -ti postgres bash
