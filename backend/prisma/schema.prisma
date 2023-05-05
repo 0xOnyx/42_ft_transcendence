@@ -162,12 +162,16 @@ model	LockUsers {
 
 enum	StatusGame {
 	CREATED
-	STARTED
+	READY
+	INIT
+	WAIT
+	RUN
+	LOST
 	FINISHED
 }
 
 enum	TypeGame {
-	STANDARD
+	CLASSIC
 	BLACKHOLE
 }
 
@@ -176,12 +180,12 @@ model	Game {
 	status								StatusGame	@default(CREATED)
 	player_one_id					Int
 	player_one						User				@relation("player_one", fields: [player_one_id], references: [id])
-	player_two_id					Int
-	player_two						User				@relation("player_two", fields: [player_two_id], references: [id])
+	player_two_id					Int?
+	player_two						User?				@relation("player_two", fields: [player_two_id], references: [id])
 	player_one_accepted		Boolean			@default(false)
 	player_two_accepted		Boolean			@default(false)
-	map_type							TypeGame		@default(STANDARD)
-	level									Int
+	map_type							TypeGame		@default(CLASSIC)
+	level									Int?
 	created_at						DateTime		@default(now())
 	score_one							Int
 	score_two							Int
