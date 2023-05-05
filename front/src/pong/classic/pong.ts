@@ -10,6 +10,7 @@ import Controller from './controller.js';
 import Bound from './bound.js';
 import Text from './text.js';
 import Dash from './dash.js';
+import type { NetMessage } from './message.js';
 
 
 var pong : Pong;
@@ -30,6 +31,9 @@ export default class Pong
     gutter : number = 20.0;
     renderPong : boolean = true;
     scoreLimit : number = 3;
+    network : boolean = false;
+    server : boolean = false;
+    networkMessage : NetMessage | null = null;
 
     constructor(_width : number, _height : number, _context : CanvasRenderingContext2D | null)
     {
@@ -71,13 +75,18 @@ export default class Pong
         this.addPlayer();
 
         pong = this;
+    }
+
+    setNetworkMessage(mes: NetMessage)
+    {
+        this.networkMessage = mes;
 
     }
 
     addPlayer()
     {
-        let no : string = <string>'' + this.players.length + 1;
-        let player = new Player(no, this.size, this.timer);
+        let name : string = <string>'' + this.players.length + 1;
+        let player = new Player(this.players.length, name, this.size, this.timer);
 
         if (this.players.length == 0)
         {
@@ -95,16 +104,19 @@ export default class Pong
 
     run() : void
     {
-        console.log("run");
-
         this.init();
 
-        loop();
+        if(this.server)
+            setInterval(() => { this.gameLoop(); }, 1000 / 60);
+        else
+            loop();
     }
 
     init() : void
     {
         this.ball.setPosition(this.size.w / 2, this.size.h / 2);
+
+        this.ball.vector.scalarMulti(.5);
 
         for (let index = 0; index < this.players.length; index++) {
             const player = this.players[index];
@@ -116,6 +128,7 @@ export default class Pong
                 player.setPosition(this.size.w - this.gutter - player.size.w, (this.size.h - player.size.h) / 2);
             }
         }
+
         if(this.status == 'init')
             this.status = 'wait';
         else
@@ -127,13 +140,19 @@ export default class Pong
     {
         this.timer.tick();
 
-        for (let index = 0; index < this.players.length; index++) {
-            const player = this.players[index];
-            player.update(this.controllers[index]);
+        if (this.status !== 'finish')
+        {
+            for (let index = 0; index < this.players.length; index++) {
+                const player = this.players[index];
+                if(this.network)
+                    player.networkUpdate(<NetMessage>this.networkMessage);
+                else
+                    player.update(this.controllers[index]);
+            }
         }
 
         // check if the round is over
-        if (this.status === 'run')
+        if (this.status === 'run' && !this.network)
         {
             for (let index = 0; index < this.overBounds.length; index++) {
                 const bound = this.overBounds[index];
@@ -145,7 +164,7 @@ export default class Pong
             }
         }
 
-        if (this.status === 'run')
+        if (this.status === 'run' && !this.network)
         {
             // update ball collider with other elements
             for (let index = 0; index < this.colliders.length; index++) {
@@ -161,7 +180,12 @@ export default class Pong
             this.ball.update();
         }
 
-        if (this.status === 'wait')
+        if (this.status === 'run' && this.network)
+        {
+            this.ball.networkUpdate(<NetMessage>this.networkMessage);
+        }
+
+        if (this.status === 'wait' && !this.network)
         {
             window.addEventListener('touch', () => {
                 this.status = 'run';
@@ -170,7 +194,7 @@ export default class Pong
                 this.status = 'run';
         }
 
-        if (this.status === 'lost')
+        if (this.status === 'lost' && !this.network)
         {
             let isFinished : boolean = false;
             for (let index = 0; index < this.players.length; index++) {
@@ -226,7 +250,6 @@ export default class Pong
             this.ball.vector = vectBall;
         }
 
-
     }
 
     clear() : void
@@ -244,7 +267,6 @@ export default class Pong
                 txt.content = <string>'' + this.players[index].score;
                 txt.draw(this.context);
             }
-
         }
 
         for (let index = 0; index < this.meshes.length; index++) {
@@ -265,7 +287,7 @@ export default class Pong
         const angle = -range + gutter + ((range - (2 * gutter)) * (diff / player.size.h));
         const vectPlayer = new Vector(Math.sin(angle) * invers, Math.cos(angle));
         const center = new Vector(0, player.size.h / 2);
-        
+
         // (new Dash(player.position.copy().add(center), player.position.copy().add(center).add(vectPlayer.scalarMulti(100)))).draw(this.context);
     }
 

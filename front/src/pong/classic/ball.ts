@@ -2,6 +2,7 @@ import Rectangle from './rectangle.js';
 import type Timer from './timer.js';
 import type Size from './size.js';
 import Vector from './vector.js';
+import type { NetMessage } from './message.js';
 
 export default class Ball extends Rectangle
 {
@@ -35,5 +36,12 @@ export default class Ball extends Rectangle
     {
         this.position.add(this.getNextPosition());
     }
-    
+
+    networkUpdate(mes: NetMessage)
+    {
+        this.setPosition(mes.ball.position.x, mes.ball.position.y);
+        this.vector.x = mes.ball.vector.x;
+        this.vector.y = mes.ball.vector.y;
+    }
+
 }

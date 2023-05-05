@@ -1,24 +1,31 @@
 
-export type netMesPlayer = {
-    y: Number;
-    score: Number;
+export type NetMessagePlayer = {
+    y: number;
+    score: number;
 }
 
-export type netMesBall = {
+export type NetMessageBall = {
     position: {
-        x: Number;
-        y: Number;        
+        x: number;
+        y: number;
     },
     vector: {
-        x: Number;
-        y: Number;     
+        x: number;
+        y: number;
     }
 }
 
-export type netMessage = {
+export class NetMessage {
 
-    player1: netMesPlayer;
-    player2: netMesPlayer;
-    ball: netMesBall;
-
+    players: [NetMessagePlayer, NetMessagePlayer] = [{y: 0, score: 0}, {y: 0, score: 0}];
+    ball: NetMessageBall = {
+        position: {
+            x: 0,
+            y: 0,
+        },
+        vector: {
+            x: 0,
+            y: 0,
+        }
+    };
 }
