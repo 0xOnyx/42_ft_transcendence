@@ -57,6 +57,7 @@ services:
     build: ./front
     volumes:
       - ../front:/app:delegated
+      - ../pong:/pong
     ports:
       - "3001:3001"
     depends_on:
@@ -69,6 +70,7 @@ services:
     build: ./back
     volumes:
       - ../backend:/app:delegated
+      - ../pong:/pong
     ports:
       - "3000:3000"
     depends_on:
