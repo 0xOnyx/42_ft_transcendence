@@ -12,6 +12,7 @@
     //bg-green-600
     export let user : RoomUser;
     let current_user: User;
+    let color: string;
 
     onMount(async ()=>{
         current_user = await userservice.getUser(user.user_id)
@@ -34,10 +35,21 @@
         dispatch('clicker');
     }
 
+    $: color = getColorBg(user);
+
+    function getColorBg(user)
+    {
+        if (user.ban)
+            return 'bg-red-500 border-white';
+        else if (Date.parse(user.term_penalty) > Date.now())
+            return 'bg-yellow-500 border-white';
+        return 'bg-color2 border-color2'
+    }
+
 </script>
 
 {#if current_user}
-    <div on:click={clicker} class="mx-1.5 cursor-pointer rounded-xl bg-color2  border-color2  border-2  p-5 flex items-center mt-1">
+    <div on:click={clicker} class="mx-1.5 cursor-pointer rounded-xl {color} border-2  p-5 flex items-center mt-1">
 
         <div class="mx-2 flex-shrink">
 
@@ -47,11 +59,13 @@
 
         </div>
 
-        <div class="mx-2 flex-grow text-left">
+        <div class="{user.ban ? 'line-through' : ''} mx-2 flex-grow text-left">
             {current_user?.name}
             {user.role === RoleUser.ADMIN ? "👑" : ""}
+            {user.ban ? "⛓": ""}
+            {user.mute ? "👮": ""}
         </div>
-        {#if current_user?.online_status}
+        {#if current_user?.online_status && !user.ban && !user.mute}
             <div class="mx-2">
                 <div class="h-4 w-4 rounded-full {getColor(current_user.online_status)}"></div>
             </div>

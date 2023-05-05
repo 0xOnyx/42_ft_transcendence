@@ -110,8 +110,12 @@
         }
         else
             id_room = Number($page.params.id);
+        rooms = rooms.filter((item: (Rooms & {user: RoomUser[]}))=>{return (
+            !(item.user.find(element=>element.user_id == user.id).ban)
+        )})
         current_room_id = rooms.findIndex((item: (Rooms & {user: RoomUser[]}))=>{return (item.id === id_room)});
-        console.log(current_room_id);
+
+
         if (current_room_id == -1 && $page.params.id != "last")
         {
             await goto("/rooms/channel/last");
@@ -185,9 +189,13 @@
         })
 
         socket.on("leftRoom", (room: (Rooms & {user: RoomUser[]})) =>{
+            console.log("left room");
+            const room_id_current = rooms[current_room_id].id;
             rooms = rooms.filter(item=>{
                 return item.id != room.id
             })
+            if (room.id === room_id_current)
+                room_message = [];
         })
 
         socket.on("NewFriend", (user: User)=>{
@@ -247,6 +255,7 @@
     let closeDeleteRoom = false
     let closeMuteUser = false;
     let closeUnsetAdmin = false;
+    let closeUnBanUser = false;
 
     async function acceptLeftChannel()
     {
@@ -319,7 +328,15 @@
 
     async function banUser()
     {
-        socket.emit()
+        await socket.emit("banUserChannel", {room_id: rooms[current_room_id].id, user_id: currentRoomUserSelect.id})
+        closeBanUser = false;
+        currentRoomUserSelect = null;
+    }
+    async function unbanUser()
+    {
+        await socket.emit("unbanUserChannel", {room_id: rooms[current_room_id].id, user_id: currentRoomUserSelect.id});
+        closeUnBanUser = false;
+        currentRoomUserSelect = null;
     }
 
     async function setAdmin()
@@ -335,6 +352,15 @@
         closeUnsetAdmin = false;
         currentRoomUserSelect = null;
     }
+
+    async function setMuteTime(event)
+    {
+        await socket.emit("muteUser", {room_id: rooms[current_room_id].id, user_id: currentRoomUserSelect.id, number_hours: event.detail})
+        closeMuteUser = false;
+        currentRoomUserSelect = null;
+    }
+
+
 </script>
 
 {#if error.length > 0}
@@ -380,11 +406,13 @@
                 buttonAccecpt={setUnsetAdmin} buttonDecline={()=>{closeUnsetAdmin = false}}></WarningAsk>
 {/if}
 {#if closeMuteUser}
-    <PopUpAskTime on:changePassword={()=>{}} on:close={()=>{closeMuteUser = false}}></PopUpAskTime>
+    <PopUpAskTime on:timeSelect={setMuteTime} on:close={()=>{closeMuteUser = false}}></PopUpAskTime>
 {/if}
 
-
-
+{#if closeUnBanUser}
+    <WarningAsk title="Unban user ?" message="If your unban this {currentRoomUserSelect.name}. he will get access to this room."
+                buttonAccecpt={unbanUser} buttonDecline={()=>{closeUnBanUser = false}}></WarningAsk>
+{/if}
 
 {#if closeWarningLeftChannel}
     <WarningAsk title="Leave channel ?" message="You will lose all of your message with {rooms[current_room_id].name}. This action cannot be undone."
@@ -446,7 +474,7 @@
                                     <p>NO CHANNEL</p>  <!-- CREATE THIS -->
                                 {:else}
                                     {#each rooms as room}
-                                        <ItemRoomChannel current={room.id === id_room} room={room}></ItemRoomChannel>
+                                       <ItemRoomChannel current={room.id === id_room} room={room}></ItemRoomChannel>
                                     {/each}
                                 {/if}
                             {/if}
@@ -532,14 +560,18 @@
                                 <div>
                                     {#if rooms[current_room_id]?.user.find(element => element.role === RoleUser.ADMIN && element.user_id === user.id)
                                     && rooms[current_room_id]?.owner_id !== currentRoomUserSelect.id  && currentRoomUserSelect.id !== user.id}
-                                        <ButtonElement title="Kick" on:clicker={()=>{closeKickUser = true}}></ButtonElement>
-                                        <ButtonElement title="BanUser" on:clicker={()=>{closeBanUser = true}}></ButtonElement>
-                                        {#if rooms[current_room_id]?.user.find(element => element.role === RoleUser.ADMIN && element.user_id === currentRoomUserSelect.id)}
-                                            <ButtonElement title="UnsetAdmin" on:clicker={()=>{closeUnsetAdmin = true}}></ButtonElement>
+                                        {#if !rooms[current_room_id]?.user.find(element =>element.user_id === currentRoomUserSelect.id).ban}
+                                            <ButtonElement title="Kick" on:clicker={()=>{closeKickUser = true}}></ButtonElement>
+                                            <ButtonElement title="BanUser" on:clicker={()=>{closeBanUser = true}}></ButtonElement>
+                                            {#if rooms[current_room_id]?.user.find(element => element.role === RoleUser.ADMIN && element.user_id === currentRoomUserSelect.id)}
+                                                <ButtonElement title="UnsetAdmin" on:clicker={()=>{closeUnsetAdmin = true}}></ButtonElement>
+                                            {:else}
+                                                <ButtonElement title="SetAdmin" on:clicker={()=>{closeSetAdmin = true}}></ButtonElement>
+                                            {/if}
+                                            <ButtonElement title="MuteUser" on:clicker={()=>{closeMuteUser = true}}></ButtonElement>
                                         {:else}
-                                            <ButtonElement title="SetAdmin" on:clicker={()=>{closeSetAdmin = true}}></ButtonElement>
+                                            <ButtonElement title="Unban" on:clicker={()=>{closeUnBanUser = true}}></ButtonElement>
                                         {/if}
-                                        <ButtonElement title="MuteUser" on:clicker={()=>{closeMuteUser = true}}></ButtonElement>
                                     {/if}
                                 </div>
                             {:else if !rooms[current_room_id]?.user}
@@ -564,4 +596,3 @@
     </div>
 
 </div>
-

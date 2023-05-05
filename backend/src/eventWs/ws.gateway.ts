@@ -85,7 +85,7 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
       if (user && user.room_user)
       {
         user.room_user.forEach((element: (RoomUser & {room: Rooms}))=>{
-            if (!element.ban)
+//            if (!element.ban)
               client.join(element.room.id.toString());
         })
       }
@@ -167,7 +167,7 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
         return !!(element.room && element.room.id == Number(data.room_id));
 
       });
-      if (!room_user?.mute && room_user?.term_penalty)
+      if (room_user?.mute && room_user?.term_penalty)
       {
         if (room_user.term_penalty <= new Date())
         {
@@ -177,7 +177,10 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
       }
       if (!room_user || room_user.ban || room_user.mute || !room_user.room)
       {
-        throw new WsException("not permit");
+        if (room_user?.mute)
+          throw new WsException("Your are temporary mute in this channel");
+        else
+          throw new WsException("not permit your are ban or mute");
       }
       let typeMessage: TypeMessage;
       if (data.message_type == "MESSAGE") {
@@ -363,7 +366,10 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
     })
     const user = await this.userService.user({id: data.user_id});
     if (user)
+    {
       this.server.in(user.oauth_42_id.toString()).socketsLeave(data.room_id.toString());
+      this.server.in(user.oauth_42_id.toString()).emit("leftRoom", room_update);
+    }
     this.server.in(data.room_id.toString()).emit("updateRoom", room_update);
   }
 
@@ -396,8 +402,13 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
       @ConnectedSocket() client: CustomSocket
   )
   {
+    if (data.number_hours <= 0 || data.number_hours >= 24)
+      throw new WsException("Your value to mute user is not valide !");
+    console.log(data.number_hours);
     this.check_user(data, client);
+    console.log(data.number_hours);
     const term_penality = this.getTime(data.number_hours);
+    console.log(term_penality);
     await this.messageService.updateUser({id: data.room_id}, {id: data.user_id}, {mute: true, term_penalty: term_penality});
     const room_update = await this.messageService.room({
       where: {id: Number(data.room_id)},
