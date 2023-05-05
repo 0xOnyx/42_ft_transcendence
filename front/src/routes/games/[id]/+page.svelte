@@ -10,7 +10,7 @@
 	import UserInfo from '../../../components/UserInfo.svelte';
 	import NavBar from '../../../components/NavBar.svelte';
 
-    import Pong from '../../../pong/classic/pong';
+    import Pong from "../../../../../pong/src/classic/pong";
 
     import type { PageData } from './$types';
 	import { onMount } from 'svelte';
@@ -18,9 +18,6 @@
     let socket : Socket = io('/events', {
             path: "/api/gamews/"
     });
-
-    //PageData.id;
-
     let canvas : HTMLCanvasElement;
     let search_value: string = "";
     let connectedWs: Boolean = true;
@@ -109,12 +106,17 @@
 
     let userstats : UserStats = {
         played : 42,
+        win: 5,
         ratio: 84,
         league: '',
         level: 21
     }
 
 	onMount(async () => {
+
+        socket = io('/events', {
+                path: "/api/gamews/"
+        });
 
         let pong : Pong = new Pong(800, 500, canvas.getContext('2d'));
         pong.run();
@@ -155,7 +157,7 @@
 
                             <div  class="mt-20">
 
-                                <UserInfo portal=true user={user} update={updatePopUp} />
+                                <UserInfo portal={true} user={user} />
 
                             </div>
 
@@ -186,7 +188,7 @@
 
                             <div class="mt-20">
 
-                                <UserInfo portal=true user={user} update={updatePopUp} />
+                                <UserInfo portal={true} user={user} />
 
                             </div>
 

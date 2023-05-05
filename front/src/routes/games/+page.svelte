@@ -10,6 +10,7 @@
 	import Checkbox from "../../components/Checkbox.svelte";
 	import ItemName from "../../components/Itemname.svelte";
 	import GamesType from "../../components/GamesType.svelte";
+	import gameservice from "../../services/GameService";
 
     let user : User;
     let search_value : string = '';
@@ -41,9 +42,12 @@
         search = await userservice.searchUser(search_value);
     }
 
-    function startGame()
+    async function startGame()
     {
-        document.location.href = "/games/1";
+        let game_id : number |null = await gameservice.create(user.id);
+        if(game_id) {
+            document.location.href = "/games/" + game_id;
+        }
     }
 
     function joinGame()
