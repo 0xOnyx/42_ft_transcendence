@@ -7,8 +7,6 @@
     export let user: User;
     async function DeleteInvite()
     {
-        console.log("OK")
-
         socket.emit("deleteFriend", {
             user_id: user.id,
         })

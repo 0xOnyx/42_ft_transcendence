@@ -18,8 +18,6 @@ export class UserService
      */
     async isLogged() : Promise<boolean>
     {
-        console.log("isLogged start");
-
         let logged: boolean;
 
         let res: Response = await fetch(`${PUBLIC_API_URI}/auth/islogged`, {
@@ -38,8 +36,6 @@ export class UserService
 
     async getCurrentUser() : Promise<User>
     {
-        console.log("getCurrentUser start");
-
         let logged: boolean;
 
         let res: Response = await fetch(`${PUBLIC_API_URI}/user/me`, {
@@ -60,8 +56,6 @@ export class UserService
         });
 
         const friends_list: Array<Friend> = (await res.json()).friend;
-
-        console.log (friends_list);
 
         for (const item of friends_list) {
             let id = item.friend_id;
@@ -95,6 +89,15 @@ export class UserService
         return await res.json();
     }
 
+    async getUser(id: number): Promise<User>
+    {
+        let res: Response = await fetch(`${PUBLIC_API_URI}/user/id/${id}`, {
+            method: 'GET',
+            credentials: 'include'
+        });
+
+        return await res.json();
+    }
 
 
 }

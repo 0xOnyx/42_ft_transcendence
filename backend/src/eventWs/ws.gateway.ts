@@ -85,7 +85,7 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
       if (user && user.room_user)
       {
         user.room_user.forEach((element: (RoomUser & {room: Rooms}))=>{
-            if (!element.ban)
+//            if (!element.ban)
               client.join(element.room.id.toString());
         })
       }
@@ -167,7 +167,7 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
         return !!(element.room && element.room.id == Number(data.room_id));
 
       });
-      if (!room_user?.mute && room_user?.term_penalty)
+      if (room_user?.mute && room_user?.term_penalty)
       {
         if (room_user.term_penalty <= new Date())
         {
@@ -177,7 +177,10 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
       }
       if (!room_user || room_user.ban || room_user.mute || !room_user.room)
       {
-        throw new WsException("not permit");
+        if (room_user?.mute)
+          throw new WsException("Your are temporary mute in this channel");
+        else
+          throw new WsException("not permit your are ban or mute");
       }
       let typeMessage: TypeMessage;
       if (data.message_type == "MESSAGE") {
@@ -191,7 +194,6 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
           throw new WsException("only in single chat");
         const add_id: RoomUser | undefined = room_user.room.user.find(element => element.user_id != client.request.user?.id)
         let friend: Friend | undefined = (await this.userService.getFriendAny({id: client.request.user.id}, {id: add_id?.user_id}))[0];
-        console.log(friend);
         if (friend)
           throw new WsException("already friend or your already request to be friend");
         if (!friend)
@@ -212,7 +214,7 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
 
   @SubscribeMessage('createRoomPublic')
   async createRoomPublic(
-      @MessageBody() data: {password?: string},
+      @MessageBody() data: {name: string, password?: string},
       @ConnectedSocket() client: CustomSocket,
   ) {
     if (!client.request.user)
@@ -220,7 +222,8 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
     const room: Rooms = await this.messageService.createRoom(TypeRoom.PUBLIC_ROOM, {id: client.request.user.id}, data);
     await this.messageService.joinRoom({id: room.id}, {id: client.request.user.id}, RoleUser.ADMIN, data.password);
     this.server.in(client.request.user.oauth_42_id.toString()).socketsJoin(room.id.toString());
-    this.server.in(room.id.toString()).emit("updateRoom", room);
+    this.server.in(room.id.toString()).emit("updateRoom",  await this.messageService.room({where: {id: room.id}, include: {user: true}}));
+    return (room.id);
 }
 
   @SubscribeMessage('joinRoomPublic')
@@ -231,12 +234,15 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
     if (!client.request.user)
       throw new WsException("no user");
     await this.messageService.joinRoom({id: Number(data.room_id)}, {id: client.request.user.id}, RoleUser.USER, data.password);
-    const room = await this.messageService.room({
+    let room = await this.messageService.room({
       where: {id: Number(data.room_id)},
       include: {user: true}
     })
-    this.server.in(data.room_id.toString()).emit("updateRoom", room);
+    if (room && room.password && room.password?.length > 0)
+      room.password = "lock";
     this.server.in(client.request.user.oauth_42_id.toString()).socketsJoin(data.room_id.toString());
+    this.server.in(data.room_id.toString()).emit("updateRoom", room);
+    return (room);
   }
 
   @SubscribeMessage('leftRoomPublic')
@@ -251,8 +257,9 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
       where: {id: Number(data.room_id)},
       include: {user: true}
     })
-    this.server.in(data.room_id.toString()).emit("updateRoom", room);
     this.server.in(client.request.user.oauth_42_id.toString()).socketsLeave(data.room_id.toString());
+    this.server.in(data.room_id.toString()).emit("updateRoom", room);
+    this.server.in(client.request.user.oauth_42_id.toString()).emit("leftRoom", room);
   }
 
   @SubscribeMessage('updateRoomPublic')
@@ -264,6 +271,21 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
       throw new WsException("no user");
     const room = await this.messageService.updateRoom({id: Number(data.room_id)}, {password: data.password})
     this.server.in(room.id.toString()).emit("updateRoom", room);
+  }
+
+  @SubscribeMessage('deleteRoomPublic')
+  async deleteRoomPublic(
+      @MessageBody() data: {room_id: number},
+      @ConnectedSocket() client: CustomSocket
+  ) {
+    if (!client.request.user)
+      throw new WsException("no user");
+    const room = await this.messageService.room({where: {id: Number(data.room_id)}, include: {user: true}});
+    if (!room)
+      throw new WsException("no room user");
+    await this.messageService.deleteRoom({id: Number(data.room_id)});
+    this.server.in(data.room_id.toString()).emit("leftRoom", room);
+    this.server.in(data.room_id.toString()).socketsLeave(data.room_id.toString());
   }
 
   @SubscribeMessage('createDm')
@@ -344,7 +366,10 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
     })
     const user = await this.userService.user({id: data.user_id});
     if (user)
+    {
       this.server.in(user.oauth_42_id.toString()).socketsLeave(data.room_id.toString());
+      this.server.in(user.oauth_42_id.toString()).emit("leftRoom", room_update);
+    }
     this.server.in(data.room_id.toString()).emit("updateRoom", room_update);
   }
 
@@ -377,8 +402,13 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
       @ConnectedSocket() client: CustomSocket
   )
   {
+    if (data.number_hours <= 0 || data.number_hours >= 24)
+      throw new WsException("Your value to mute user is not valide !");
+    console.log(data.number_hours);
     this.check_user(data, client);
+    console.log(data.number_hours);
     const term_penality = this.getTime(data.number_hours);
+    console.log(term_penality);
     await this.messageService.updateUser({id: data.room_id}, {id: data.user_id}, {mute: true, term_penalty: term_penality});
     const room_update = await this.messageService.room({
       where: {id: Number(data.room_id)},
@@ -401,7 +431,10 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
     })
     const user = await this.userService.user({id: data.user_id});
     if (user)
+    {
       this.server.in(user.oauth_42_id.toString()).socketsLeave(data.room_id.toString());
+      this.server.in(user.oauth_42_id.toString()).emit("leftRoom", room);
+    }
     this.server.in(data.room_id.toString()).emit("updateRoom", room);
   }
 

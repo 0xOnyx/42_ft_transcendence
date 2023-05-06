@@ -14,4 +14,5 @@ export class AuthService {
 		})
 		return res.redirect(process.env.REDIRECT);
 	}
+
 }

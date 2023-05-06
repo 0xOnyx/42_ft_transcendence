@@ -10,7 +10,6 @@
     export let room: Rooms
     async function createInvite()
     {
-        console.log("OK")
 
         socket.emit("message", {
             room_id: room.id,

@@ -27,3 +27,8 @@ export type UserStats = {
     level: number,
 	league: string,
 }
+
+export enum RoleUser {
+    ADMIN =  'ADMIN',
+    USER =  'USER'
+}

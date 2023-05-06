@@ -6,14 +6,11 @@
     import {PUBLIC_API_URI} from "$env/static/public";
     import {goto} from "$app/navigation"
     import {Socket} from "socket.io-client";
-	import { imageUrl } from '../services/Utilities';
-	import { onMount } from 'svelte';
 
     //bg-green-600
     export let user : User;
+    export let io: Socket;
     export let requestBlock: Function;
-    export let socket: Socket;
-    let socket: Socket;
 
     function getColor(status: Status)
     {
@@ -31,7 +28,6 @@
             method: 'GET',
             credentials: 'include'
         });
-        console.log(res.status)
         let rooms: (Rooms & { user: RoomUser[] }) | undefined;
         if (res.status == 204)
         {
@@ -45,8 +41,7 @@
                 requestBlock(user.id);
             }
             else {
-                socket.emit("createDm", {user_id: user.id}, (rooms) => {
-                    console.log(rooms)
+                io.emit("createDm", {user_id: user.id}, (rooms) => {
                     if (rooms)
                         goto(`/rooms/dms/${rooms.id}`);
                 })
@@ -59,15 +54,13 @@
 
         }
     }
-
-
 </script>
 
 <div on:click={getRoom} class="cursor-pointer rounded-xl bg-color5 p-5 flex items-center mt-1">
 
     <div class="mx-2 flex-shrink">
         <div class="w-[40px] h-[40px] bg-cover  rounded-full mx-auto"
-             style="background-image: url( {imageUrl(user?.image_url)} )">
+             style="background-image: url( /{user?.image_url || `image/default.png`} )">
         </div>
 
     </div>

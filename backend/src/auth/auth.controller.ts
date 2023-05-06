@@ -1,6 +1,7 @@
-import {Controller, Ip, Get, Res, UseGuards, Request, Req} from '@nestjs/common';
+import {Controller, Ip, Param, Get, Post, Res, UseGuards, Request, Req} from '@nestjs/common';
 import { AuthService } from './auth.service'
 import { OauthGuard } from "./guards/oauth.guard";
+import { LocalGuard } from "./guards/local.guard";
 import {ApiOperation} from "@nestjs/swagger";
 
 @Controller('auth')
@@ -24,6 +25,7 @@ export class AuthController {
 	@ApiOperation({summary: "test if req is auth true or false"})
 	isLogged(@Request() req: any): boolean
 	{
+		console.log(req.headers.cookie);
 		return req.isAuthenticated();
 	}
 
@@ -33,5 +35,12 @@ export class AuthController {
 	{
 		await req.session.destroy();
 		return res.redirect('/');
+	}
+
+	@UseGuards(LocalGuard)
+	@Post("dev/login")
+	async devLogin(@Request() req: any, @Res() res: any)
+	{
+		return res.redirect(process.env.REDIRECT);
 	}
 }
