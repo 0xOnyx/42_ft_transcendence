@@ -1,5 +1,6 @@
 <script lang="ts">
-    import type {Messages} from "../types/room";
+    import { imageUrl } from "../services/Utilities";
+import type {Messages} from "../types/room";
     import type {User} from "../types/user";
     import DateElement from "./DateElement.svelte";
 
@@ -33,7 +34,7 @@
 
 
         <div class="w-10 h-10 bg-cover  rounded-full mx-auto"
-             style="background-image: url( /{user?.image_url || 'image/default.png'} )">
+             style="background-image: url( {imageUrl(user?.image_url) } )">
         </div>
 
     </div>
@@ -45,7 +46,7 @@
 
 
         <div class="w-10 h-10 bg-cover  rounded-full mx-auto"
-             style="background-image: url( /{current_message?.user.image_url || 'image/default.png'} )">
+             style="background-image: url( {imageUrl(current_message?.user.image_url)} )">
         </div>
     </div>
 
