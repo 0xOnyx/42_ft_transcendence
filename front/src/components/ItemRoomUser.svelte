@@ -1,11 +1,11 @@
 <script lang="ts">
 
     import { imageUrl } from '../services/Utilities';
-import type {Room, RoomUser} from '../types/room';
+    import type {Rooms, RoomUser} from '../types/room';
 	import type { User } from '../types/user';
 
     //bg-green-600
-    export let room : Room;
+    export let room : (Rooms & {user: RoomUser[]});
     export let user : User;
 
 </script>

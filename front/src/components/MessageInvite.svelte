@@ -12,7 +12,6 @@
 
     async function acceptFriend()
     {
-        console.log("acceptFriend");
         socket.emit("acceptFriend", {id: Number(current_message.content), message_id: current_message.id, room_id: current_message.room_id})
     }
 

@@ -37,11 +37,13 @@ export class PrismaGameService {
             map_type : map_type,
             score_one : 0,
             score_two : 0,
+            level : 0,
             player_one : {
                 connect : {
                     id : +player_one_id
                 }
             },
+            player_two : {},
         };
 
         if(player_two_id) {

@@ -7,7 +7,6 @@
 
     import type {User} from '../../../../types/user';
     import type {Friend} from '../../../../types/friend'
-    import type {UserStats} from '../../../../types/user';
     import type {Messages, Rooms, RoomUser} from '../../../../types/room';
     import {MessageRole} from '../../../../types/room';
 	import UserNotification from '../../../../components/UserNotificationDM.svelte';
@@ -39,24 +38,15 @@
     let friends : User[] = [];
     let socket: Socket;
     let connectedWs: Boolean = false;
-    let iscurrentFriend: Boolean = false;
     let roomUserDm: RoomUser;
 	let chatbox : HTMLDivElement;
-    let unread_message: Number = 0;
     let error : string = ""
 
-    let userstats : UserStats = {
-        played : 42,
-        ratio: 84,
-        level: 21
-    }
     let id_room: number;
 
     let loadValue = async ()=>{
 
         let res: Response;
-
-        console.log("LOAD VALUE");
 
         if (!await userservice.isLogged())
             await goto("/");
@@ -107,6 +97,7 @@
         else
             id_room = Number($page.params.id);
         current_room = rooms.find((item: (Rooms & {user: RoomUser[]}))=>{return (item.id === id_room)}) as (Rooms & {user: RoomUser[]});
+        console.log(current_room);
         if (!current_room && $page.params.id != "last")
         {
             await goto("/rooms/dms/last");
@@ -132,7 +123,8 @@
         }
         else
             room_message = [];
-		chatbox.scrollTop = chatbox.scrollHeight;
+        if (chatbox)
+            chatbox.scrollTop = chatbox.scrollHeight;
     }
 
 
@@ -157,7 +149,8 @@
             else
             {
                 const index = rooms.findIndex((item: (Rooms & {user: RoomUser[]}))=>{return (item.id === data.room_id)})
-                rooms[index].count_messages += 1;
+                if (index >= 0)
+                    rooms[index].count_messages += 1;
             }
             if (room_message.length > MAX_MESSAGE)
                 room_message.shift();
@@ -167,10 +160,10 @@
 
         socket.on("updateRoom", (room: (Rooms & {user: RoomUser[]})) =>{
             let index: number;
-            if ((index = rooms.findIndex((item: (Rooms & {user: RoomUser[]}) ) => {item.id === room.id})) == -1)
+            if ((index = rooms.findIndex(item => item.id === room.id)) == -1)
                 rooms.push(room);
             else
-                room[index] = room;
+                rooms[index] = room;
             rooms = rooms;
         })
 
@@ -191,8 +184,6 @@
         })
 
         socket.on("updateMessage", (message: (Messages & {user: User}))=>{
-            console.log(message)
-            console.log(room_message);
             const id = room_message.findIndex(item=>{return(item.id == message.id)});
             room_message[id] = message;
         })
@@ -337,7 +328,7 @@
                             <p>no user found :/</p>  <!-- CREATE THIS -->
                         {:else}
                             {#each search as user}
-                                <ItemName requestBlock={()=>{closeWarningUnbanUser=user.id}} socket={socket} user={user}></ItemName>
+                                <ItemName requestBlock={()=>{closeWarningUnbanUser=user.id}} io={socket} user={user}></ItemName>
                             {/each}
                         {/if}
                     {/if}
@@ -359,9 +350,9 @@
 
                 <div class="flex items-center border-1 p-8">
 
-                    <input autofocus on:keydown={(e)=>{e.key === "Enter" && sendMessage()}} bind:value={message_value} type="text" class="border border-color2 bg-color5 rounded-md w-full p-2 pr-12 focus:outline-none" />
+                    <input disabled={rooms.length <= 0} autofocus on:keydown={(e)=>{e.key === "Enter" && sendMessage()}} bind:value={message_value} type="text" class="disabled:border-zinc-500  border border-color2 bg-color5 rounded-md w-full p-2 pr-12 focus:outline-none" />
                     <div class="relative">
-                        <button on:click={sendMessage} class="-top-4 -left-10 absolute bg-color2 p-0 m-0 rounded-xl"><Icon icon="send" css="inline p-0 h-8 stroke-color2 fill-white"></Icon></button>
+                        <button disabled={rooms.length <= 0} on:click={sendMessage} class="-top-4 -left-10 absolute bg-color2 disabled:bg-zinc-500 p-0 m-0 rounded-xl"><Icon icon="send" css="inline p-0 h-8 {rooms.length <= 0 ? 'stroke-zinc-500' : 'stroke-color2' }  fill-white"></Icon></button>
                     </div>
 
                 </div>
@@ -383,7 +374,7 @@
                         {#if rooms.length <= 0}
                             <p>NO DM</p>
                         {:else}
-                            <UserInfo portal=false user={current_room_user}></UserInfo>
+                            <UserInfo update={false} user={current_room_user}></UserInfo>
 
                             <div>
                                 <UserStat userstats={current_room_user}></UserStat>

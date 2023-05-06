@@ -111,6 +111,7 @@ model	Rooms {
 	//last_message_id	Int?
 	//last_message		Messages?		@relation("last_message", fields: [last_message_id], references: [id])
 	count_messages	Int					@default(0)
+	name            String?
 }
 
 enum		TypeMessage {
