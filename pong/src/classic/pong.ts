@@ -34,8 +34,9 @@ export default class Pong
     network : boolean = false;
     server : boolean = false;
     networkMessage : NetMessage | null = null;
+    change : Array<Function>;
 
-    constructor(_width : number, _height : number, _context : CanvasRenderingContext2D | null)
+    constructor(_width : number, _height : number, _context : CanvasRenderingContext2D | null | undefined)
     {
         this.context = <CanvasRenderingContext2D>_context;
 
@@ -77,10 +78,21 @@ export default class Pong
         pong = this;
     }
 
+    addChangeListener(fn : Function)
+    {
+        this.change.push(fn);
+    }
+
+    emitChange()
+    {
+        for (let index = 0; index < this.change.length; index++) {
+            this.change[index]();   
+        }
+    }
+
     setNetworkMessage(mes: NetMessage)
     {
         this.networkMessage = mes;
-
     }
 
     addPlayer()
@@ -133,7 +145,6 @@ export default class Pong
             this.status = 'wait';
         else
             this.status = 'run';
-
     }
 
     update () : void
@@ -152,7 +163,7 @@ export default class Pong
         }
 
         // check if the round is over
-        if (this.status === 'run' && !this.network)
+        if (this.status === 'run')
         {
             for (let index = 0; index < this.overBounds.length; index++) {
                 const bound = this.overBounds[index];
@@ -160,21 +171,25 @@ export default class Pong
                 {
                     this.players[1-index].score++;
                     this.status = 'lost';
+                    this.emitChange();
                 }
             }
         }
 
-        if (this.status === 'run' && !this.network)
+        if (this.status === 'run')
         {
-            // update ball collider with other elements
-            for (let index = 0; index < this.colliders.length; index++) {
-                const mesh = this.colliders[index];
-                this.checkBallMeshCollision(mesh);
-            }
-
-            for (let index = 0; index < this.players.length; index++) {
-                const player = this.players[index];
-                this.checkBallPlayerCollision(player, index);
+            if(this.network)
+            {
+                // update ball collider with other elements
+                for (let index = 0; index < this.colliders.length; index++) {
+                    const mesh = this.colliders[index];
+                    this.checkBallMeshCollision(mesh);
+                }
+    
+                for (let index = 0; index < this.players.length; index++) {
+                    const player = this.players[index];
+                    this.checkBallPlayerCollision(player, index);
+                }
             }
 
             this.ball.update();
@@ -185,7 +200,7 @@ export default class Pong
             this.ball.networkUpdate(<NetMessage>this.networkMessage);
         }
 
-        if (this.status === 'wait' && !this.network)
+        if (this.status === 'wait')
         {
             window.addEventListener('touch', () => {
                 this.status = 'run';
@@ -194,7 +209,7 @@ export default class Pong
                 this.status = 'run';
         }
 
-        if (this.status === 'lost' && !this.network)
+        if (this.status === 'lost')
         {
             let isFinished : boolean = false;
             for (let index = 0; index < this.players.length; index++) {
@@ -214,17 +229,24 @@ export default class Pong
     {
         let newPos : Vector = this.ball.getNextPosition();
         let testPos : Vector;
+        let updateChange : boolean = false;
 
         testPos = newPos.copy();
         testPos.y = 0.0;
         if (this.ball.onCollide(meshB, testPos)) {
             this.ball.vector.x *= -1;
+            updateChange = true;
         }
 
         testPos = newPos.copy();
         testPos.x = 0.0;
         if (this.ball.onCollide(meshB, testPos)) {
             this.ball.vector.y *= -1;
+            updateChange = true;
+        }
+
+        if(updateChange) {
+            this.emitChange();
         }
     }
 
@@ -248,6 +270,7 @@ export default class Pong
             else
                 vectBall = new Vector(Math.sin(angle) * 1, Math.cos(angle));
             this.ball.vector = vectBall;
+            this.emitChange();
         }
 
     }
