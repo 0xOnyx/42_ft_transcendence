@@ -123,18 +123,6 @@
 
 	});
 
-    let _openUpdate : boolean = false;
-    let _openFile : boolean = false;
-
-	const updatePopUp = ( _popup : string ) => {
-		if (_popup === "update") {
-			_openUpdate = !_openUpdate;
-		} else if ( _popup === "file" ) {
-			_openFile = !_openFile;
-		}
-	}
-
-
 </script>
 
 <NavBar user={user} />
