@@ -90,7 +90,7 @@
 						</a>
 						<a class="relative flex flex-col lg:flex-row items-center justify-center hover:scale-110 transition-all space-x-1" href="/rooms/channel/last">
 							<span class="relative lg:hidden">
-								<Icon icon="chat" css="inline relative" height="30" width="30" />
+								<Icon icon="chatrooms" css="inline relative" height="30" width="30" />
 								{#if totalCHAN > 0}
 									<div class="absolute inline-flex items-center justify-center min-w-60 h-5 text-2xs -top-2 -right-2.5 px-1 font-bold text-white bg-red-500 border-2 border-white rounded-full dark:border-gray-900">{totalCHAN > 99 ? "99+" : totalCHAN}</div>
 								{/if}
