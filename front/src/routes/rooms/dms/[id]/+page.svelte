@@ -281,8 +281,8 @@
                 buttonAccecpt={acceptUnbanUser} buttonDecline={()=>{closeWarningUnbanUser = -1}}></WarningAsk>
 {/if}
 
-<NavBar user={user} />
 
+<NavBar user={user} />
 
 <div class="h-full container md:py-5 xl:py-10 mx-auto">
 
