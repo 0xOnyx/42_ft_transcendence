@@ -7,6 +7,8 @@
     import type {User, Status, UserStats} from '../../types/user';
     import type {Friend} from '../../types/friend';
 
+	import { fade, fly, slide } from 'svelte/transition';
+
     import {onMount} from "svelte";
     import {goto} from "$app/navigation";
     import {io, Socket} from "socket.io-client";
@@ -18,6 +20,7 @@
 	import Achievement from "../../components/Achievement.svelte";
 	import userservice from "../../services/UserService";
     import WarningAsk from '../../components/warningAsk.svelte'
+	import UsersList from "../../components/UsersList.svelte";
 
     interface UserStats {
         played: number,
@@ -50,6 +53,7 @@
     let socket: Socket ;
 
 	let leftHanded : boolean = false;
+	let blockedList : boolean = false;
 
 
     let userstats : UserStats = {
@@ -62,8 +66,9 @@
 
 	$: userstats.ratio = Math.round(userstats.win / userstats.played * 100);
 
-    async function searchUser()
+    async function searchUser( e : CustomEvent)
     {
+	      search_value = e.detail.text;
         search = await userservice.searchUser(search_value);
     }
 
@@ -176,97 +181,60 @@
     <WarningAsk title="Ublock user" message="Do you want to unban this user ?."
                 buttonAccecpt={acceptUnbanUser} buttonDecline={()=>{closeWarningUnbanUser = -1}}></WarningAsk>
 {/if}
+{#if _openUpdate}
+<PopUp id="update" on:confirmPopUp={updateUser} on:closePopUp={updatePopUp} title="Modify username" placeholder="Username" />
+{/if}
+{#if _openFile}
+<PopUp id="file" on:closePopUp={updatePopUp} title="Modify profile picture" />
+{/if}
+{#if error.length > 0}
+<div class="relative z-[100]" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+	<div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+	<div class="fixed inset-0 overflow-y-auto">
+		<div class="flex min-h-full items-center justify-center p-4 text-left sm:items-center sm:p-0">
 
-<NavBar user={user} bind:leftHanded={leftHanded}/>
+			<div class="bg-red-100 border border-red-400 text-red-700 px-60 py-3 rounded relative" role="alert">
+				<strong class="font-bold">ERROR SERVER !</strong>
+				<span class="block sm:inline">{error}</span>
+				<span on:click={()=>{error=""}} class="absolute top-0 bottom-0 right-0 px-4 py-3">
+					<svg class="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/></svg>
+				</span>
+			</div>
+		</div>
+	</div>
+</div>
+{/if}
 
-<div class="h-full py-7 landscape:py-0 md:py-10 xl:py-10">
+<div class="flex-col">
+	<NavBar user={user} bind:leftHanded={leftHanded}/>
 
-    <div class="sm:h-[85%] w-full px-[2%] self-center py-1 grid">
+	<div class="flex py-2 landscape:py-0 md:py-10 xl:py-10">
 
-        <div class="grid mobile-landscape:grid-cols-2 gap-4 {leftHanded ? 'mobile-landscape:pl-[3.75rem]' : 'mobile-landscape:pr-[3.75rem]'} sm:grid-cols-3 h-full text-center align-middle m-1">
+		<div class="h-[80vh] grow sm:h-screen mobile-landscape:h-screen w-full px-[5%] self-center py-1 grid overflow-hidden">
+			
+			<div class="flex flex-col sm:flex-row sm:max-h-[85%] gap-4 {leftHanded ? 'mobile-landscape:pl-[3.75rem]' : 'mobile-landscape:pr-[3.75rem]'} sm:grid-cols-3 text-center align-middle m-1 overflow-hidden">
 
-            <div class="relative info-user screen shadow-lg shadow-black/50 bg-black/25 overflow-auto rounded-3xl mobile-landscape:col-span-1 sm:col-span-2">
-				<div class="absolute screen-overlay"></div>
-                <div class="py-[3%] gap-y-3 h-full grid grid-cols-2 grid-rows-2 mobile-landscape:grid-cols-2 mobile-landscape:grid-rows-2 sm:grid-rows-none sm:grid-cols-1">
-					<div class="relative col-start-1 row-start-1 self-end sm:self-end">
-						<UserInfo portal=true user={user} on:updateUserInfo={updatePopUp} />
-
-						{#if error.length > 0}
-							<div class="relative z-[100]" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-								<div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
-								<div class="fixed inset-0 overflow-y-auto">
-									<div class="flex min-h-full items-center justify-center p-4 text-left sm:items-center sm:p-0">
-
-										<div class="bg-red-100 border border-red-400 text-red-700 px-60 py-3 rounded relative" role="alert">
-											<strong class="font-bold">ERROR SERVER !</strong>
-											<span class="block sm:inline">{error}</span>
-											<span on:click={()=>{error=""}} class="absolute top-0 bottom-0 right-0 px-4 py-3">
-												<svg class="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/></svg>
-											</span>
-										</div>
-									</div>
-								</div>
-							</div>
-						{/if}
-
-						{#if _openUpdate}
-							<PopUp id="update" on:confirmPopUp={updateUser} on:closePopUp={updatePopUp} title="Modify username" placeholder="Username" />
-						{/if}
-						{#if _openFile}
-							<PopUp id="file" on:closePopUp={updatePopUp} title="Modify profile picture" />
-						{/if}
-					</div>
-
-					<div class="relative self-end sm:self-center col-start-2 row-start-1 mobile-landscape:col-start-2 mobile-landscape:row-start-1 sm:col-start-1 sm:row-start-2">
-						<UserStat userstats={userstats} />
-					</div>
-
-					<div class="relative col-start-1 col-span-2 row-start-2 mobile-landscape:col-span-2 mobile-landscape:row-start-2 sm:row-start-3 sm:col-span-1 self-center mobile-landscape:self-center sm:self-start">
+				<div class="info-user screen grow h-1/3 sm:h-full sm:w-2/3 mobile-landscape:w-1/2 overflow-hidden flex shadow-lg shadow-black/50 bg-black/25 rounded-3xl mobile-landscape:col-span-1 sm:col-span-2">
+					<div class="screen-overlay"></div>
+					<div class="relative gap-3 flex flex-col p-3 grow m-auto">
+						<div class="flex sm:flex-col mobile-landscape:flex-row justify-center gap-3">
+							<UserInfo portal=true user={user} on:updateUserInfo={updatePopUp} />
+							<UserStat userstats={userstats} />
+						</div>
+						<div class="max-h-32 overflow-scroll overscroll-contain">
 							<Achievement userstats={userstats} />
+						</div>
 					</div>
-
 				</div>
+
+
+				<UsersList user={user} bind:friends={friends} bind:search={search} socket={socket} on:search={searchUser} />		
+
 			</div>
 
-            <div class="">
+		</div>
 
-                <h2 class="flex space-x-2 text-left border-b-2 text-lg">
-					<Icon icon="friends" />
-					<span>Friends list</span>
-				</h2>
-
-
-
-                <div class="mt-2">
-                    <input class="w-full rounded-2xl py-1 px-3 bg-color5 focus:outline-none" type="text" bind:value={search_value} placeholder="Search" on:keyup={searchUser}>
-                </div>
-
-                <div class="overflow-auto mt-3">
-                    {#if search_value.length <= 0}
-                        {#if friends.length <= 0}
-                            <p>NO FRIEND</p>  <!-- CREATE THIS -->
-                        {:else}
-                            {#each friends as friend}
-                                <ItemName requestBlock={()=>{closeWarningUnbanUser=friend.id}} io={socket} user={friend}></ItemName>
-                            {/each}
-                        {/if}
-                    {:else}
-                        {#if  search.length <= 0}
-                            <p>no user found :/</p>  <!-- CREATE THIS -->
-                        {:else}
-                            {#each search as user}
-                                <ItemName requestBlock={()=>{closeWarningUnbanUser=user.id}} io={socket} user={user}></ItemName>
-                            {/each}
-                        {/if}
-                    {/if}
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
+	</div>
 </div>
 
 
