@@ -62,14 +62,14 @@
 
 <div class="otp-container flex gap-3 rounded-sm">
 	<div>
-		<input class="otp" id="first" type="text" inputmode="numeric" maxlength="1">
-		<input class="otp" id="second" type="text" inputmode="numeric" maxlength="1">
-		<input class="otp" id="third" type="text" inputmode="numeric" maxlength="1">
+		<input class="otp" type="text" inputmode="numeric" maxlength="1">
+		<input class="otp" type="text" inputmode="numeric" maxlength="1">
+		<input class="otp" type="text" inputmode="numeric" maxlength="1">
 	</div>
 	<div>
-		<input class="otp" id="first" type="text" inputmode="numeric" maxlength="1">
-		<input class="otp" id="second" type="text" inputmode="numeric" maxlength="1">
-		<input class="otp" id="third" type="text" inputmode="numeric" maxlength="1">
+		<input class="otp" type="text" inputmode="numeric" maxlength="1">
+		<input class="otp" type="text" inputmode="numeric" maxlength="1">
+		<input class="otp" type="text" inputmode="numeric" maxlength="1">
 	</div>
 </div>
   
