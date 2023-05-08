@@ -21,6 +21,9 @@
 	import userservice from "../../services/UserService";
     import WarningAsk from '../../components/warningAsk.svelte'
 	import UsersList from "../../components/UsersList.svelte";
+	import UserSettings from "../../components/UserSettings.svelte";
+
+	import { leftHanded } from "../../services/Stores";
 
     interface UserStats {
         played: number,
@@ -52,7 +55,6 @@
     let connectedWs: Boolean = false;
     let socket: Socket ;
 
-	let leftHanded : boolean = false;
 	let blockedList : boolean = false;
 
 
@@ -113,12 +115,15 @@
 
     let _openUpdate: boolean = false;
     let _openFile: boolean = false;
+	let _openSettings: boolean = false;
 
 	const updatePopUp = ( e : CustomEvent ) => {
 		if (e.detail.text === "update") {
 			_openUpdate = !_openUpdate;
 		} else if ( e.detail.text === "file" ) {
 			_openFile = !_openFile;
+		} else if ( e.detail.text === "settings") {
+			_openSettings = !_openSettings;
 		}
 	}
 
@@ -187,6 +192,7 @@
 {#if _openFile}
 <PopUp id="file" on:closePopUp={updatePopUp} title="Modify profile picture" />
 {/if}
+
 {#if error.length > 0}
 <div class="relative z-[100]" aria-labelledby="modal-title" role="dialog" aria-modal="true">
 	<div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
@@ -206,26 +212,49 @@
 {/if}
 
 <div class="flex-col">
-	<NavBar user={user} bind:leftHanded={leftHanded}/>
+	<NavBar user={user} />
 
 	<div class="flex py-2 landscape:py-0 md:py-10 xl:py-10">
 
 		<div class="h-[80vh] grow sm:h-screen mobile-landscape:h-screen w-full px-[5%] self-center py-1 grid overflow-hidden">
 			
-			<div class="flex flex-col sm:flex-row sm:max-h-[85%] gap-4 {leftHanded ? 'mobile-landscape:pl-[3.75rem]' : 'mobile-landscape:pr-[3.75rem]'} sm:grid-cols-3 text-center align-middle m-1 overflow-hidden">
+			<div class="flex flex-col sm:flex-row sm:max-h-[85%] gap-4 {$leftHanded ? 'mobile-landscape:pl-[3.75rem]' : 'mobile-landscape:pr-[3.75rem]'} sm:grid-cols-3 text-center align-middle m-1">
 
-				<div class="info-user screen grow h-1/3 sm:h-full sm:w-2/3 mobile-landscape:w-1/2 overflow-hidden flex shadow-lg shadow-black/50 bg-black/25 rounded-3xl mobile-landscape:col-span-1 sm:col-span-2">
+				<div class="info-user screen grow h-1/2 sm:h-full sm:w-2/3 mobile-landscape:w-1/2 overflow-hidden flex shadow-lg shadow-black/50 bg-black/25 rounded-3xl mobile-landscape:col-span-1 sm:col-span-2">
 					<div class="screen-overlay"></div>
-					<div class="relative gap-3 flex flex-col p-3 grow m-auto">
-						<div class="flex sm:flex-col mobile-landscape:flex-row justify-center gap-3">
-							<UserInfo portal=true user={user} on:updateUserInfo={updatePopUp} />
-							<UserStat userstats={userstats} />
-						</div>
-						<div class="max-h-32 overflow-scroll overscroll-contain">
-							<Achievement userstats={userstats} />
-						</div>
+					<div class="absolute flex w-full justify-between">
+						<button on:click={() => { _openSettings = !_openSettings}} class="transition-opacity duration-300 grow p-3 border-black {_openSettings ? "border-b-2 bg-black/50 text-gray-500" : "border-r-2"}">
+							Statistics
+						</button>
+						<button on:click={() => { _openSettings = !_openSettings}} class="transition-opacity duration-300 grow p-3 border-black  {_openSettings ? "border-l-2" : "border-b-2 bg-black/50 text-gray-500"}">
+							Settings
+						</button>
 					</div>
+					<div class="grow flex">
+
+						<div class="relative gap-3 flex flex-col p-3 grow m-auto items-center">
+							{#if _openSettings}
+							<div in:fade="{{ delay: 200, duration: 400 }}">
+								<div class="flex sm:flex-col mobile-landscape:flex-row justify-center gap-3">
+									<UserInfo portal={_openSettings} user={user} on:updateUserInfo={updatePopUp} />
+									<UserSettings user={user} />
+								</div>
+							</div>
+							{:else}
+							<div in:fade="{{ delay: 200, duration: 400 }}">
+							<div class="flex sm:flex-col mobile-landscape:flex-row justify-center gap-3">
+								<UserInfo portal={_openSettings} user={user} on:updateUserInfo={updatePopUp} />
+								<UserStat userstats={userstats} />
+							</div>
+							<div class="max-h-32 overflow-scroll overscroll-contain">
+								<Achievement userstats={userstats} />
+							</div>
+						</div>
+							{/if}
+						</div>
+
 				</div>
+			</div>
 
 
 				<UsersList user={user} bind:friends={friends} bind:search={search} socket={socket} on:search={searchUser} />		

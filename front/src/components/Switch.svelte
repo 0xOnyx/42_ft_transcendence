@@ -1,7 +1,17 @@
 <script lang="ts">
+	import { createEventDispatcher } from "svelte";
+
+	const dispatch = createEventDispatcher();
+
 	export let checked : boolean = false;
 	export let color : string = "#2196F3";
 	export let css : string = "";
+
+	function inputChecked () {
+		dispatch('inputChange', {
+			type: checked
+		});
+	}
 </script>
   
   <style>
@@ -45,11 +55,11 @@
 	}
   
 	input:checked + .slider {
-	  background-color: #2196f3;
+	  background-color: #70af85;
 	}
   
 	input:checked + .slider {
-	  box-shadow: 0 0 1px #2196f3;
+	  box-shadow: 0 0 1px #70af85;
 	}
   
 	input:checked + .slider:before {
@@ -60,6 +70,6 @@
   </style>
   
   <label class="switch {css}">
-	<input type="checkbox" bind:checked />
+	<input type="checkbox" bind:checked on:change={inputChecked}/>
 	<span class="slider" />
   </label>

@@ -3,7 +3,7 @@
 	import Switch from './Switch.svelte';
 	import Icon from "./Icon.svelte";
 	import { imageUrl } from "../services/Utilities";
-
+	import { leftHanded } from "../services/Stores";
 
     export let user : User;
 	let totalDM : number = 3;
@@ -11,18 +11,17 @@
 
 	let scale : boolean = false;
 
-	export let leftHanded : boolean = false;
-
 	function handleClick() {
 		scale = !scale;
 	}
 
 
+
 </script>
 
 <!-- Mobile Navigation bar-->
-<div class="absolute h-full w-full flex items-end mobile-landscape:items-center {leftHanded ? 'justify-start' : 'justify-end'} sm:hidden mobile-landscape:flex">
-	<div class="bg-gradient-to-t from-black/25 to-transparent grid grid-cols-3 w-full h-20 mobile-landscape:grid-cols-1 mobile-landscape:grid-rows-6 mobile-landscape:w-20 mobile-landscape:h-full mobile-landscape:bg-gradient-to-l {leftHanded ? 'mobile-landscape:from-transparent mobile-landscape:to-black/25' : ''}">
+<div class="absolute h-full w-full flex items-end mobile-landscape:items-center {$leftHanded ? 'justify-start' : 'justify-end'} sm:hidden mobile-landscape:flex">
+	<div class="bg-gradient-to-t from-black/25 to-transparent grid grid-cols-3 w-full h-20 mobile-landscape:grid-cols-1 mobile-landscape:grid-rows-6 mobile-landscape:w-20 mobile-landscape:h-full mobile-landscape:bg-gradient-to-l {$leftHanded ? 'mobile-landscape:from-transparent mobile-landscape:to-black/25' : ''}">
 		<a class="hidden mobile-landscape:flex items-center" href="/portal">
 			<div class="w-8 h-8 bg-cover rounded-full mx-auto"style="background-image: url( {imageUrl(user?.image_url)} )"></div>
 		</a>
@@ -53,15 +52,6 @@
 		<a class="hidden mobile-landscape:flex mobile-landscape:row-start-6 items-center justify-center"  href="/api/auth/logout"><Icon icon="log" height="30" width="30" css="inline " /></a>
 	</div>
 </div>
-<div class="absolute h-full w-full hidden mobile-landscape:flex {leftHanded ? 'justify-end' : 'justify-start'}">
-	<div class="grid grid-rows-6 mx-[2%]">
-		<div class="flex row-start-6 flex-col items-center justify-center w-20">
-			<span class="text-2xs">Left Handed</span>
-			<Switch bind:checked={leftHanded} />
-		</div>
-	</div>
-</div>
-
 
 <!-- Top navigation bar-->
 <nav class="relative flex bg-gradient-to-b from-black/25 to-transparent mobile-landscape:hidden">
