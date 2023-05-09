@@ -12,6 +12,7 @@ import { Server } from 'socket.io';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Socket } from 'dgram';
 import { clearInterval } from 'timers';
+import Pong from '../../../pong/src/classic/pong'
 
   @Injectable()
   @WebSocketGateway({
@@ -22,24 +23,35 @@ import { clearInterval } from 'timers';
     @WebSocketServer()
     server: Server;
     interval: NodeJS.Timer;
-//     pong: Pong;
+    pong: Pong;
 
-    async handleDisconnect(client: Socket) {
-      console.log("connection", Socket);
+    async handleDisconnect(client: Socket) 
+    {
+      console.log("disconnection x", Socket);
+    }
 
-      this.run();
+    async handleConnection(client: Socket) 
+    {
+      console.log("connection x", Socket);
+    }
+
+    @SubscribeMessage('joinGame')
+    start(@MessageBody() data: any): any {
+
+      console.log(data);
+      this.pong = new Pong(800, 500, null).setServer(true);
+      return {};
 
     }
 
     @SubscribeMessage('events')
-    findAll(@MessageBody() data: any): Observable<WsResponse<number>> {
+    changeGameStatus(@MessageBody() data: any): Observable<WsResponse<number>> {
        
       return from([1, 2, 3]).pipe(map(item => ({ event: 'events', data: item })));
 
-    }
+    }    
     
     @OnEvent('game.create')
-    @SubscribeMessage('events')
     gameCreate(payload: any) {
 
       this.server.emit('events', payload);
@@ -58,7 +70,8 @@ import { clearInterval } from 'timers';
           time : new Date().getTime()
         });
 
-      }, 200);  
+      }, 200);
+
     }
     
   
