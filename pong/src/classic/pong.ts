@@ -34,7 +34,8 @@ export default class Pong
     network : boolean = false;
     server : boolean = false;
     networkMessage : NetMessage | null = null;
-    change : Array<Function>;
+    change : Array<Function> = [];
+    socket : WebSocket;
 
     constructor(_width : number, _height : number, _context : CanvasRenderingContext2D | null | undefined)
     {
@@ -78,6 +79,12 @@ export default class Pong
         pong = this;
     }
 
+    setServer(serv: boolean) : Pong
+    {
+        this.server = serv;
+        return this;
+    }
+
     addChangeListener(fn : Function)
     {
         this.change.push(fn);
@@ -90,9 +97,10 @@ export default class Pong
         }
     }
 
-    setNetworkMessage(mes: NetMessage)
+    setNetworkMessage(mes: NetMessage) : Pong
     {
         this.networkMessage = mes;
+        return this;
     }
 
     addPlayer()
@@ -163,7 +171,7 @@ export default class Pong
         }
 
         // check if the round is over
-        if (this.status === 'run')
+        if (this.status === 'run' && this.server)
         {
             for (let index = 0; index < this.overBounds.length; index++) {
                 const bound = this.overBounds[index];
@@ -311,7 +319,7 @@ export default class Pong
         const vectPlayer = new Vector(Math.sin(angle) * invers, Math.cos(angle));
         const center = new Vector(0, player.size.h / 2);
 
-        // (new Dash(player.position.copy().add(center), player.position.copy().add(center).add(vectPlayer.scalarMulti(100)))).draw(this.context);
+        (new Dash(player.position.copy().add(center), player.position.copy().add(center).add(vectPlayer.scalarMulti(100)))).draw(this.context);
     }
 
     inRange(min: number, max : number, value : number)
@@ -326,7 +334,7 @@ export default class Pong
     gameLoop() : void
     {
         pong.update();
-        if (this.renderPong)
+        if (!this.server)
         {
             pong.clear();
             pong.draw();

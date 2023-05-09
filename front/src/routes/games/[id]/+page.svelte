@@ -1,106 +1,16 @@
 <script lang="ts">
     import {PUBLIC_API_URI} from "$env/static/public";
-    import {io, Socket} from "socket.io-client";
-
-    import {Status, type User} from '../../../types/user';
-    import type {UserStats} from '../../../types/user';
-    import {MessageRole, type Messages, type Rooms} from '../../../types/room';
-    import  {UserRole, RoomType} from '../../../types/room';
+    import {io, type Socket} from "socket.io-client";
+    import type {User, UserStats} from '../../../types/user';
 	import UserStat from '../../../components/UserStat.svelte';
 	import UserInfo from '../../../components/UserInfo.svelte';
 	import NavBar from '../../../components/NavBar.svelte';
-
     import Pong from "../../../../../pong/src/classic/pong";
-
-    import type { PageData } from './$types';
+    import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 
-    let socket : Socket = io('/events', {
-            path: "/api/gamews/"
-    });
+    let socket : Socket;
     let canvas : HTMLCanvasElement;
-    let search_value: string = "";
-    let connectedWs: Boolean = true;
-    let room_message: (Messages & {user: User})[]= [
-        {
-            "id": 1,
-            "room_id": 40,
-            "user_id": 1,
-            "message_type": MessageRole.MESSAGE,
-            "content": "asdf",
-            "created_at": "2023-04-18T14:50:05.942Z",
-            "user": {
-                "id": 1,
-                "name": "jer",
-                "email": "jerdos-s@student.42lausanne.ch",
-                "first_name": "Jérémy",
-                "last_name": "Dos santos",
-                "image_url": "image/jerdos-s.png",
-                "oauth_42_login": "jerdos-s",
-                "oauth_42_id": 116337,
-                "last_login": "2023-04-17T15:44:38.719Z",
-                "online_status": Status.ONLINE
-            }
-        },
-        {
-            "id": 2,
-            "room_id": 40,
-            "user_id": 1,
-            "message_type": MessageRole.MESSAGE,
-            "content": "asdf",
-            "created_at": "2023-04-18T14:50:06.709Z",
-            "user": {
-                "id": 1,
-                "name": "jer",
-                "email": "jerdos-s@student.42lausanne.ch",
-                "first_name": "Jérémy",
-                "last_name": "Dos santos",
-                "image_url": "image/jerdos-s.png",
-                "oauth_42_login": "jerdos-s",
-                "oauth_42_id": 116337,
-                "last_login": "2023-04-17T15:44:38.719Z",
-                "online_status": Status.ONLINE
-            }
-        },
-    ];
-
-
-    let rooms : Array<Rooms> = [
-
-        {
-            id: 1,
-            owner_id: 1,
-            name: "Room 1",
-            type: RoomType.SINGLE_CHAT,
-            last_message_id: 4,
-            count_messages: 2,
-            users: [
-                {
-                    id: 1,
-                    room_id: 1,
-                    user_id: 1,
-                    role: UserRole.ADMIN,
-                    user: {
-                        id: 1,
-                        name: 'Jacob Jones',
-                        image_url: 'image/default.png'
-                    }
-                },
-        		{
-                    id: 2,
-                    room_id: 1,
-                    user_id: 2,
-                    role: UserRole.USER,
-                    user: {
-                        id: 2,
-                        name: 'Leslie Alexander',
-                        image_url: 'image/default.png'
-                    }
-                },
-            ],
-
-        }
-    ]
 
     let user : User = { id: 1, name: 'Jacob Jones', image_url: 'image/default.png' };
 
@@ -115,10 +25,12 @@
 	onMount(async () => {
 
         socket = io('/events', {
-                path: "/api/gamews/"
+                path: "/gamews/"
         });
 
-        let pong : Pong = new Pong(800, 500, canvas.getContext('2d'));
+        socket.emit("joinGame", {game_id: $page.params.id})
+
+        let pong : Pong = new Pong(800, 500, canvas.getContext('2d'))->setSocket(socket);
         pong.run();
 
 	});
