@@ -6,6 +6,7 @@
     import {PUBLIC_API_URI} from "$env/static/public";
     import {goto} from "$app/navigation"
     import {Socket} from "socket.io-client";
+	import { imageUrl } from '../services/Utilities';
 
     //bg-green-600
     export let user : User;
@@ -61,7 +62,7 @@
 
     <div class="mx-2 flex-shrink">
         <div class="w-[40px] h-[40px] bg-cover  rounded-full mx-auto"
-             style="background-image: url( /{user?.image_url || `image/default.png`} )">
+             style="background-image: url( {imageUrl(user?.image_url)} )">
         </div>
 
     </div>
