@@ -26,6 +26,19 @@ export class UserServiceService {
         }
     }
 
+	async getBlockedUser(id: number) {
+        const user: any = await this.userService.userSelect({id: id}, {
+            id: true,
+            lock_user: true,
+        })
+        if (!user)
+            return {};
+        return {
+            id: user.id,
+            blockedUsers: [...user.lock_user]
+        }
+    }
+
     getSearch(queryList: {
         skip?: number;
         take?: number;

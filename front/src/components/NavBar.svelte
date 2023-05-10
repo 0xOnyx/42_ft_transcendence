@@ -68,7 +68,7 @@
 				<div class="hidden sm:flex items-center">
 					<div class="flex items-end lg:items-center space-x-8 lg:space-x-10 grow">
 						<!-- New Game-->
-						<a class="hover:scale-110 grow transition-all flex flex-col justify-center items-center" href="/portal">
+						<a class="hover:scale-110 grow transition-all flex flex-col justify-center items-center" href="/games">
 							<span class="lg:hidden">
 								<Icon icon="game" height="40" width="40" />
 							</span>

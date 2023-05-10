@@ -54,7 +54,7 @@
 
 <style>
 	.otp {
-		@apply rounded-md bg-gray-700 max-h-[6vh] text-lg border-gray-500 border-2 text-gray-300 items-center justify-center;
+		@apply rounded-md bg-gray-700 max-h-[50px] text-lg border-gray-500 border-2 text-gray-300 items-center justify-center;
 		aspect-ratio: 2/3;
 		caret-color: transparent; 
 		text-align: center;

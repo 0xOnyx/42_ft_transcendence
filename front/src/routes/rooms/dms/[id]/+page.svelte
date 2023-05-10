@@ -328,7 +328,7 @@
                             <p>no user found :/</p>  <!-- CREATE THIS -->
                         {:else}
                             {#each search as user}
-                                <ItemName requestBlock={()=>{closeWarningUnbanUser=user.id}} io={socket} user={user}></ItemName>
+                                <ItemName on:requestUnblock user={user}></ItemName>
                             {/each}
                         {/if}
                     {/if}
@@ -369,7 +369,7 @@
 
 
 
-                <div class="overflow-auto mt-3 bg-color5 flex-grow  rounded-xl">
+                <div class="overflow-auto mt-3 bg-core-red flex-grow  rounded-xl">
                     <div class="mt-20">
                         {#if rooms.length <= 0}
                             <p>NO DM</p>
