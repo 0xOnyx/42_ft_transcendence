@@ -16,15 +16,18 @@
     otpInputs = Array.from(document.querySelectorAll<HTMLInputElement>('.otp'));
 
     otpInputs.forEach((input, index) => {
-      input.addEventListener('input', () => {
+      input.addEventListener('input', (event) => {
         if (input.value) {
-			
-          if (index < otpInputs.length - 1) {
-            otpInputs[index + 1].focus();
-          } else if (index != otpInputs.length -1) {
-            input.blur();
-          }
-		  updateInputValue();
+			if (input.value.length === 1) {
+        		input.value = '';
+        	}
+    		input.value += event.data;
+        	if (index < otpInputs.length - 1) {
+           		 otpInputs[index + 1].focus();
+          	} else if (index != otpInputs.length -1) {
+            	input.blur();
+          	}
+		  	updateInputValue();
         }
       });
 	  input.addEventListener('keydown', (event) => {
@@ -37,7 +40,11 @@
         } else if (event.key === 'ArrowRight' && index < otpInputs.length - 1) {
         	otpInputs[index + 1].focus();
         } else if (event.key === 'Backspace' || event.key === 'Delete') {
-			otpInputs[index].value = '';
+			if (otpInputs[index].value === '') {
+				otpInputs[index - 1].focus();
+			} else {
+				otpInputs[index].value = '';
+			}
 			updateInputValue();
 		}
       });
@@ -47,7 +54,7 @@
 
 <style>
 	.otp {
-		@apply rounded-md bg-gray-700 max-h-[6vh] text-lg border-gray-500 border-2 text-gray-300 items-center justify-center;
+		@apply rounded-md bg-gray-700 max-h-[50px] text-lg border-gray-500 border-2 text-gray-300 items-center justify-center;
 		aspect-ratio: 2/3;
 		caret-color: transparent; 
 		text-align: center;
