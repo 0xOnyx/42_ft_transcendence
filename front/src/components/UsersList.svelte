@@ -31,13 +31,13 @@
 <div class="relative flex flex-col h-2/3 sm:h-full grow sm:w-1/3 mobile-landscape:w-1/2 overflow-hidden">
 	<div class="">
 		<div class="flex items-center justify-between border-b-2 ">
-			<button id="friend-list" on:click={ () => { blockedList = !blockedList}}>
+			<button id="friend-list" on:click={ () => { blockedList = false}}>
 				<h2 class="flex items-center space-x-2 sm:space-x-1 md:space-x-2 text-left whitespace-nowrap {blockedList ? "text-sm sm:text-2xs md:text-xs lg:text-sm opacity-50" : "text-lg sm:text-xs md:text-md lg:text-lg opacity-100"}">
 					<Icon icon="friends" />
 					<span>Friends list</span>
 				</h2>
 			</button>
-			<button id="blocked-list" on:click={ () => { blockedList = !blockedList}}>
+			<button id="blocked-list" on:click={ () => { blockedList = true}}>
 				<h2 class="flex items-center space-x-2 sm:space-x-1 md:space-x-2 text-right whitespace-nowrap {blockedList ? "text-lg sm:text-xs md:text-md lg:text-lg opacity-100" : "text-sm sm:text-2xs md:text-xs lg:text-sm opacity-50"}">
 					
 					<span>Blocked Users</span>
