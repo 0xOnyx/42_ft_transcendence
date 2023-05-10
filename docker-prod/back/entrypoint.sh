@@ -1,5 +1,5 @@
 #!/bin/bash
 cd /app
-npm install &&
-npx prisma migrate deploy &&
-npm run start:dev
+npm install
+npm run build
+node dist/src/main.js

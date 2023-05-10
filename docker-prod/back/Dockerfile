@@ -1,9 +1,4 @@
-FROM debian:latest
-
-RUN apt update && apt install -y curl
-RUN curl -sL https://deb.nodesource.com/setup_18.x | bash -
-
-RUN	apt install -y nodejs procps && node -v
+FROM node:18
 
 RUN npm install -g npm@9.6.2
 
