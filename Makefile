@@ -31,5 +31,15 @@ run:
 	echo "start project"
 	cd docker && docker compose up --build
 
+clean:
+	echo "clean all"
+	docker compose -f docker/docker-compose.yml rm
+	docker image rm docker-backend -f
+	docker image rm docker-frontend -f
+	docker image rm postgres -f
+	docker image rm nginx -f
+	docker system prune -f
+
+
 s: 
 	sudo service docker start
