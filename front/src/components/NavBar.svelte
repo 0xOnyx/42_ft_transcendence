@@ -3,7 +3,7 @@
 	import Switch from './Switch.svelte';
 	import Icon from "./Icon.svelte";
 	import { imageUrl } from "../services/Utilities";
-
+	import { leftHanded } from "../services/Stores";
 
     export let user : User;
 	let totalDM : number = 3;
@@ -11,18 +11,17 @@
 
 	let scale : boolean = false;
 
-	export let leftHanded : boolean = false;
-
 	function handleClick() {
 		scale = !scale;
 	}
 
 
+
 </script>
 
 <!-- Mobile Navigation bar-->
-<div class="absolute h-full w-full flex items-end mobile-landscape:items-center {leftHanded ? 'justify-start' : 'justify-end'} sm:hidden mobile-landscape:flex">
-	<div class="bg-gradient-to-t from-black/25 to-transparent grid grid-cols-3 w-full h-20 mobile-landscape:grid-cols-1 mobile-landscape:grid-rows-6 mobile-landscape:w-20 mobile-landscape:h-full mobile-landscape:bg-gradient-to-l {leftHanded ? 'mobile-landscape:from-transparent mobile-landscape:to-black/25' : ''}">
+<div class="absolute h-full w-full flex items-end mobile-landscape:items-center {$leftHanded ? 'justify-start' : 'justify-end'} sm:hidden mobile-landscape:flex">
+	<div class="bg-gradient-to-t from-black/25 to-transparent grid grid-cols-3 w-full h-20 mobile-landscape:grid-cols-1 mobile-landscape:grid-rows-6 mobile-landscape:w-20 mobile-landscape:h-full mobile-landscape:bg-gradient-to-l {$leftHanded ? 'mobile-landscape:from-transparent mobile-landscape:to-black/25' : ''}">
 		<a class="hidden mobile-landscape:flex items-center" href="/portal">
 			<div class="w-8 h-8 bg-cover rounded-full mx-auto"style="background-image: url( {imageUrl(user?.image_url)} )"></div>
 		</a>
@@ -53,15 +52,6 @@
 		<a class="hidden mobile-landscape:flex mobile-landscape:row-start-6 items-center justify-center"  href="/api/auth/logout"><Icon icon="log" height="30" width="30" css="inline " /></a>
 	</div>
 </div>
-<div class="absolute h-full w-full hidden mobile-landscape:flex {leftHanded ? 'justify-end' : 'justify-start'}">
-	<div class="grid grid-rows-6 mx-[2%]">
-		<div class="flex row-start-6 flex-col items-center justify-center w-20">
-			<span class="text-2xs">Left Handed</span>
-			<Switch bind:checked={leftHanded} />
-		</div>
-	</div>
-</div>
-
 
 <!-- Top navigation bar-->
 <nav class="relative flex bg-gradient-to-b from-black/25 to-transparent mobile-landscape:hidden">
@@ -75,51 +65,44 @@
 				</a>
 
 			<!-- Primary Menu-->
-				<div class="hidden lg:flex items-center space-x-10 grow">
+				<div class="hidden sm:flex items-center">
+					<div class="flex items-end lg:items-center space-x-8 lg:space-x-10 grow">
 						<!-- New Game-->
-
-					<a class="hover:scale-110 transition-all flex flex-col justify-center items-center" href="/games">Game</a>
-
-					<a class="relative flex items-center justify-center hover:scale-110 transition-all space-x-1" href="/rooms/dms/last">
-						<span>Direct Message</span>
-						{#if totalDM > 0}
-							<div class="inline-flex items-center justify-center min-w-60 h-5 text-2xs px-1 font-bold text-white bg-red-500 border-2 border-white rounded-full dark:border-gray-900">{totalDM > 99 ? "99+" : totalDM}</div>
-						{/if}
-					</a>
-					<a class="relative flex items-center justify-center hover:scale-110 transition-all space-x-1" href="/rooms/channel/last">
-						<span>Chatrooms</span>
-						{#if totalCHAN > 0}
-							<div class="inline-flex items-center justify-center min-w-60 h-5 text-2xs -bottom-2 -right-2.5 px-1 font-bold text-white bg-red-500 border-2 border-white rounded-full dark:border-gray-900">{totalCHAN > 99 ? "99+" : totalCHAN}</div>
-						{/if}
-					</a>
-				</div>
-
-				<div class="hidden sm:flex lg:hidden items-center">
-					<div class="flex items-end grow space-x-8">
-						<a class="hover:scale-110 grow transition-all flex flex-col justify-center items-center">
-							<Icon icon="game" height="40" width="40" />
-							<span class="text-2xs">Game</span>
+						<a class="hover:scale-110 grow transition-all flex flex-col justify-center items-center" href="/portal">
+							<span class="lg:hidden">
+								<Icon icon="game" height="40" width="40" />
+							</span>
+							<span class="text-2xs lg:text-lg">Game</span>
 						</a>
-						<button class="hover:scale-110 grow transition-all flex flex-col items-center justify-center">
-							<div class="relative">
-								<Icon icon="chat" css="inline relative" height="30" width="30" />
+
+						<a class="relative flex flex-col lg:flex-row items-center justify-center hover:scale-110 transition-all space-x-1" href="/rooms/dms/last">
+								<span class="relative lg:hidden">
+									<Icon icon="chat" css="inline relative" height="30" width="30" />
+									{#if totalDM > 0}
+										<div class="absolute inline-flex items-center justify-center min-w-60 h-5 text-2xs -top-2 -right-2.5 px-1 font-bold text-white bg-red-500 border-2 border-white rounded-full dark:border-gray-900">{totalDM > 99 ? "99+" : totalDM}</div>
+									{/if}
+								</span>
+								<span class="text-2xs lg:text-lg">Direct Message</span> 
 								{#if totalDM > 0}
-									<div class="absolute inline-flex items-center justify-center min-w-60 h-5 text-2xs -top-2 -right-2.5 px-1 font-bold text-white bg-red-500 border-2 border-white rounded-full dark:border-gray-900">{totalDM > 99 ? "99+" : totalCHAN}</div>
+									<div class="hidden lg:inline-flex items-center justify-center min-w-60 h-5 text-2xs -top-0.5 px-1 font-bold text-white bg-red-500 border-2 border-white rounded-full dark:border-gray-900">{totalDM > 99 ? "99+" : totalDM}</div>
 								{/if}
-							</div>
-							<span class="text-2xs">Direct Messages</span>
-						</button>
-						<button class="hover:scale-110 grow transition-all flex flex-col items-center justify-center">
-							<div class="relative">
-								<Icon icon="chatrooms" css="inline relative" height="30" width="30" />
+
+						</a>
+						<a class="relative flex flex-col lg:flex-row items-center justify-center hover:scale-110 transition-all space-x-1" href="/rooms/channel/last">
+							<span class="relative lg:hidden">
+								<Icon icon="chat" css="inline relative" height="30" width="30" />
 								{#if totalCHAN > 0}
 									<div class="absolute inline-flex items-center justify-center min-w-60 h-5 text-2xs -top-2 -right-2.5 px-1 font-bold text-white bg-red-500 border-2 border-white rounded-full dark:border-gray-900">{totalCHAN > 99 ? "99+" : totalCHAN}</div>
 								{/if}
-							</div>
-							<span class="text-2xs">Chatrooms</span>
-						</button>
+							</span>
+							<span class="text-2xs lg:text-lg">Chatrooms</span> 
+							{#if totalCHAN > 0}
+								<div class="hidden lg:inline-flex items-center justify-center min-w-60 h-5 text-2xs -top-0.5 px-1 font-bold text-white bg-red-500 border-2 border-white rounded-full dark:border-gray-900">{totalCHAN > 99 ? "99+" : totalCHAN}</div>
+							{/if}
+						</a>
 					</div>
 				</div>
+
 			</li>
 
 <!-- User settings -->
