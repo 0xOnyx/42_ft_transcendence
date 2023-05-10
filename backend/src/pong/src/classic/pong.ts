@@ -1,4 +1,3 @@
-import Keyboard from './keyboard.js';
 import type Mesh from './mesh.js';
 import Rectangle from './rectangle.js';
 import Timer from './timer.js';
@@ -8,17 +7,16 @@ import Ball from './ball.js';
 import Size from './size.js';
 import Controller from './controller.js';
 import Bound from './bound.js';
-import Text from './text.js';
 import Dash from './dash.js';
 import type { NetMessage } from './message.js';
-import { Socket } from 'socket.io-client';
+import { Server } from 'socket.io';
+
 
 var pong : Pong;
 
 export default class Pong
 {
     context : CanvasRenderingContext2D;
-    keyboard : Keyboard = new Keyboard();
     meshes : Array<Mesh> = [];
     colliders : Array<Mesh> = [];
     timer : Timer = new Timer();
@@ -32,15 +30,13 @@ export default class Pong
     renderPong : boolean = true;
     scoreLimit : number = 3;
     network : boolean = false;
-    server : boolean = false;
+    server : Server;
     networkMessage : NetMessage | null = null;
     change : Array<Function> = [];
-    socket : Socket;
+    room : string;
 
-    constructor(_width : number, _height : number, _context : CanvasRenderingContext2D | null | undefined)
+    constructor(_width : number, _height : number)
     {
-        this.context = <CanvasRenderingContext2D>_context;
-
         this.size = new Size(_width, _height);
 
         this.ball = new Ball(this.size, this.timer);
@@ -67,8 +63,8 @@ export default class Pong
         this.meshes.push(line);
         this.meshes.push(this.ball);
 
-        this.controllers.push(new Controller('alpha', this.keyboard));
-        this.controllers.push(new Controller('arrow', this.keyboard));
+        this.controllers.push(new Controller('alpha'));
+        this.controllers.push(new Controller('arrow'));
 
         this.overBounds.push(new Bound(0,0,this.gutter,this.size.h));
         this.overBounds.push(new Bound(this.size.w - this.gutter,0,this.size.w,this.size.h));
@@ -79,22 +75,21 @@ export default class Pong
         pong = this;
     }
 
-    setSocket(socket: Socket) : Pong
-    {
-        this.socket = socket;
-        return this;
-    }
-
-    setServer(serv: boolean) : Pong
+    setServer(serv: Server) : Pong
     {
         this.server = serv;
         return this;
     }
 
-    addChangeListener(fn : Function) : Pong
+    setRoom(room: string) : Pong
+    {
+        this.room = room;
+        return this;
+    }
+
+    addChangeListener(fn : Function)
     {
         this.change.push(fn);
-        return this;
     }
 
     emitChange()
@@ -133,10 +128,6 @@ export default class Pong
     {
         this.init();
 
-        if(this.server)
-            setInterval(() => { this.gameLoop(); }, 1000 / 60);
-        else
-            loop();
     }
 
     init() : void
@@ -215,15 +206,6 @@ export default class Pong
             this.ball.networkUpdate(<NetMessage>this.networkMessage);
         }
 
-        if (this.status === 'wait')
-        {
-            window.addEventListener('touch', () => {
-                this.status = 'run';
-            });
-            if (this.keyboard.isKeyDown(' '))
-                this.status = 'run';
-        }
-
         if (this.status === 'lost')
         {
             let isFinished : boolean = false;
@@ -298,23 +280,6 @@ export default class Pong
     draw() : void
     {
 
-        if (this.status === 'wait' || this.status === 'run' || this.status === 'finish') {
-            for (let index = 0; index < this.players.length; index++) {
-                let txt : Text = new Text();
-                txt.setPosition(this.size.w / 4 + ((this.size.w / 2) * index), this.size.h / 4);
-                txt.content = <string>'' + this.players[index].score;
-                txt.draw(this.context);
-            }
-        }
-
-        for (let index = 0; index < this.meshes.length; index++) {
-            const mesh = this.meshes[index];
-            mesh.draw(this.context);
-        }
-
-        this.drawPlayerVector(this.players[0], -1);
-        this.drawPlayerVector(this.players[1], 1);
-
     }
 
     drawPlayerVector(player : Player, invers : number)
@@ -347,13 +312,6 @@ export default class Pong
             pong.draw();
         }
     }
-}
-
-function loop() : void
-{
-    pong.gameLoop();
-    window.requestAnimationFrame(loop);
-
 }
 
 

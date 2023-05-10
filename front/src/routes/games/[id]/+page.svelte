@@ -5,9 +5,9 @@
 	import UserStat from '../../../components/UserStat.svelte';
 	import UserInfo from '../../../components/UserInfo.svelte';
 	import NavBar from '../../../components/NavBar.svelte';
-    import Pong from "../../../../../pong/src/classic/pong";
+    import Pong from "../../../pong/src/classic/pong";
     import { page } from '$app/stores';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 
     let socket : Socket;
     let canvas : HTMLCanvasElement;
@@ -30,10 +30,18 @@
 
         socket.emit("joinGame", {game_id: $page.params.id})
 
-        let pong : Pong = new Pong(800, 500, canvas.getContext('2d'))->setSocket(socket);
-        pong.run();
+        let pong : Pong = (new Pong(800, 500, canvas.getContext('2d'))).setSocket(socket);
 
+        pong.run();
+        
 	});
+
+    onDestroy(async () => {
+
+        socket.emit("leaveGame", {game_id: $page.params.id});
+        socket.close();
+
+    });
 
 </script>
 

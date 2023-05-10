@@ -11,6 +11,7 @@
 	import ItemName from "../../components/Itemname.svelte";
 	import GamesType from "../../components/GamesType.svelte";
 	import gameservice from "../../services/GameService";
+	import { goto } from "$app/navigation";
 
     let user : User;
     let search_value : string = '';
@@ -46,7 +47,7 @@
     {
         let game_id : number |null = await gameservice.create(user.id);
         if(game_id) {
-            document.location.href = "/games/" + game_id;
+            goto("/games/" + game_id);
         }
     }
 
