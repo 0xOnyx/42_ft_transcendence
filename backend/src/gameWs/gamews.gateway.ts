@@ -11,6 +11,7 @@ import { Server, Socket } from 'socket.io';
 import { OnEvent } from '@nestjs/event-emitter';
 import { clearInterval } from 'timers';
 import { Pong } from 'src/pong/src';
+import { IoAdapter } from '@nestjs/platform-socket.io';
 
   @Injectable()
   @WebSocketGateway({
@@ -21,7 +22,7 @@ import { Pong } from 'src/pong/src';
     @WebSocketServer()
     server: Server;
     interval: NodeJS.Timer;
-    pongs: Array<Pong>;
+    pongs: Map<string, Pong> = new Map;
 
     async handleDisconnect(client: Socket) 
     {
@@ -39,11 +40,34 @@ import { Pong } from 'src/pong/src';
       console.log('joinGame', data);
       let room : string = 'game_' + <string>(data.game_id);
       client.join(room);
+    
+      if (!this.pongs.has(room)) {
+        this.server.on(room, (message : any) => {
+          console.log ('on game', message);
+        });
+        this.pongs.set(room, ((new Pong(800, 500))
+              .setServer(this.server)
+              .addPlayer()
+              .setRoom(room)
+              .addChangeListener((pong : Pong) => {
+                               
+                  this.server.in(pong.getRoom()).emit('eventGame',
 
-      if (this.server.sockets.adapter.rooms.get(room)?.size == 2) {
-        this.pongs.push((new Pong(800, 500))
-          .setServer(this.server)
-          .setRoom(room));
+                    pong.getNetworkMessage()
+
+                  );
+
+              })));
+      } 
+      else {
+        const p : Pong = <Pong>this.pongs.get(room);
+        if (p.playerCount() < 2) {
+          this.pongs.get(room)?.addPlayer();
+        }
+        if (p.playerCount() == 2) {
+          p.run();
+        }
+
       }
       return {};
 
@@ -68,7 +92,6 @@ import { Pong } from 'src/pong/src';
     run()
     {
       // this.pong = new Pong();
-
       clearInterval(this.interval);
       this.interval = setInterval(() => {
         

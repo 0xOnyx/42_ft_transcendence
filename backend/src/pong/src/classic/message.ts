@@ -16,7 +16,7 @@ export type NetMessageBall = {
 }
 
 export class NetMessage {
-
+    status: string;
     players: [NetMessagePlayer, NetMessagePlayer] = [{y: 0, score: 0}, {y: 0, score: 0}];
     ball: NetMessageBall = {
         position: {

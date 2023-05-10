@@ -8,7 +8,7 @@ import Size from './size.js';
 import Controller from './controller.js';
 import Bound from './bound.js';
 import Dash from './dash.js';
-import type { NetMessage } from './message.js';
+import { NetMessage } from './message.js';
 import { Server } from 'socket.io';
 
 
@@ -40,7 +40,7 @@ export default class Pong
         this.size = new Size(_width, _height);
 
         this.ball = new Ball(this.size, this.timer);
-
+    
         const rect_top : Rectangle = new Rectangle();
         rect_top.setSize(_width - 60.0, 10.0);
         rect_top.setPosition(30.0, 10.0);
@@ -69,9 +69,6 @@ export default class Pong
         this.overBounds.push(new Bound(0,0,this.gutter,this.size.h));
         this.overBounds.push(new Bound(this.size.w - this.gutter,0,this.size.w,this.size.h));
 
-        this.addPlayer();
-        this.addPlayer();
-
         pong = this;
     }
 
@@ -87,15 +84,21 @@ export default class Pong
         return this;
     }
 
-    addChangeListener(fn : Function)
+    getRoom() : string
+    {
+        return this.room;
+    }
+
+    addChangeListener(fn : Function) : Pong
     {
         this.change.push(fn);
+        return this;
     }
 
     emitChange()
     {
         for (let index = 0; index < this.change.length; index++) {
-            this.change[index]();   
+            this.change[index](this);   
         }
     }
 
@@ -105,7 +108,31 @@ export default class Pong
         return this;
     }
 
-    addPlayer()
+    getNetworkMessage() : NetMessage
+    {
+        this.networkMessage = new NetMessage();
+
+        this.networkMessage.ball.position.x = this.ball.position.x;
+        this.networkMessage.ball.position.y = this.ball.position.y;
+
+        this.networkMessage.ball.vector.x = this.ball.vector.x;
+        this.networkMessage.ball.vector.y = this.ball.vector.y;
+
+        for (let index = 0; index < this.players.length; index++) {
+            this.networkMessage.players[index].score = this.players[index].score;
+            this.networkMessage.players[index].y = this.players[index].position.y;
+        }
+        this.networkMessage.status = this.status;
+
+        return this.networkMessage;
+    }
+
+    playerCount() : number
+    {
+        return this.players.length;
+    }
+
+    addPlayer() : Pong
     {
         let name : string = <string>'' + this.players.length + 1;
         let player = new Player(this.players.length, name, this.size, this.timer);
@@ -121,13 +148,15 @@ export default class Pong
 
         this.players.push(player);
         this.meshes.push(player);
-        // this.colliders.push(player);
+        
+        return this; 
+
     }
 
     run() : void
     {
-        this.init();
-
+        if(this.status == 'init')
+            this.init();
     }
 
     init() : void
@@ -151,6 +180,8 @@ export default class Pong
             this.status = 'wait';
         else
             this.status = 'run';
+
+        this.emitChange();
     }
 
     update () : void

@@ -8,10 +8,14 @@
     import Pong from "../../../pong/src/classic/pong";
     import { page } from '$app/stores';
 	import { onDestroy, onMount } from 'svelte';
+	import type { NetMessage } from "../../../pong/src/classic/message";
+	import gameservice from "../../../services/GameService";
+	
 
     let socket : Socket;
     let canvas : HTMLCanvasElement;
 
+    let game : any;
     let user : User = { id: 1, name: 'Jacob Jones', image_url: 'image/default.png' };
 
     let userstats : UserStats = {
@@ -24,6 +28,8 @@
 
 	onMount(async () => {
 
+        let game = await gameservice.get($page.params.id);
+
         socket = io('/events', {
                 path: "/gamews/"
         });
@@ -31,8 +37,14 @@
         socket.emit("joinGame", {game_id: $page.params.id})
 
         let pong : Pong = (new Pong(800, 500, canvas.getContext('2d'))).setSocket(socket);
-
-        pong.run();
+        pong.init();
+        
+        socket.on('game_' + <string>$page.params.id, (netMessage : NetMessage) => {
+            console.log(netMessage);
+            pong.setNetworkMessage(netMessage);
+        });
+        
+        setTimeout(() => pong.gameLoop(), 1000 / 60);
         
 	});
 

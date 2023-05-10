@@ -67,9 +67,6 @@ export default class Pong
         this.meshes.push(line);
         this.meshes.push(this.ball);
 
-        this.controllers.push(new Controller('alpha', this.keyboard));
-        this.controllers.push(new Controller('arrow', this.keyboard));
-
         this.overBounds.push(new Bound(0,0,this.gutter,this.size.h));
         this.overBounds.push(new Bound(this.size.w - this.gutter,0,this.size.w,this.size.h));
 
@@ -129,16 +126,6 @@ export default class Pong
         // this.colliders.push(player);
     }
 
-    run() : void
-    {
-        this.init();
-
-        if(this.server)
-            setInterval(() => { this.gameLoop(); }, 1000 / 60);
-        else
-            loop();
-    }
-
     init() : void
     {
         this.ball.setPosition(this.size.w / 2, this.size.h / 2);
@@ -147,7 +134,6 @@ export default class Pong
 
         for (let index = 0; index < this.players.length; index++) {
             const player = this.players[index];
-            player.update(this.controllers[index]);
             if (index == 0)
             {
                 player.setPosition(this.gutter, (this.size.h - player.size.h) / 2);
@@ -170,10 +156,6 @@ export default class Pong
         {
             for (let index = 0; index < this.players.length; index++) {
                 const player = this.players[index];
-                if(this.network)
-                    player.networkUpdate(<NetMessage>this.networkMessage);
-                else
-                    player.update(this.controllers[index]);
             }
         }
 
@@ -349,11 +331,5 @@ export default class Pong
     }
 }
 
-function loop() : void
-{
-    pong.gameLoop();
-    window.requestAnimationFrame(loop);
-
-}
 
 
