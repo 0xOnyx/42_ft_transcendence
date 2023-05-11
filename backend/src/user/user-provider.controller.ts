@@ -115,7 +115,7 @@ export class UserProviderController {
     @ApiOperation({summary: "get user information"})
     @ApiBody({type: updateUser})
     async getUser(@Request() req: any) {
-        return this.userServiceServer.getUser(Number(req.user.id));
+        return this.userServiceServer.getUser(Number(req.user.id), {auth: true});
     }
 
     @UseGuards(AuthenticatedGuard)
