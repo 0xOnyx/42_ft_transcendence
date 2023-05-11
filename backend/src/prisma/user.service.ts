@@ -9,7 +9,7 @@ export class UserService {
 	async user(
 		userWhereUniqueInput: Prisma.UserWhereUniqueInput,
 		include?: Prisma.UserInclude,
-	): Promise<Prisma.UserGetPayload<{include : typeof include}> | null> {
+	): Promise<Prisma.UserGetPayload<{include : Prisma.UserInclude}> | null> {
 		return this.prisma.user.findUnique({
 			where: userWhereUniqueInput,
 			include: include,
@@ -154,4 +154,24 @@ export class UserService {
 		})
 	}
 
+	async createTotp(where: Prisma.UserWhereUniqueInput, token: string)
+	{
+		return await this.prisma.authenticators.create({
+			data: {
+				secret: token,
+				user: {
+					connect: where
+				}
+			}
+		})
+	}
+
+	async removeTotp(where: Prisma.UserWhereUniqueInput)
+	{
+		return await this.prisma.authenticators.delete({
+			where: {
+				user_id: where.id
+			}
+		})
+	}
 }

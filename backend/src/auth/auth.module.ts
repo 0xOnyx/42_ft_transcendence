@@ -9,10 +9,11 @@ import { UserService } from "../prisma/user.service";
 import { ActivitylogService } from "../prisma/activitylog.service";
 import { SessionSerializer } from "./session.serializer";
 import {LocalStrategy} from "./strategies/local.strategy";
+import {TotpStrategy} from "./strategies/totp.strategy";
 
 @Module({
   imports: [PassportModule, PrismaModule, PassportModule.register({session: true})],
-  providers: [ActivitylogService, UserService, Api42Service, AuthService, OauthStrategy, SessionSerializer, LocalStrategy],
+  providers: [ActivitylogService, UserService, Api42Service, AuthService, OauthStrategy, TotpStrategy, SessionSerializer, LocalStrategy],
   controllers: [AuthController]
 })
 export class AuthModule {}
