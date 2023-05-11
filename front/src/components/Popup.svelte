@@ -31,7 +31,7 @@
 
 	function  confirmPopUp ( value : string ) {
 		console.log("hello there");
-		
+
 		dispatch('confirmPopUp', {
 			text: value,
 			type: "confirm"
@@ -109,7 +109,7 @@
 								</div>
 							</div>
 						{:else if id === "auth"}
-						<div class="mt-3 flex flex-col gap-4 items-center text-center sm:ml-4 sm:mt-0 sm:text-left">
+						<div class="flex flex-col mobile-landscape:flex-row mobile-landscape:gap-10 m-auto gap-4 items-center text-center  sm:text-left">
 							<div class="mt-2 bg-white h-40 w-40 text-black flex grow items-center justify-center">
 								QR CODE
 							</div>

@@ -1,16 +1,22 @@
 <script lang="ts">
 
     import type {User} from '../types/user';
-    import type {Rooms, RoomUser} from "../types/room";
     import {Status} from '../types/user';
     import {PUBLIC_API_URI} from "$env/static/public";
     import {goto} from "$app/navigation"
     import {Socket} from "socket.io-client";
+	import { createEventDispatcher } from 'svelte';
+
+	const dispatch = createEventDispatcher();
 
     //bg-green-600
     export let user : User;
-    export let io: Socket;
-    export let requestBlock: Function;
+
+	async function handleClick() {
+		dispatch('userClicked', {
+			id: user.id
+		})
+	}
 
     function getColor(status: Status)
     {
@@ -21,42 +27,9 @@
         else if (status == Status.ONLINE)
             return "bg-green-600";
     }
-
-    async function getRoom()
-    {
-        const res: Response = await fetch(`${PUBLIC_API_URI}/message/getDmUser/${user.id}`, {
-            method: 'GET',
-            credentials: 'include'
-        });
-        let rooms: (Rooms & { user: RoomUser[] }) | undefined;
-        if (res.status == 204)
-        {
-            let res: Response = await fetch(`${PUBLIC_API_URI}/user/isBlockedByMe/${user.id}`, {
-                method: 'GET',
-                credentials: 'include'
-            });
-            let status = await res.json();
-            if (status)
-            {
-                requestBlock(user.id);
-            }
-            else {
-                io.emit("createDm", {user_id: user.id}, (rooms) => {
-                    if (rooms)
-                        goto(`/rooms/dms/${rooms.id}`);
-                })
-            }
-        }
-        if (res.status == 200) {
-            rooms = await res.json();
-            if (rooms)
-                await goto(`/rooms/dms/${rooms.id}`);
-
-        }
-    }
 </script>
 
-<div on:click={getRoom} class="cursor-pointer rounded-xl bg-color5 p-5 flex items-center mt-1">
+<div on:click={handleClick} class="cursor-pointer rounded-xl bg-color5 p-5 flex items-center mt-1">
 
     <div class="mx-2 flex-shrink">
         <div class="w-[40px] h-[40px] bg-cover  rounded-full mx-auto"

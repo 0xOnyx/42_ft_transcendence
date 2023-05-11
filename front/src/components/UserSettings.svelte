@@ -28,9 +28,6 @@
 		}
 	}
 
-	console.log(user);
-	console.log("Left: ", $leftHanded);
-
 </script>
 
 
