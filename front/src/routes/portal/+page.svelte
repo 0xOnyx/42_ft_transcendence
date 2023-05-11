@@ -9,6 +9,8 @@
 
 	import { fade, fly, slide } from 'svelte/transition';
 
+	import type { Rooms, RoomUser } from "../../types/room";
+
     import {onMount} from "svelte";
     import {goto} from "$app/navigation";
     import {io, Socket} from "socket.io-client";
@@ -24,6 +26,7 @@
 	import UserSettings from "../../components/UserSettings.svelte";
 
 	import { leftHanded } from "../../services/Stores";
+	import BlockUser from "../../components/BlockUser.svelte";
 
     interface UserStats {
         played: number,
@@ -51,12 +54,12 @@
     let search_value: string = "";
     let search : User[] = [];
     let friends : User[] = [];
+	let locked : User[] = [];
     let user : User;
     let connectedWs: Boolean = false;
     let socket: Socket ;
 
 	let blockedList : boolean = false;
-
 
     let userstats : UserStats = {
         played : 42,
@@ -68,10 +71,25 @@
 
 	$: userstats.ratio = Math.round(userstats.win / userstats.played * 100);
 
-    async function searchUser( e : CustomEvent)
+    async function searchUser( e : CustomEvent )
     {
-	      search_value = e.detail.text;
+	    search_value = e.detail.text;
         search = await userservice.searchUser(search_value);
+		if (!e.detail.all) {
+			console.log("Blocked Only");
+			for (let item of search) { 
+				let res: Response = await fetch(`${PUBLIC_API_URI}/user/isBlockedByMe/${item.id}`, {
+				method: 'GET',
+				credentials: 'include'
+				});
+				let status = await res.json();
+				if (!status) {
+					search = search.filter((user: User)=>{
+						return (user.id != Number(item.id));
+					});
+				}
+			}
+		}
     }
 
     onMount(async () => {
@@ -83,6 +101,7 @@
 
         user = await userservice.getCurrentUser();
         friends = await userservice.getFriends();
+		locked = await userservice.getBlockedUsers();
 
         socket = io('/events', {
             path: "/ws/"
@@ -103,6 +122,17 @@
 
         socket.on("LostFriend", (data: {id: number})=>{
             friends = friends.filter((item: User)=>{
+                return (item.id != Number(data.id))
+            })
+        })
+
+		socket.on("AddBlock", (user: User)=>{
+            locked = [...locked, user];
+        })
+
+		socket.on("RemoveBlock", (data: {id: number})=>{
+			console.log("Try remove");
+            locked = locked.filter((item: User)=>{
                 return (item.id != Number(data.id))
             })
         })
@@ -153,15 +183,59 @@
         }
     }
     let closeWarningUnbanUser = -1;
+
     async function acceptUnbanUser()
     {
+		const id : number = closeWarningUnbanUser;
+		console.log(id);
         await socket.emit("unblockUser", {
             user_id: closeWarningUnbanUser
         });
         closeWarningUnbanUser = -1;
+		getRoom(id);
     }
 
+	function unblockUser(e : CustomEvent) {
+		console.log("unblock path");
+		closeWarningUnbanUser = e.detail.id;
+	}
 
+	async function getRoom( id : number)
+    {
+		console.log("romm path");
+        const res: Response = await fetch(`${PUBLIC_API_URI}/message/getDmUser/${id}`, {
+            method: 'GET',
+            credentials: 'include'
+        });
+        let rooms: (Rooms & { user: RoomUser[] }) | undefined;
+        if (res.status == 204) {
+			let res: Response = await fetch(`${PUBLIC_API_URI}/user/isBlockedByMe/${id}`, {
+        	 method: 'GET',
+        	credentials: 'include'
+            });
+        	let status = await res.json();
+        	if (status) {
+				closeWarningUnbanUser = id;
+        	} else {
+				socket.emit("createDm", {user_id: id}, (rooms) => {
+					if (rooms)
+						goto(`/rooms/dms/${rooms.id}`);
+					})
+			}
+        }
+        if (res.status == 200) {
+            rooms = await res.json();
+            if (rooms)
+                await goto(`/rooms/dms/${rooms.id}`);
+
+        }
+	}
+
+	function itemClicked( e : CustomEvent) {
+		const id : number = e.detail.id;
+		console.log("itemClicked:", id);
+		getRoom(id);
+	}
     //export let data: PageData;
 </script>
 
@@ -220,19 +294,19 @@
 			
 			<div class="flex flex-col sm:flex-row sm:max-h-[85%] gap-4 {$leftHanded ? 'mobile-landscape:pl-[3.75rem]' : 'mobile-landscape:pr-[3.75rem]'} sm:grid-cols-3 text-center align-middle m-1">
 
-				<div class="info-user screen grow h-1/2 sm:h-full sm:w-2/3 mobile-landscape:w-1/2 overflow-hidden flex shadow-lg shadow-black/50 bg-black/25 rounded-3xl mobile-landscape:col-span-1 sm:col-span-2">
+				<div class="info-user screen border-gray-700 grow h-1/2 sm:h-full sm:w-2/3 mobile-landscape:w-1/2 overflow-hidden flex shadow-lg shadow-black/50 bg-black/25 rounded-3xl mobile-landscape:col-span-1 sm:col-span-2">
 					<div class="screen-overlay"></div>
 					<div class="absolute flex w-full justify-between">
-						<button on:click={() => { _openSettings = !_openSettings}} class="transition-opacity duration-300 grow p-3 border-black {_openSettings ? "border-b-2 bg-black/50 text-gray-500" : "border-r-2"}">
+						<button on:click={() => { _openSettings = !_openSettings}} class="transition-opacity duration-300 grow p-3 border-gray-700 {_openSettings ? "border-b-[3px] bg-black/50 text-gray-500" : "border-r-[3px]"}">
 							Statistics
 						</button>
-						<button on:click={() => { _openSettings = !_openSettings}} class="transition-opacity duration-300 grow p-3 border-black  {_openSettings ? "border-l-2" : "border-b-2 bg-black/50 text-gray-500"}">
+						<button on:click={() => { _openSettings = !_openSettings}} class="transition-opacity duration-300 grow p-3 border-gray-700  {_openSettings ? "border-l-[3px]" : "border-b-[3px] bg-black/50 text-gray-500"}">
 							Settings
 						</button>
 					</div>
 					<div class="grow flex">
 
-						<div class="relative gap-3 flex flex-col p-3 grow m-auto items-center">
+						<div class="relative top-6 gap-3 flex flex-col grow m-auto p-t-6">
 							{#if _openSettings}
 							<div in:fade="{{ delay: 200, duration: 400 }}">
 								<div class="flex sm:flex-col mobile-landscape:flex-row justify-center gap-3">
@@ -257,7 +331,7 @@
 			</div>
 
 
-				<UsersList user={user} bind:friends={friends} bind:search={search} socket={socket} on:search={searchUser} />		
+				<UsersList user={user} bind:friends={friends} bind:locked={locked} bind:search={search} socket={socket} on:userClicked={itemClicked} on:unblock={unblockUser} on:search={searchUser} />		
 
 			</div>
 

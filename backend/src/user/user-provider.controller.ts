@@ -54,6 +54,13 @@ export class UserProviderController {
         return this.userServiceServer.getFriend(req.user.id);
     }
 
+	@UseGuards(AuthenticatedGuard)
+    @Get("blocked")
+    @ApiOperation({summary: "Get all current blocked users log"})
+    getBlockedUser(@Request() req: any) {
+        return this.userServiceServer.getBlockedUser(req.user.id);
+    }
+
     //usage exemple => /user/search?skip=0&take=1&element=name&value=salut
     @UseGuards(AuthenticatedGuard)
     @Get("search")

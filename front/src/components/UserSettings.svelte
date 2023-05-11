@@ -81,7 +81,6 @@
     </div>
 {/if}
 
-
 {#if _openAuth && secret}
 <PopUp id="auth" user={user} secret={secret} on:closePopUp={updatePopUp} on:confirmPopUp={updatePopUp} title="Two-factor authentication (2FA)" />
 {/if}
