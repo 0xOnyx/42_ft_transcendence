@@ -10,7 +10,7 @@ import { Response } from 'express';
 export class GameController {
     constructor(private gameService : GameService){}
 
-    //@UseGuards(AuthenticatedGuard)
+    @UseGuards(AuthenticatedGuard)
     @ApiOperation({summary: "Get all games"})
     @Get() 
     all()
@@ -18,7 +18,7 @@ export class GameController {
         return this.gameService.get();
     }
 
-    //@UseGuards(AuthenticatedGuard)
+    @UseGuards(AuthenticatedGuard)
     @ApiOperation({summary: "get a game specified by :id"})
     @Get(':id')
     async get(@Param("id") id: string)
@@ -30,7 +30,7 @@ export class GameController {
             throw new NotFoundException(`The game with id ${id} does not exist.`);
     }
 
-    //@UseGuards(AuthenticatedGuard)
+    @UseGuards(AuthenticatedGuard)
     @ApiOperation({summary: "Create a new game with parameters"})
     @Post('create')
     async create(@Body() body: CreateGameValidator )
@@ -46,7 +46,7 @@ export class GameController {
  
     }
     
-    //@UseGuards(AuthenticatedGuard)
+    @UseGuards(AuthenticatedGuard)
     @ApiOperation({summary: "delete a game specified by :id"})
     @Get(':id/delete')
     async delete(@Param("id") id: string, @Res() res: Response)
