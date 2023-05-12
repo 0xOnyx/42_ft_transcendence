@@ -41,9 +41,9 @@
         user = await userservice.getCurrentUser();
         game = await gameservice.get(parseInt($page.params.id));
 
-        if (game != null)
+        if (game != null && user != null)
         {
-            socket.emit("joinGame", {game_id: $page.params.id})
+            socket.emit("joinGame", {game_id: $page.params.id, user_id: user.id})
 
             console.log(game);
 
@@ -69,12 +69,11 @@
             pong.setSocket(socket)
                 .connectGame(parseInt($page.params.id));
 
-            internal = setInterval(() => { pong?.gameLoop()}, 1000 / 60);
+            pong.run();
 
             socket.on('eventGame', (data : any) => {
                 pong?.setNetworkMessage(data);
             });
-
 
             user = await userservice.getCurrentUser();
 
@@ -84,10 +83,17 @@
 
     onDestroy(async () => {
 
-        socket.emit("leaveGame", {game_id: $page.params.id});
-        socket.close();
+        if (pong)
+        {
+            if (pong.players[0].connected == false && pong.players[1].connected == false)
+            {
+                pong.stop();
+            }
+        }
 
-        clearInterval(internal);
+        socket.emit("leaveGame", {game_id: $page.params.id});
+
+        socket.close();
 
     });
 

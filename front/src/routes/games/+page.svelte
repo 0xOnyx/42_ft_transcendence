@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {onMount} from "svelte";
+    import {onDestroy, onMount} from "svelte";
     import type { PageData } from './$types';
 
     import NavBar from '../../components/NavBar.svelte';
@@ -12,31 +12,15 @@
 	import GamesType from "../../components/GamesType.svelte";
 	import gameservice from "../../services/GameService";
 	import { goto } from "$app/navigation";
+	import { Socket, io } from "socket.io-client";
 
+    let socket : Socket;
     let user : User;
     let search_value : string = '';
     let friends : Array<User> = new Array;
     let search : Array<User> = new Array;
     let closeWarningUnbanUser = -1;
     let join : boolean = false;
-
-    onMount(async () => {
-
-        user = await userservice.getCurrentUser();
-        friends = await userservice.getFriends();
-
-        async function test() {
-            console.log(await userservice.isLogged());
-        }
-
-        test();
-
-    });
-
-    function alertme(event : CustomEvent)
-    {
-        alert(event.detail.checked);
-    }
 
     async function searchUser()
     {
@@ -51,10 +35,44 @@
         }
     }
 
-    function joinGame()
+    function joinMatchmakingGame()
     {
         join = !join;
+
+        if (join) {
+            socket.emit("joinMatchmakingGame", {user_id: user.id});
+        } else {
+            socket.emit("leaveMatchmakingGame", {user_id: user.id});
+        }
+
     }
+
+	onMount(async () => {
+
+        socket = io('/events', {
+                path: "/gamews/"
+        });
+
+        user = await userservice.getCurrentUser();
+        friends = await userservice.getFriends();
+
+        async function test() {
+            console.log(await userservice.isLogged());
+        }
+
+        test();
+
+    });
+
+    onDestroy(async () => {
+
+        if (join) {
+            socket.emit("leaveMatchmakingGame", {user_id: user.id});
+        }
+
+        socket.close();
+
+    });
 
 </script>
 
@@ -84,7 +102,7 @@
                             </div>
                             <div class="p-5">
 
-                                <button  on:click={joinGame} class="bg-color2 border-2 border-color2 px-8 py-1 w-full rounded-md text-black flex">
+                                <button  on:click={joinMatchmakingGame} class="bg-color2 border-2 border-color2 px-8 py-1 w-full rounded-md text-black flex">
                                     <div class="flex items-center"><Checkbox disable={true} checked={join}></Checkbox></div>
                                     <div class="flex-grow">Join</div>
                                 </button>
@@ -130,7 +148,7 @@
                                                 <p>NO FRIEND</p>  <!-- CREATE THIS -->
                                             {:else}
                                                 {#each friends as friend}
-                                                    <ItemName requestBlock={()=>{closeWarningUnbanUser=friend.id}} user={friend}></ItemName>
+                                                    <ItemName user={friend}></ItemName>
                                                 {/each}
                                             {/if}
                                         {:else}
@@ -138,7 +156,7 @@
                                                 <p>no user found :/</p>  <!-- CREATE THIS -->
                                             {:else}
                                                 {#each search as user}
-                                                    <ItemName requestBlock={()=>{closeWarningUnbanUser=user.id}} user={user}></ItemName>
+                                                    <ItemName user={user}></ItemName>
                                                 {/each}
                                             {/if}
                                         {/if}
