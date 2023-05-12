@@ -15,6 +15,7 @@ export default class Player extends Rectangle
     timer : Timer;
     score : number = 0;
     name : string = 'player';
+    ready : boolean = false;
 
     constructor(_id : number, _name : string, _canvas : Size, _timer : Timer)
     {
@@ -24,7 +25,7 @@ export default class Player extends Rectangle
         this.name = _name;
         this.id = _id;
         this.setSize(10.0, 80.0);
-        
+
     }
 
 }

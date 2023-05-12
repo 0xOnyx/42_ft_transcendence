@@ -1,22 +1,30 @@
+import { NetMessagePlayerMove } from "./message";
 
 export default class Controller
 {  
+    currentUp : boolean;
+    currentDown : boolean;
 
-   type: string;
-
-    constructor(_type : string) 
+    constructor() 
     {
-        this.type = _type;
+        this.currentUp = false;
+        this.currentDown = false;
     }
 
     up() : boolean
     {
-        return false;
+        return this.currentUp;
     }
 
     down() : boolean
     {
-        return false;
+        return this.currentDown;
+    }
+
+    setNetMove(move : NetMessagePlayerMove)
+    {
+        this.currentUp = move.up;
+        this.currentDown = move.down;
     }
 
 }

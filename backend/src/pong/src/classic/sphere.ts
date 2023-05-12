@@ -1,5 +1,5 @@
-import Mesh from './mesh.js';
-import Size from './size.js';
+import Mesh from './mesh';
+import Size from './size';
 
 export default class Sphere extends Mesh
 {

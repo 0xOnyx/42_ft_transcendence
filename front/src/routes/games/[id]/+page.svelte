@@ -5,18 +5,21 @@
 	import UserStat from '../../../components/UserStat.svelte';
 	import UserInfo from '../../../components/UserInfo.svelte';
 	import NavBar from '../../../components/NavBar.svelte';
-    import Pong from "../../../pong/src/classic/pong";
+    import Pong, { GameStatus } from "../../../pong/src/classic/pong";
     import { page } from '$app/stores';
 	import { onDestroy, onMount } from 'svelte';
 	import type { NetMessage } from "../../../pong/src/classic/message";
 	import gameservice from "../../../services/GameService";
-	
+	import { loop } from "svelte/internal";
+	import userservice from "../../../services/UserService";
 
     let socket : Socket;
     let canvas : HTMLCanvasElement;
 
     let game : any;
-    let user : User = { id: 1, name: 'Jacob Jones', image_url: 'image/default.png' };
+    let user : User;
+    let pong : Pong | undefined;
+    let internal : any = null;
 
     let userstats : UserStats = {
         played : 42,
@@ -26,32 +29,65 @@
         level: 21
     }
 
-	onMount(async () => {
+    let userOne : User;
+    let userTwo : User;
 
-        let game = await gameservice.get($page.params.id);
+	onMount(async () => {
 
         socket = io('/events', {
                 path: "/gamews/"
         });
 
-        socket.emit("joinGame", {game_id: $page.params.id})
+        user = await userservice.getCurrentUser();
+        game = await gameservice.get(parseInt($page.params.id));
 
-        let pong : Pong = (new Pong(800, 500, canvas.getContext('2d'))).setSocket(socket);
-        pong.init();
-        
-        socket.on('game_' + <string>$page.params.id, (netMessage : NetMessage) => {
-            console.log(netMessage);
-            pong.setNetworkMessage(netMessage);
-        });
-        
-        setTimeout(() => pong.gameLoop(), 1000 / 60);
-        
+        if (game != null)
+        {
+            socket.emit("joinGame", {game_id: $page.params.id})
+
+            console.log(game);
+
+            pong = (new Pong(800, 500, canvas.getContext('2d')));
+
+            if (game.player_one_id === user.id) {
+                console.log(user.id);
+                pong.setPlayerController(0);
+                userOne = user;
+            }
+
+            if (game.player_two_id === user.id) {
+                pong.setPlayerController(1);
+                userTwo = user;
+            } else {
+
+                if (game.player_two_id) {
+                    userTwo = await userservice.getUser(game.player_two_id);
+                }
+
+            }
+
+            pong.setSocket(socket)
+                .connectGame(parseInt($page.params.id));
+
+            internal = setInterval(() => { pong?.gameLoop()}, 1000 / 60);
+
+            socket.on('eventGame', (data : any) => {
+                pong?.setNetworkMessage(data);
+            });
+
+
+            user = await userservice.getCurrentUser();
+
+        }
+
 	});
 
     onDestroy(async () => {
 
         socket.emit("leaveGame", {game_id: $page.params.id});
         socket.close();
+
+        clearInterval(internal);
 
     });
 
@@ -77,7 +113,7 @@
 
                             <div  class="mt-20">
 
-                                <UserInfo portal={true} user={user} />
+                                <UserInfo portal={true} user={userOne} />
 
                             </div>
 
@@ -106,18 +142,20 @@
 
                         <div class="overflow-auto bg-color5 flex-grow rounded-xl">
 
-                            <div class="mt-20">
+                            {#if userTwo}
+                                <div class="mt-20">
 
-                                <UserInfo portal={true} user={user} />
+                                    <UserInfo portal={true} user={userTwo} />
 
-                            </div>
+                                </div>
 
-                            <div>
+                                <div>
 
-                                <UserStat userstats={userstats}></UserStat>
+                                    <UserStat userstats={userstats}></UserStat>
 
-                            </div>
+                                </div>
 
+                            {/if}
                         </div>
 
                     </div>

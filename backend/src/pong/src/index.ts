@@ -1,4 +1,4 @@
-import Pong from "./classic/pong";
+import PongServer from "./classic/pongserver";
 
-export { Pong };
+export { PongServer };
 

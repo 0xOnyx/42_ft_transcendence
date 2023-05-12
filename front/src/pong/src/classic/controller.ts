@@ -1,37 +1,59 @@
 import Keyboard from "./keyboard.js";
 
 export default class Controller
-{  
+{
 
-    keyboard: Keyboard;
-    type: string;
+    keyboard : Keyboard;
+    currentUp : boolean;
+    currentDown : boolean;
+    currentSpace : boolean;
 
-    constructor(_type : string, _keyboard : Keyboard) 
+    constructor(_keyboard : Keyboard)
     {
         this.keyboard = _keyboard;
-        this.type = _type;
+        this.currentUp = false;
+        this.currentDown = false;
+        this.currentSpace = false;
     }
 
-    up()
+    hasChange() : boolean
     {
-        if (this.type === 'arrow') {
-            return this.keyboard.up;
-        }
-        if (this.type === 'alpha') {
-            return this.keyboard.isKeyDown('q');
-        }        
+        let changed : boolean = false;
 
+        if (this.currentUp != this.keyboard.up)
+        {
+            this.currentUp = this.keyboard.up;
+            changed = true;
+        }
+
+        if (this.currentDown != this.keyboard.down)
+        {
+            this.currentDown = this.keyboard.down;
+            changed = true;
+        }
+
+        if (this.currentSpace != this.keyboard.space)
+        {
+            this.currentSpace = this.keyboard.space;
+            changed = true;
+        }
+
+        return changed;
     }
 
-    down()
+    up() : boolean
     {
-        if (this.type === 'arrow') {
-            return this.keyboard.down;
-        }
-        if (this.type === 'alpha') {
-            return this.keyboard.isKeyDown('a');
-        }        
+        return this.currentUp;
+    }
 
+    down() : boolean
+    {
+        return this.currentDown;
+    }
+
+    space() : boolean
+    {
+        return this.currentSpace;
     }
 
 }

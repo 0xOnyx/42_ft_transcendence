@@ -1,7 +1,7 @@
-import Timer from "./timer.js";
-import Vector from "./vector.js";
-import Size from "./size.js";
-import Bound from "./bound.js";
+import Timer from "./timer";
+import Vector from "./vector";
+import Size from "./size";
+import Bound from "./bound";
 
 export default class Mesh
 {

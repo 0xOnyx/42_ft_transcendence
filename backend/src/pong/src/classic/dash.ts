@@ -1,6 +1,5 @@
-import Mesh from './mesh.js';
-import Size from './size.js';
-import Vector from './vector.js';
+import Mesh from './mesh';
+import Vector from './vector';
 
 export default class Dash extends Mesh
 {

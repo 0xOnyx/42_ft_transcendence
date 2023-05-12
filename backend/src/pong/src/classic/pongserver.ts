@@ -1,20 +1,29 @@
-import type Mesh from './mesh.js';
-import Rectangle from './rectangle.js';
-import Timer from './timer.js';
-import Vector from './vector.js';
-import Player from './player.js';
-import Ball from './ball.js';
-import Size from './size.js';
-import Controller from './controller.js';
-import Bound from './bound.js';
-import Dash from './dash.js';
-import { NetMessage } from './message.js';
+import type Mesh from './mesh';
+import Rectangle from './rectangle';
+import Timer from './timer';
+import Vector from './vector';
+import Player from './player';
+import Ball from './ball';
+import Size from './size';
+import Controller from './controller';
+import Bound from './bound';
+import Dash from './dash';
+import { NetMessage, NetMessageState, GameEvent } from './message';
 import { Server } from 'socket.io';
 
+export enum GameStatus {
 
-var pong : Pong;
+	CREATED = 'CREATED',
+	READY = 'READY',
+	INIT = 'INIT',
+	WAIT = 'WAIT',
+	RUN = 'RUN',
+	LOST = 'LOST',
+	FINISHED = 'FINISHED',
 
-export default class Pong
+}
+
+export default class PongServer
 {
     context : CanvasRenderingContext2D;
     meshes : Array<Mesh> = [];
@@ -25,14 +34,15 @@ export default class Pong
     overBounds : Array<Bound> = [];
     ball : Ball;
     size : Size;
-    status : string = "init";
+    status : GameStatus = GameStatus.INIT;
     gutter : number = 20.0;
     renderPong : boolean = true;
-    scoreLimit : number = 3;
+    scoreLimit : number = 10;
     network : boolean = false;
     server : Server;
     networkMessage : NetMessage | null = null;
     change : Array<Function> = [];
+    gameId : number = 0;
     room : string;
 
     constructor(_width : number, _height : number)
@@ -63,22 +73,32 @@ export default class Pong
         this.meshes.push(line);
         this.meshes.push(this.ball);
 
-        this.controllers.push(new Controller('alpha'));
-        this.controllers.push(new Controller('arrow'));
+        this.controllers.push(new Controller());
+        this.controllers.push(new Controller());
 
         this.overBounds.push(new Bound(0,0,this.gutter,this.size.h));
         this.overBounds.push(new Bound(this.size.w - this.gutter,0,this.size.w,this.size.h));
 
-        pong = this;
     }
 
-    setServer(serv: Server) : Pong
+    setGameId(game_id : number) : PongServer
+    {
+        this.gameId = game_id;
+        return this;
+    }
+
+    getGameId() : number
+    {
+        return this.gameId;
+    }
+
+    setServer(serv: Server) : PongServer
     {
         this.server = serv;
         return this;
     }
 
-    setRoom(room: string) : Pong
+    setRoom(room: string) : PongServer
     {
         this.room = room;
         return this;
@@ -89,7 +109,7 @@ export default class Pong
         return this.room;
     }
 
-    addChangeListener(fn : Function) : Pong
+    addChangeListener(fn : Function) : PongServer
     {
         this.change.push(fn);
         return this;
@@ -102,7 +122,7 @@ export default class Pong
         }
     }
 
-    setNetworkMessage(mes: NetMessage) : Pong
+    setNetworkMessage(mes: NetMessage) : PongServer
     {
         this.networkMessage = mes;
         return this;
@@ -112,17 +132,24 @@ export default class Pong
     {
         this.networkMessage = new NetMessage();
 
-        this.networkMessage.ball.position.x = this.ball.position.x;
-        this.networkMessage.ball.position.y = this.ball.position.y;
+        this.networkMessage.event = GameEvent.UPDATE;
 
-        this.networkMessage.ball.vector.x = this.ball.vector.x;
-        this.networkMessage.ball.vector.y = this.ball.vector.y;
+        const state : NetMessageState = new NetMessageState();
+
+        state.ball.position.x = this.ball.position.x;
+        state.ball.position.y = this.ball.position.y;
+
+        state.ball.vector.x = this.ball.vector.x;
+        state.ball.vector.y = this.ball.vector.y;
 
         for (let index = 0; index < this.players.length; index++) {
-            this.networkMessage.players[index].score = this.players[index].score;
-            this.networkMessage.players[index].y = this.players[index].position.y;
+            state.players[index].score = this.players[index].score;
+            state.players[index].y = this.players[index].position.y;
+            state.players[index].ready = this.players[index].ready; 
         }
-        this.networkMessage.status = this.status;
+        state.status = this.status;
+
+        this.networkMessage.state = state;
 
         return this.networkMessage;
     }
@@ -132,7 +159,7 @@ export default class Pong
         return this.players.length;
     }
 
-    addPlayer() : Pong
+    addPlayer() : PongServer
     {
         let name : string = <string>'' + this.players.length + 1;
         let player = new Player(this.players.length, name, this.size, this.timer);
@@ -155,8 +182,10 @@ export default class Pong
 
     run() : void
     {
-        if(this.status == 'init')
+        if(this.status == GameStatus.INIT)
             this.init();
+
+        setInterval(() => { this.gameLoop() } , 1000 / 60);
     }
 
     init() : void
@@ -176,68 +205,72 @@ export default class Pong
             }
         }
 
-        if(this.status == 'init')
-            this.status = 'wait';
+        if(this.status == GameStatus.INIT)
+            this.status = GameStatus.WAIT;
         else
-            this.status = 'run';
+            this.status = GameStatus.RUN;
 
         this.emitChange();
+    }
+
+    checkReady() : boolean
+    {
+        let ret = false;
+        if(this.status == GameStatus.WAIT)
+        {
+            if (this.players[0].ready || this.players[1].ready )
+            {
+                this.status = GameStatus.RUN;
+                ret = true;
+            }
+        }
+        return ret;
     }
 
     update () : void
     {
         this.timer.tick();
 
-        if (this.status !== 'finish')
+        if (this.status !== GameStatus.FINISHED)
         {
             for (let index = 0; index < this.players.length; index++) {
                 const player = this.players[index];
-                if(this.network)
-                    player.networkUpdate(<NetMessage>this.networkMessage);
-                else
-                    player.update(this.controllers[index]);
+                player.update(this.controllers[index]);
             }
         }
 
         // check if the round is over
-        if (this.status === 'run' && this.server)
+        if (this.status === GameStatus.RUN)
         {
             for (let index = 0; index < this.overBounds.length; index++) {
                 const bound = this.overBounds[index];
                 if(this.ball.getCollider().inBound(bound))
                 {
                     this.players[1-index].score++;
-                    this.status = 'lost';
+                    this.status = GameStatus.LOST;
                     this.emitChange();
                 }
             }
         }
 
-        if (this.status === 'run')
+        if (this.status === GameStatus.RUN)
         {
-            if(this.network)
-            {
-                // update ball collider with other elements
-                for (let index = 0; index < this.colliders.length; index++) {
-                    const mesh = this.colliders[index];
-                    this.checkBallMeshCollision(mesh);
-                }
-    
-                for (let index = 0; index < this.players.length; index++) {
-                    const player = this.players[index];
-                    this.checkBallPlayerCollision(player, index);
-                }
+
+            // update ball collider with other elements
+            for (let index = 0; index < this.colliders.length; index++) {
+                const mesh = this.colliders[index];
+                this.checkBallMeshCollision(mesh);
             }
 
+            for (let index = 0; index < this.players.length; index++) {
+                const player = this.players[index];
+                this.checkBallPlayerCollision(player, index);
+            }
+        
             this.ball.update();
         }
 
-        if (this.status === 'run' && this.network)
-        {
-            this.ball.networkUpdate(<NetMessage>this.networkMessage);
-        }
-
-        if (this.status === 'lost')
+        if (this.status === GameStatus.LOST)
         {
             let isFinished : boolean = false;
             for (let index = 0; index < this.players.length; index++) {
@@ -248,7 +281,7 @@ export default class Pong
             if (!isFinished)
                 this.init();
             else
-                this.status = 'finish';
+                this.status = GameStatus.FINISHED;
         }
 
     }
@@ -336,13 +369,7 @@ export default class Pong
 
     gameLoop() : void
     {
-        pong.update();
-        if (!this.server)
-        {
-            pong.clear();
-            pong.draw();
-        }
+        this.update();
+        this.emitChange();
     }
 }
-
-

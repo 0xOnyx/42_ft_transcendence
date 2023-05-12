@@ -1,11 +1,9 @@
 
-import Rectangle from './rectangle.js';
-import Timer from './timer.js';
-import Controller from './controller.js';
-import Vector from './vector.js';
-import Size from './size.js';
-import type { NetMessage } from './message.js';
-
+import Rectangle from './rectangle';
+import Timer from './timer';
+import Controller from './controller';
+import Vector from './vector';
+import Size from './size';
 
 export default class Player extends Rectangle
 {
@@ -15,6 +13,7 @@ export default class Player extends Rectangle
     timer : Timer;
     score : number = 0;
     name : string = 'player';
+    ready : boolean = false;
 
     constructor(_id : number, _name : string, _canvas : Size, _timer : Timer)
     {
@@ -26,20 +25,12 @@ export default class Player extends Rectangle
         this.setSize(10.0, 80.0);
     }
 
-    networkUpdate(mes: NetMessage)
-    {
-        const new_pos : Vector = this.position.copy();
-
-        new_pos.y = mes.players[this.id].y;
-
-        this.setPosition(new_pos);
-    }
-
     update(controller : Controller) : void
     {
         const new_pos : Vector = this.position.copy();
 
         if (controller.up()) {
+            console.log('up');
             let value : number = this.speed * this.timer.delta;
             new_pos.add((new Vector).up().scalarMulti(this.speed * this.timer.delta));
         }
