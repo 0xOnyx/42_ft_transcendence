@@ -1,3 +1,4 @@
+import {uniqueNamesGenerator, adjectives, colors, animals} from "unique-names-generator";
 import {Injectable, UnauthorizedException} from "@nestjs/common";
 import {PassportStrategy} from "@nestjs/passport";
 import {Strategy} from "passport-oauth2"
@@ -29,7 +30,7 @@ export class OauthStrategy extends PassportStrategy(Strategy,"oauth") {
 		const data = await this.api42Service.get_user(accessToken);
 		if (!data?.id)
 			throw new UnauthorizedException()
-		const includes = {log: true};
+		const includes = {log: true, auth: true};
 		let user = await this.userService.user({oauth_42_id: data.id}, includes);
 		if (!user) {
 			jdenticon.configure({
@@ -47,8 +48,9 @@ export class OauthStrategy extends PassportStrategy(Strategy,"oauth") {
 			const png = jdenticon.toPng(data.login, 100);
 			const uri = `${process.env.PHOTO_PATH}/${data.login}.png`
 			await fs.writeFileSync(uri, png);
+			let sameName = await this.userService.user({name: data.login});
 			user = await this.userService.createUser({
-				name: data.login,
+				name: sameName ? uniqueNamesGenerator({ dictionaries: [adjectives, colors, animals] }) : data.login,
 				email: data.email,
 				first_name: data.first_name,
 				last_name: data.last_name,

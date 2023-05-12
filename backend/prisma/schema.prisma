@@ -3,162 +3,151 @@
 
 // Type https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#int
 
-generator	client {
-	provider	=	"prisma-client-js"
+generator client {
+  provider = "prisma-client-js"
 }
 
-datasource	db {
-	provider	=	"postgresql"
-	url				=	env("DATABASE_URL")
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
-enum	Status {
-	ONLINE
-	OFFLINE
-	HIDDEN
+enum Status {
+  ONLINE
+  OFFLINE
+  HIDDEN
 }
 
-model	User {
-	id						  Int					  @default(autoincrement()) @id
-	name						String				@unique
-	email						String				@unique
-	first_name			String
-	last_name				String
-	image_url				String
-	oauth_42_login	String				@unique
-	oauth_42_id			Int						@unique
-	last_login			DateTime
-	online_status		Status				@default(OFFLINE)
-	auth						Authenticators[]
-	friend					Friend[]			@relation("friend")
-	symetric_friend	Friend[]			@relation("symetric_friend")
-	User_State			UserState?
-	log							ActivityLog[]
-	messages				Messages[]
-	owner_room			Rooms[]
-	room_user				RoomUser[]
-	lock_user				LockUsers[]		@relation("user_lock")
-	symetric_user		LockUsers[]		@relation("symetric_user_lock")
-	game_player_one	Game[]				@relation("player_one")
-	game_player_two	Game[]				@relation("player_two")
+model User {
+  id              Int             @id @default(autoincrement())
+  name            String          @unique
+  email           String          @unique
+  first_name      String
+  last_name       String
+  image_url       String
+  oauth_42_login  String          @unique
+  oauth_42_id     Int             @unique
+  last_login      DateTime
+  online_status   Status          @default(OFFLINE)
+  auth            Authenticators?
+  friend          Friend[]        @relation("friend")
+  symetric_friend Friend[]        @relation("symetric_friend")
+  User_State      UserState?
+  log             ActivityLog[]
+  messages        Messages[]
+  owner_room      Rooms[]
+  room_user       RoomUser[]
+  lock_user       LockUsers[]     @relation("user_lock")
+  symetric_user   LockUsers[]     @relation("symetric_user_lock")
+  game_player_one Game[]          @relation("player_one")
+  game_player_two Game[]          @relation("player_two")
 }
 
-enum	TypeAuth {
-	SMS
-	EMAIL
-	APP
+model Authenticators {
+  id      Int    @id @default(autoincrement())
+  user_id Int    @unique
+  user    User   @relation(fields: [user_id], references: [id])
+  secret  String
 }
 
-model	Authenticators {
-	id							Int			@default(autoincrement()) @id
-	user_id					Int
-	user						User		@relation(fields: [user_id], references: [id])
-	default					Boolean	@default(false)
-	type						TypeAuth
-	phone						String
-	email						String
-	secret					String
-	validate_to			DateTime
+model Friend {
+  id          Int       @id @default(autoincrement())
+  user_id     Int
+  user        User      @relation("friend", fields: [user_id], references: [id])
+  friend_id   Int
+  friend_user User      @relation("symetric_friend", fields: [friend_id], references: [id])
+  request_at  DateTime  @default(now())
+  accept_at   DateTime?
 }
 
-model	Friend {
-	id							Int			@default(autoincrement()) @id
-	user_id					Int
-	user 						User		@relation("friend", fields: [user_id], references: [id])
-	friend_id				Int
-	friend_user			User		@relation("symetric_friend", fields: [friend_id], references: [id])
-	request_at			DateTime @default(now())
-	accept_at				DateTime?
+model UserState {
+  id      Int  @id @default(autoincrement())
+  user_id Int  @unique
+  user    User @relation(fields: [user_id], references: [id])
+  wins    Int  @default(0)
+  losses  Int  @default(0)
+  level   Int  @default(0)
 }
 
-model	UserState {
-	id							Int		@default(autoincrement()) @id
-	user_id					Int		@unique
-	user						User	@relation(fields: [user_id], references: [id])
-	wins						Int		@default(0)
-	losses					Int		@default(0)
-	level						Int		@default(0)
+enum Log {
+  LOGIN
+  LOGOUT
+  CREATE_ROOM
+  UPDATE_ROOM
 }
 
-enum	Log {
-	LOGIN
-	LOGOUT
-	CREATE_ROOM
-	UPDATE_ROOM
+model ActivityLog {
+  id      Int  @id @default(autoincrement())
+  user_id Int
+  user    User @relation(fields: [user_id], references: [id])
+  type    Log
+  datas   Json
 }
 
-model	ActivityLog {
-	id							Int		@default(autoincrement()) @id
-	user_id					Int
-	user						User	@relation(fields: [user_id], references: [id])
-	type						Log
-	datas						Json
+enum TypeRoom {
+  PUBLIC_ROOM
+  SINGLE_CHAT
 }
 
-enum		TypeRoom {
-	PUBLIC_ROOM
-	SINGLE_CHAT
+model Rooms {
+  id             Int        @id @default(autoincrement())
+  owner_id       Int
+  owner          User       @relation(fields: [owner_id], references: [id])
+  type           TypeRoom
+  password       String?
+  messages       Messages[] @relation("message")
+  user           RoomUser[]
+  // last_message_id	    Int?
+  // last_message		    Messages?		    @relation("last_message", fields: [last_message_id], references: [id])
+  count_messages Int        @default(0)
+  name           String?
 }
 
-model	Rooms {
-	id							Int					@default(autoincrement()) @id
-	owner_id				Int
-	owner						User				@relation(fields: [owner_id], references: [id])
-	type						TypeRoom
-	password				String?
-	messages				Messages[]	@relation("message")
-	user						RoomUser[]
-	//last_message_id	Int?
-	//last_message		Messages?		@relation("last_message", fields: [last_message_id], references: [id])
-	count_messages	Int					@default(0)
-	name            String?
-}
-
-enum		TypeMessage {
-	MESSAGE
-	ADD_FRIEND
-	INVITE_GAME
+enum TypeMessage {
+  MESSAGE
+  ADD_FRIEND
+  INVITE_GAME
 }
 
 model Messages {
-	id								Int				@default(autoincrement()) @id
-	room_id						Int
-	room							Rooms			@relation("message", fields: [room_id], references: [id])
-	user_id						Int
-	user							User			@relation(fields: [user_id], references: [id])
-	message_type			TypeMessage
-	content						String
-	create_at					DateTime	@default(now())
-	//last_message_user	RoomUser[]
-	//last_message			Rooms?		@relation("last_message")
+  id           Int         @id @default(autoincrement())
+  room_id      Int
+  room         Rooms       @relation("message", fields: [room_id], references: [id])
+  user_id      Int
+  user         User        @relation(fields: [user_id], references: [id])
+  message_type TypeMessage
+  content      String
+  create_at    DateTime    @default(now())
+  // last_message_user	    RoomUser[]
+  // last_message			Rooms?      		@relation("last_message")
 }
 
-enum	RoleUser {
-	ADMIN
-	USER
+enum RoleUser {
+  ADMIN
+  USER
 }
 
-model	RoomUser {
-	id										Int				@default(autoincrement()) @id
-	room_id								Int
-	room									Rooms			@relation(fields: [room_id], references: [id])
-	user_id								Int
-	user									User			@relation(fields: [user_id], references: [id])
-	role									RoleUser	@default(USER)
-	ban										Boolean		@default(false)
-	mute									Boolean		@default(false)
-	term_penalty					DateTime	@default(now())
-	//last_message_read_id	Int?
-	//last_message					Messages?	@relation(fields: [last_message_read_id], references: [id])
-	count_read_messages		Int				@default(0)
+model RoomUser {
+  id                  Int      @id @default(autoincrement())
+  room_id             Int
+  room                Rooms    @relation(fields: [room_id], references: [id])
+  user_id             Int
+  user                User     @relation(fields: [user_id], references: [id])
+  role                RoleUser @default(USER)
+  ban                 Boolean  @default(false)
+  mute                Boolean  @default(false)
+  term_penalty        DateTime @default(now())
+  // last_message_read_id	Int?
+  // last_message			Messages?       	@relation(fields: [last_message_read_id], references: [id])
+  count_read_messages Int      @default(0)
 }
 
-model	LockUsers {
-	id										Int			@default(autoincrement()) @id
-	user_id								Int
-	user									User		@relation("user_lock", fields: [user_id], references: [id])
-	lock_user_id					Int
-	lock_user							User		@relation("symetric_user_lock", fields: [lock_user_id], references: [id] )
+model LockUsers {
+  id           Int  @id @default(autoincrement())
+  user_id      Int
+  user         User @relation("user_lock", fields: [user_id], references: [id])
+  lock_user_id Int
+  lock_user    User @relation("symetric_user_lock", fields: [lock_user_id], references: [id])
 }
 
 enum	StatusGame {
@@ -176,18 +165,18 @@ enum	TypeGame {
 	BLACKHOLE
 }
 
-model	Game {
-	id										Int					@default(autoincrement()) @id
-	status								StatusGame	@default(CREATED)
-	player_one_id					Int
-	player_one						User				@relation("player_one", fields: [player_one_id], references: [id])
-	player_two_id					Int?
-	player_two						User?				@relation("player_two", fields: [player_two_id], references: [id])
-	player_one_accepted		Boolean			@default(false)
-	player_two_accepted		Boolean			@default(false)
-	map_type							TypeGame		@default(CLASSIC)
-	level									Int?
-	created_at						DateTime		@default(now())
-	score_one							Int
-	score_two							Int
+model Game {
+  id                  Int        @id @default(autoincrement())
+  status              StatusGame @default(CREATED)
+  player_one_id       Int
+  player_one          User       @relation("player_one", fields: [player_one_id], references: [id])
+  player_two_id       Int?
+  player_two          User?      @relation("player_two", fields: [player_two_id], references: [id])
+  player_one_accepted Boolean    @default(false)
+  player_two_accepted Boolean    @default(false)
+  map_type            TypeGame   @default(CLASSIC)
+  level               Int?
+  created_at          DateTime   @default(now())
+  score_one           Int
+  score_two           Int
 }

@@ -1,11 +1,7 @@
 <script lang="ts">
     import {PUBLIC_API_URI} from "$env/static/public";
-	import { loop_guard } from "svelte/internal";
-
 	import { fade, fly } from "svelte/transition";
-
 	import { createEventDispatcher } from 'svelte';
-	import UserSettings from "./UserSettings.svelte";
 	import type { User } from "../types/user";
 	import OTP from "./OTP.svelte";
 
@@ -15,6 +11,7 @@
 	export let description : string = 'Modale description';
     export let placeholder : string = 'Placeholder';
 	export let user : User;
+    export let secret : string = "Base32 token"
 
     let fileinput: HTMLInputElement;
     let files: string;
@@ -31,7 +28,7 @@
 
 	function  confirmPopUp ( value : string ) {
 		console.log("hello there");
-		
+
 		dispatch('confirmPopUp', {
 			text: value,
 			type: "confirm"
@@ -96,12 +93,12 @@
 							<div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
 								<div class="mt-2">
 									<div class="relative">
-										
-										<input 
+
+										<input
 											id="UpdateUsername"
 											on:keyup={(e)=>{(e.keyCode === 13) && updateUser(value)}}
-											class="w-full peer rounded-t-md border-b-[3px] border-gray-600 py-1 px-3 bg-gray-300 text-gray-900 placeholder:text-transparent focus:outline-none focus:border-process-green" 
-											type="text" 
+											class="w-full peer rounded-t-md border-b-[3px] border-gray-600 py-1 px-3 bg-gray-300 text-gray-900 placeholder:text-transparent focus:outline-none focus:border-process-green"
+											type="text"
 											bind:value={value}
 											placeholder="New username" />
 										<label for="UpdateUsername" class="absolute py-1 px-2 peer-placeholder-shown:left-1 peer-placeholder-shown:-top-0.5 peer-placeholder-shown:text-lg transition-transform-colors duration-300 ease-out text-2xs text-process-green transform -translate-y-full peer-placeholder-shown:translate-y-0 -left-2 peer-placeholder-shown:text-gray-900/25">New username</label>
@@ -110,8 +107,8 @@
 							</div>
 						{:else if id === "auth"}
 						<div class="mt-3 flex flex-col gap-4 items-center text-center sm:ml-4 sm:mt-0 sm:text-left">
-							<div class="mt-2 bg-white h-40 w-40 text-black flex grow items-center justify-center">
-								QR CODE
+							<div class="bg-contain mt-2 bg-white h-40 w-40 text-black flex grow items-center justify-center"
+                                 style="background-image: url( 'https://chart.googleapis.com/chart?chs=400x400&chld=L|0&cht=qr&chl={encodeURIComponent(secret)}')">
 							</div>
 							<OTP on:inputValueChange={updateValue} />
 						</div>

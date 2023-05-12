@@ -1,5 +1,6 @@
 import {PUBLIC_API_URI} from "$env/static/public";
 import type { Friend } from "../types/friend.js";
+import type { Blocked } from "../types/blocked.js";
 import type { User } from "../types/user.js";
 
 let userservice : UserService;
@@ -45,7 +46,37 @@ export class UserService
 
         return await res.json();
     }
+	  
+	async getBlockedUsers() : Promise<Array<User>>
+	{
+		const users : Array<User> = new Array;
 
+		const res : Response = await fetch(`${PUBLIC_API_URI}/user/blocked`, {
+			method: 'GET',
+			credentials: 'include'
+		})
+
+		const	blocked_list : Array<Blocked> = (await res.json()).blockedUsers;
+
+		for (const item of blocked_list) {
+            const id = item.lock_user_id;
+            try {
+                const res: Response = await fetch(`${PUBLIC_API_URI}/user/id/${id}`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                const new_blocked: User = (await res.json());
+                users.push(new_blocked);
+            }
+            catch (err)
+            {
+                console.error(err);
+            }
+        }
+
+        return Promise.resolve(users);
+
+	}
     async getFriends() : Promise<Array<User>>
     {
         let users: Array<User> = new Array;

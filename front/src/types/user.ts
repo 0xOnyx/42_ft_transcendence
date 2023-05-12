@@ -12,6 +12,11 @@ export type User =
     online_status?: Status,
 }
 
+export type Authenticators = {
+    id: number
+    user_id: number
+    secret: string
+}
 
 
 export enum Status {

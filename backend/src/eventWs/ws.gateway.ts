@@ -404,11 +404,8 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
   {
     if (data.number_hours <= 0 || data.number_hours >= 24)
       throw new WsException("Your value to mute user is not valide !");
-    console.log(data.number_hours);
     this.check_user(data, client);
-    console.log(data.number_hours);
     const term_penality = this.getTime(data.number_hours);
-    console.log(term_penality);
     await this.messageService.updateUser({id: data.room_id}, {id: data.user_id}, {mute: true, term_penalty: term_penality});
     const room_update = await this.messageService.room({
       where: {id: Number(data.room_id)},
@@ -456,7 +453,9 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
     if (!dmUser || !(room = dmUser.find((element: (Rooms & {user: RoomUser[]})) => {
       return !!element.user.find((element: RoomUser) => element.user_id == Number(data.user_id))})))
       return ;
-    await this.deleteFriend(data, client);
+	const user : User | null = await this.userService.user({id: client.request.user.id});
+	this.server.in(client.request.user.oauth_42_id.toString()).emit("AddBlock", user);
+	await this.deleteFriend(data, client);
     await this.leftDm(data, client);
   }
 
@@ -471,7 +470,8 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
     const block_users = await this.userService.getBlockUserUnique({id: client.request.user.id}, {id: Number(data.user_id)})
     if (block_users.length <= 0)
       throw new WsException("you have no block the user");
-    await this.userService.unblockUser({id: client.request.user.id}, {id: Number(data.user_id)})
+	this.server.in(client.request.user.oauth_42_id.toString()).emit("RemoveBlock", {id: data.user_id});
+	await this.userService.unblockUser({id: client.request.user.id}, {id: Number(data.user_id)})
   }
 
   @SubscribeMessage('acceptFriend')
@@ -494,7 +494,6 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
     const userFriend: User | null = await this.userService.user({id: id});
     this.server.in(client.request.user.oauth_42_id.toString()).emit("NewFriend", userFriend);
     const user: User | null = await this.userService.user({id: client.request.user.id})
-    console.log(user);
     if (userFriend)
       this.server.in(userFriend.oauth_42_id.toString()).emit("NewFriend", user);
     const new_message = await this.messageService.updateMessageInvite({id: data.message_id}, {content: "Accepted"});

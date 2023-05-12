@@ -8,8 +8,11 @@ export class UserServiceService {
     constructor(private userService: UserService) {
     }
 
-    getUser(id: number) {
-        return this.userService.user({id: id})
+    async getUser(id: number, include?: Prisma.UserInclude) {
+        const user = await this.userService.user({id: id}, include)
+        if (user?.auth)
+            user.auth.secret = "secret";
+        return user;
     }
 
     async getFriend(id: number) {
@@ -23,6 +26,19 @@ export class UserServiceService {
         return {
             id: friend.id,
             friend: [...friend.friend, ...friend.symetric_friend]
+        }
+    }
+
+	async getBlockedUser(id: number) {
+        const user: any = await this.userService.userSelect({id: id}, {
+            id: true,
+            lock_user: true,
+        })
+        if (!user)
+            return {};
+        return {
+            id: user.id,
+            blockedUsers: [...user.lock_user]
         }
     }
 
