@@ -14,7 +14,7 @@ import { GameEvent } from 'src/pong/src/classic/message';
 import { NetMessagePlayerMove } from 'src/pong/src/classic/message';
 import PongServer, { GameStatus } from 'src/pong/src/classic/pongserver';
 import { PrismaGameService } from 'src/prisma/prismagame.service';
-import { StatusGame } from '@prisma/client';
+import { Game, StatusGame } from '@prisma/client';
 
   @Injectable()
   @WebSocketGateway({
@@ -48,21 +48,24 @@ import { StatusGame } from '@prisma/client';
      * @returns 
      */
     @SubscribeMessage('joinGame')
-    join(@MessageBody() data: any, @ConnectedSocket() client: Socket ): any {
+    async join(@MessageBody() data: any, @ConnectedSocket() client: Socket ) 
+    {
 
       console.log('joinGame', data);
+    
       let room_name : string = 'game_' + <string>(data.game_id);
-      
+      let game : Game = <Game>await this.prismaGameService.find(parseInt(data.game_id));
+      let pong : PongServer;
+  
       client.join(room_name);
     
       if (!this.pongs.has(room_name)) {
 
         console.log('create pong');
 
-        let pong : PongServer = new PongServer(800, 500);
+        pong = new PongServer(800, 500);
 
         pong.setServer(this.server)
-          .addPlayer()
           .setGameId(parseInt(data.game_id))
           .setRoom(room_name)
           .addChangeListener((pong : PongServer) => {
@@ -71,13 +74,17 @@ import { StatusGame } from '@prisma/client';
                 pong.getNetworkMessage()
               );
 
-              if (pong.status == GameStatus.FINISHED)
+              if (pong.status == GameStatus.FINISHED || pong.status == GameStatus.LOST)
               {
                 this.prismaGameService.find(pong.getGameId()).then((game) => {
                   console.log('update game', game);
                   if (game != null)
                   {
-                    game.status = StatusGame.FINISHED;
+                    if(pong.status == GameStatus.FINISHED)
+                      game.status = StatusGame.FINISHED;
+                    else
+                      game.status = StatusGame.RUN;
+
                     game.score_one = pong.players[0].score;
                     game.score_two = pong.players[1].score;
                     this.prismaGameService.update(game);
@@ -87,27 +94,30 @@ import { StatusGame } from '@prisma/client';
 
           });
 
+        if (<GameStatus>game.status == GameStatus.FINISHED) {
+          pong.status = GameStatus.FINISHED;
+        }
+
+        pong.players[0].score = game.score_one;
+        pong.players[1].score = game.score_two;
+
         pong.run();
-        
+
         this.pongs.set(room_name, pong);
 
+        this.prismaGameService.find(pong.getGameId()).then((game) => {
+          console.log('update game', game);
+          if (game != null)
+          {
+            game.status = StatusGame.READY;
+            this.prismaGameService.update(game);
+          }
+        });
+                
       } 
       else {
-
-        console.log('add player');
-
-        const p : PongServer = <PongServer>this.pongs.get(room_name);
-
-        if (p.playerCount() < 2) {
-          this.pongs.get(room_name)?.addPlayer();
-        }
-        if (p.playerCount() == 2) {
-          p.run();
-        }
-
+        pong = <PongServer>this.pongs.get(room_name);
       }
-
-      return {};
 
     }
 
@@ -120,7 +130,7 @@ import { StatusGame } from '@prisma/client';
     @SubscribeMessage('eventGame')
     event(@MessageBody() data: NetMessage, @ConnectedSocket() client: Socket ): any {
 
-      console.log('capture eventGame', data) ;
+      console.log('eventGame', data) ;
 
       let room : string = 'game_' + data.game_id;
 
@@ -130,6 +140,11 @@ import { StatusGame } from '@prisma/client';
 
         if (data.event == GameEvent.CONNECT)
         {
+          
+          if (data.player == 0 || data.player == 1)
+          {
+            pong.players[data.player].connected = true;
+          }
 
         }
 
@@ -152,8 +167,28 @@ import { StatusGame } from '@prisma/client';
             if (!pong.players[data.player].ready)
               pong.players[data.player].ready = true;
 
-            pong.checkReady();
+            if(pong.checkReady())
+            {
+              this.prismaGameService.find(pong.getGameId()).then((game) => {
+                console.log('update game', game);
+                if (game != null)
+                {
+                  game.status = StatusGame.RUN;
+                  this.prismaGameService.update(game);
+                }
+              });
+            }
           }
+        }
+
+        if (data.event == GameEvent.LEAVE)
+        {
+          
+          if (data.player == 0 || data.player == 1)
+          {
+            pong.players[data.player].connected = false;
+          }
+
         }
 
       }
@@ -167,16 +202,27 @@ import { StatusGame } from '@prisma/client';
      * @returns 
      */
     @SubscribeMessage('leaveGame')
-    leave(@MessageBody() data: any): any {
+    leave(@MessageBody() data: any) {
 
       console.log('leaveGame', data);
-      // todo release server
-      return {};
+      
+      let room : string = 'game_' + data.game_id;
+
+      if (this.pongs.has(room)) {
+        
+        let pong : PongServer = <PongServer>this.pongs.get(room);
+                
+        if (pong.players[0].connected == false && pong.players[1].connected == false) {
+          pong.stop();
+          this.pongs.delete(room);
+        }
+
+      }
 
     }
     
     /**
-     * emit when a nouew game is created
+     * emit when a new game is created
      * 
      * @param payload 
      */
@@ -185,6 +231,21 @@ import { StatusGame } from '@prisma/client';
 
       this.server.emit('createGame', payload);
 
+    }
+
+
+    @SubscribeMessage('leaveMatchmakingGame')
+    leaveMatchmaking(@MessageBody() data: any) {
+
+      console.log('leaveMatchmakingGame', data);
+   
+    }
+
+    @SubscribeMessage('joinMatchmakingGame')
+    joinMatchmaking(@MessageBody() data: any) {
+
+      console.log('joinMatchmakingGame', data);
+   
     }
   
   }

@@ -16,6 +16,7 @@ export default class Player extends Rectangle
     score : number = 0;
     name : string = 'player';
     ready : boolean = false;
+    connected : boolean = false;
 
     constructor(_id : number, _name : string, _canvas : Size, _timer : Timer)
     {

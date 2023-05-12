@@ -3,6 +3,7 @@ export enum GameEvent {
 
     NONE = 'NONE',
 	CONNECT = 'CONNECT',
+    LEAVE = 'LEAVE',
 	MOVE = 'MOVE',
 	UPDATE = 'UPDATE',
     READY = 'READY'

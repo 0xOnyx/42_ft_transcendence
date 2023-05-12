@@ -37,13 +37,14 @@ export default class PongServer
     status : GameStatus = GameStatus.INIT;
     gutter : number = 20.0;
     renderPong : boolean = true;
-    scoreLimit : number = 10;
+    scoreLimit : number = 3;
     network : boolean = false;
     server : Server;
     networkMessage : NetMessage | null = null;
     change : Array<Function> = [];
     gameId : number = 0;
     room : string;
+    interval : any;
 
     constructor(_width : number, _height : number)
     {
@@ -75,6 +76,9 @@ export default class PongServer
 
         this.controllers.push(new Controller());
         this.controllers.push(new Controller());
+
+        this.addPlayer();
+        this.addPlayer();
 
         this.overBounds.push(new Bound(0,0,this.gutter,this.size.h));
         this.overBounds.push(new Bound(this.size.w - this.gutter,0,this.size.w,this.size.h));
@@ -185,14 +189,25 @@ export default class PongServer
         if(this.status == GameStatus.INIT)
             this.init();
 
-        setInterval(() => { this.gameLoop() } , 1000 / 60);
+        this.interval = setInterval(() => { this.gameLoop() } , 1000 / 60);
+    }
+
+    stop() : void
+    {
+        clearInterval(this.interval);
     }
 
     init() : void
     {
         this.ball.setPosition(this.size.w / 2, this.size.h / 2);
 
-        this.ball.vector.scalarMulti(.5);
+        if (this.ball.vector.x > 0) {
+            this.ball.vector.x = .5;
+            this.ball.vector.y = 0;
+        } else {
+            this.ball.vector.x = -.5;
+            this.ball.vector.y = 0;
+        }
 
         for (let index = 0; index < this.players.length; index++) {
             const player = this.players[index];
@@ -282,6 +297,8 @@ export default class PongServer
                 this.init();
             else
                 this.status = GameStatus.FINISHED;
+
+            this.emitChange();
         }
 
     }
@@ -370,6 +387,7 @@ export default class PongServer
     gameLoop() : void
     {
         this.update();
-        this.emitChange();
+        if (this.status != GameStatus.FINISHED)
+            this.emitChange();
     }
 }

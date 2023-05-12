@@ -166,6 +166,27 @@ export default class Pong
         // this.colliders.push(player);
     }
 
+    run() : void
+    {
+        if(this.status == GameStatus.INIT)
+            this.init();
+
+        this.interval = setInterval(() => { this.gameLoop() } , 1000 / 60);
+    }
+
+    stop() : void
+    {
+        let msg : NetMessage = new NetMessage();
+
+        msg.event = GameEvent.LEAVE;
+        msg.game_id = this.gameId;
+        msg.player = this.playerIndex;
+
+        this.socket.emit('eventGame', msg);
+
+        clearInterval(this.interval);
+    }
+
     setPlayerController(playerIndex: number) : Pong
     {
         this.playerIndex = playerIndex;
@@ -189,6 +210,7 @@ export default class Pong
 
         msg.event = GameEvent.CONNECT;
         msg.game_id = this.gameId;
+        msg.player = this.playerIndex;
 
         this.socket.emit('eventGame', msg);
 
