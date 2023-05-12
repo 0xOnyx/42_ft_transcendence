@@ -10,7 +10,7 @@ export class GameService {
     
     find(id: number) 
     {
-        return this.prismaGameService.find({id : id});
+        return this.prismaGameService.find(id);
     }
 
     get()

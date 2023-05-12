@@ -10,6 +10,12 @@ export class GameService
 
     }
 
+    /**
+     * create a new game
+     *
+     * @param user_id
+     * @returns
+     */
     async create(user_id: number) : Promise<number|null>
     {
         const params = {
@@ -36,7 +42,28 @@ export class GameService
         return Promise.resolve(game.id);
     }
 
+    /**
+     * Get the game id
+     *
+     * @param game_id
+     * @returns
+     */
+    async get (game_id : number) : Promise<Game|null>
+    {
+        let res: Response = await fetch(`${PUBLIC_API_URI}/games/${game_id}`, {
+            method: 'GET',
+            credentials: 'include',
+        });
 
+        if (res.status != 200)
+        {
+            console.error((await res.json()).message[0]);
+            return Promise.resolve(null);
+        }
+
+        let game : Game = <Game>await res.json();
+        return Promise.resolve(game);
+    }
 
 }
 

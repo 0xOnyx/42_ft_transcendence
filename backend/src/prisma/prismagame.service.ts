@@ -11,8 +11,9 @@ export class PrismaGameService {
      * @param params specifiy ine 
      * @returns 
      */
-    async find(query: Prisma.GameWhereUniqueInput) {
+    async find(game_id: number) {
         
+        let query : Prisma.GameWhereUniqueInput = {id : game_id};
         return this.prisma.game.findUnique({
             where: query
         });
@@ -62,6 +63,15 @@ export class PrismaGameService {
     {
         return this.prisma.game.delete({
             where: where
+        });
+    }
+
+
+    async update(game: Game)
+    {
+        return this.prisma.game.update({
+            where: { id: game.id },
+            data: game
         });
     }
 
