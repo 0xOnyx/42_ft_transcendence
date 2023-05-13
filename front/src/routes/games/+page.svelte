@@ -1,32 +1,117 @@
 <script lang="ts">
-    import {onMount} from "svelte";
-    import type { PageData } from './$types';
-
+    import {onDestroy, onMount} from "svelte";
     import NavBar from '../../components/NavBar.svelte';
     import Icon from '../../components/Icon.svelte';
     import type {User} from '../../types/user';
-
-    import  userservice from '../../services/UserService';
+    import userservice from '../../services/UserService';
 	import Checkbox from "../../components/Checkbox.svelte";
 	import ItemName from "../../components/Itemname.svelte";
 	import GamesType from "../../components/GamesType.svelte";
+	import gameservice from "../../services/GameService";
+	import { goto } from "$app/navigation";
+	import { Socket, io } from "socket.io-client";
+	import Popup from "../../components/Popup.svelte";
+	import type { GameTypeSelection } from "../../types/game";
 
+    let socket : Socket;
     let user : User;
     let search_value : string = '';
     let friends : Array<User> = new Array;
     let search : Array<User> = new Array;
-    let closeWarningUnbanUser = -1;
     let join : boolean = false;
+    let hidePopup : boolean = true;
+    let gameType : GameTypeSelection | null = null;
+    let userSelection : User | null = null;
+    let refresh : boolean = false;
 
-    onMount(async () => {
+    async function searchUser()
+    {
+        search = await userservice.searchUser(search_value);
+    }
+
+    async function startGame()
+    {
+        if (gameType == null) {
+
+            hidePopup = false;
+
+        } else {
+
+            let user_two_id : undefined | number;
+
+            if (userSelection) {
+                user_two_id = userSelection.id;
+            }
+
+            let game_id : number | null = await gameservice.create(gameType.id, user.id, user_two_id);
+
+            if(game_id) {
+                goto("/games/" + game_id);
+            }
+
+        }
+
+    }
+
+    function selectUser(event: CustomEvent)
+    {
+        if (!userSelection) {
+            userSelection = event.detail;
+        } else {
+            if (userSelection.id == event.detail.id)
+                userSelection = null;
+            else
+                userSelection = event.detail;
+        }
+        refresh = !refresh;
+    }
+
+    function isSelectedUser(user : User) : boolean
+    {
+        if(userSelection && userSelection.id == user.id) {
+            return true;
+        }
+        else {
+            return false;
+        }
+
+    }
+
+    function joinMatchmakingGame()
+    {
+        join = !join;
+
+        if (join) {
+            socket.emit("joinMatchmakingGame", {user_id: user.id});
+        } else {
+            socket.emit("leaveMatchmakingGame", {user_id: user.id});
+        }
+
+    }
+
+	onMount(async () => {
+
+        // check if user is logged
+        if(! await userservice.isLogged())
+            await goto("/");
+
+        socket = io('/events', {
+                path: "/gamews/"
+        });
+
+        socket.on('gotoGame', (data : any) => {
+
+            console.log('gotoGame', data);
+
+            if (data.user_id == user.id)
+                goto("/games/" + data.game_id);
+
+        });
 
         user = await userservice.getCurrentUser();
         friends = await userservice.getFriends();
 
         async function test() {
-
-            console.log(await userservice.isLogged());
-
             console.log(await userservice.isLogged());
         }
 
@@ -34,30 +119,24 @@
 
     });
 
-    function alertme(event : CustomEvent)
-    {
-        alert(event.detail.checked);
-    }
+    onDestroy(async () => {
 
-    async function searchUser()
-    {
-        search = await userservice.searchUser(search_value);
-    }
+        if (join) {
+            socket.emit("leaveMatchmakingGame", {user_id: user.id});
+        }
 
-    function startGame()
-    {
-        document.location.href = "/games/1";
-    }
+        socket.close();
 
-    function joinGame()
-    {
-        join = !join;
-    }
+    });
 
 </script>
 
 
 <NavBar user={user} />
+
+{#if !hidePopup}
+    <Popup on:closePopUp={() => { hidePopup = true }} title="Error" description="Please select a game type" ></Popup>
+{/if}
 
 <div class="h-full py-7 md:py-10 xl:py-10">
 
@@ -71,18 +150,27 @@
 
                     <div class="relative lg:flex lg:w-1/3 mx-5">
 
-						<div class="lg:flex lg:flex-col grow my-10 lg:ml-10 bg-thread-blue">
+						<div class="lg:flex lg:flex-col grow my-10 lg:ml-10 bg-thread-blue  rounded-xl">
 							<h2 class="mt-10">Join server</h2>
-                            <div class="lg:grow m-5 bg-color5">
+                            <div class="lg:grow m-5 bg-color5 rounded-xl">
 
                                 <div class="p-5">
-                                    Wait for a game...
+                                    {#if join}
+
+                                        Wait for a game...
+
+                                    {:else}
+
+                                        Press the button join to wait a game in matchmaking
+
+                                    {/if}
+
                                 </div>
 
                             </div>
                             <div class="p-5">
 
-                                <button  on:click={joinGame} class="bg-color2 border-2 border-color2 px-8 py-1 w-full rounded-md text-black flex">
+                                <button  on:click={joinMatchmakingGame} class="bg-color2 border-2 border-color2 px-8 py-1 w-full rounded-md text-black flex">
                                     <div class="flex items-center"><Checkbox disable={true} checked={join}></Checkbox></div>
                                     <div class="flex-grow">Join</div>
                                 </button>
@@ -94,7 +182,7 @@
 
 					<div class="relative lg:flex lg:w-2/3 mx-5">
 
-						<div class="lg:flex lg:flex-col grow my-10 lg:mr-10 bg-thread-blue">
+						<div class="lg:flex lg:flex-col grow my-10 lg:mr-10 bg-thread-blue rounded-xl">
                             <h2 class="mt-10">New game</h2>
                             <div class="lg:grow m-5 grid grid-cols-2">
 
@@ -106,7 +194,7 @@
                                     </h2>
 
                                     <div class="mt-2 overflow-auto">
-                                        <GamesType></GamesType>
+                                        <GamesType on:change={(event) => { gameType = event.detail.gameType }}></GamesType>
                                     </div>
 
                                 </div>
@@ -128,7 +216,9 @@
                                                 <p>NO FRIEND</p>  <!-- CREATE THIS -->
                                             {:else}
                                                 {#each friends as friend}
-                                                    <ItemName requestBlock={()=>{closeWarningUnbanUser=friend.id}} user={friend}></ItemName>
+                                                    {#key refresh}
+                                                        <ItemName user={friend} on:userClicked={selectUser} checkbox={true} checked={isSelectedUser(friend)}></ItemName>
+                                                    {/key}
                                                 {/each}
                                             {/if}
                                         {:else}
@@ -136,7 +226,9 @@
                                                 <p>no user found :/</p>  <!-- CREATE THIS -->
                                             {:else}
                                                 {#each search as user}
-                                                    <ItemName requestBlock={()=>{closeWarningUnbanUser=user.id}} user={user}></ItemName>
+                                                    {#key refresh}
+                                                        <ItemName user={user} on:userClicked={selectUser} checkbox={true} checked={isSelectedUser(user)}></ItemName>
+                                                    {/key}
                                                 {/each}
                                             {/if}
                                         {/if}
@@ -147,7 +239,7 @@
 
                             <div class="p-5">
 
-                                <button on:click={startGame} class="bg-color2 border-2 border-color2 px-8 py-1 w-full rounded-md inline-block text-black">Start</button>
+                                <button on:click={startGame} class="bg-color2 border-2 border-color2 px-8 py-1 w-full rounded-md inline-block text-black">Start {#if gameType} {gameType.name} {#if userSelection} with {userSelection.name} {:else} with someone {/if} {/if}</button>
 
                             </div>
 

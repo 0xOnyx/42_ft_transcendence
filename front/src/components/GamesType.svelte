@@ -1,10 +1,11 @@
 <script lang="ts">
+	import type { GameTypeSelection } from "../types/game";
 	import Checkbox from "./Checkbox.svelte";
     import { createEventDispatcher, onMount } from 'svelte';
 
     const dispatch = createEventDispatcher();
 
-    export let gametype : string = "classic";
+    export let gametype : GameTypeSelection | null = null;
     export let disable : boolean = false;
     let refresh : boolean = false;
 
@@ -13,17 +14,12 @@
     onMount(async () => {
         games = [
             {
-                "id": "classic",
+                "id": "CLASSIC",
                 "name" : "Classic pong",
                 "checked" : false
             },
             {
-                "id": "nuclear",
-                "name" : "Nuclear Pong",
-                "checked" : false
-            },
-            {
-                "id": "blackhole",
+                "id": "BLACKHOLE",
                 "name" : "Blackhole Pong",
                 "checked" : false
             }
@@ -55,13 +51,14 @@
     function onChange(game : any)
     {
         if(game.checked)
-            gametype = game.id;
+            gametype = game;
         else
-            gametype = "";
+            gametype = null;
+
 		dispatch('change', {
-			"gametype": game.id
+			"gameType": gametype
 		});
-        console.log(games);
+
         refresh = !refresh;
     }
 </script>

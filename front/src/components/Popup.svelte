@@ -10,7 +10,7 @@
     export let title : string = 'Modale Title';
 	export let description : string = 'Modale description';
     export let placeholder : string = 'Placeholder';
-	export let user : User;
+	export let user : User | null = null;
     export let secret : string = "Base32 token"
 
     let fileinput: HTMLInputElement;

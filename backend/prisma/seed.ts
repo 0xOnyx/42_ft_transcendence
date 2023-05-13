@@ -39,7 +39,7 @@ async function main()
         email: faker.internet.email(),
         first_name: faker.name.firstName(),
         last_name: faker.name.lastName(),
-        image_url: 'image/default.png',
+        image_url: faker.image.imageUrl(),
         oauth_42_login: faker.word.adjective(),
         oauth_42_id: init_id,
         last_login: faker.date.between('2020-01-01T00:00:00.000Z', '2023-01-01T00:00:00.000Z'),
