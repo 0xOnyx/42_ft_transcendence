@@ -4,7 +4,7 @@
 	import UserStat from '../../../components/UserStat.svelte';
 	import UserInfo from '../../../components/UserInfo.svelte';
 	import NavBar from '../../../components/NavBar.svelte';
-    import Pong from "../../../pong/src/classic/pong";
+    import Pong, { GameStatus } from "../../../pong/src/classic/pong";
     import { page } from '$app/stores';
 	import { onDestroy, onMount } from 'svelte';
 	import gameservice from "../../../services/GameService";
@@ -82,6 +82,16 @@
             pong.connectGame(parseInt($page.params.id));
 
             pong.run();
+
+            pong.addChangeListener((pong : Pong) => {
+
+                if (pong.status == GameStatus.FINISHED) {
+                    if (pong.controllers.space()) {
+                        goto('/games');
+                    }
+                }
+
+            });
 
             socket.on('eventGame', (data : any) => {
                 pong?.setNetworkMessage(data);
