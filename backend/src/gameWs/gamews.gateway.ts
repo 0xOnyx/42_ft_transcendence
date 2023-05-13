@@ -246,9 +246,32 @@ type matchmakingPlayer = {socket : Socket, user_id : number}
      * @param payload 
      */
     @OnEvent('game.create')
-    gameCreate(payload: any) {
+    gameCreate(game: Game) {
 
-      this.server.emit('createGame', payload);
+      // if the player two is not set
+      if (game.player_two_id === null)
+      {
+
+        // check if exists a soon another player in match making
+        if (this.matchmakings.length > 0) {
+
+          // dont join same user
+          if (this.matchmakings[0].user_id != game.player_one_id)
+          {
+            const player : matchmakingPlayer = <matchmakingPlayer>this.matchmakings.shift();
+
+            game.player_two_id = player.user_id;
+
+            this.prismaGameService.update(game);
+            
+            this.server.emit('gotoGame', { user_id : game.player_two_id, game_id : game.id });
+            this.server.emit('gotoGame', { user_id : game.player_one_id, game_id : game.id });
+
+          }
+
+        }
+
+      }
 
     }
 
@@ -304,10 +327,8 @@ type matchmakingPlayer = {socket : Socket, user_id : number}
   
             const game : Game = await this.gameService.create(TypeGame.CLASSIC, player.user_id, data.user_id);
             
-            console.log({ user_id : data.user_id, game_id :  game.id });
-            this.server.emit('gotoGame', { user_id : data.user_id, game_id :  game.id });
-            console.log({ user_id : player.user_id, game_id :  game.id });
-            this.server.emit('gotoGame', { user_id : player.user_id, game_id :  game.id });
+            this.server.emit('gotoGame', { user_id : data.user_id, game_id :   game.id });
+            this.server.emit('gotoGame', { user_id : player.user_id, game_id : game.id });
             
             return;
 
@@ -328,7 +349,6 @@ type matchmakingPlayer = {socket : Socket, user_id : number}
         if (!exists) {
           this.matchmakings.push({socket : client, user_id : data.user_id});
         }
-
       
       }
     }
