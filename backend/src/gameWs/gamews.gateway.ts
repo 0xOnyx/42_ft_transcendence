@@ -14,7 +14,11 @@ import { GameEvent } from 'src/pong/src/classic/message';
 import { NetMessagePlayerMove } from 'src/pong/src/classic/message';
 import PongServer, { GameStatus } from 'src/pong/src/classic/pongserver';
 import { PrismaGameService } from 'src/prisma/prismagame.service';
-import { Game, StatusGame } from '@prisma/client';
+import { Game, StatusGame, TypeGame } from '@prisma/client';
+import { GameService } from 'src/game/game.service';
+
+
+type matchmakingPlayer = {socket : Socket, user_id : number}
 
   @Injectable()
   @WebSocketGateway({
@@ -23,12 +27,23 @@ import { Game, StatusGame } from '@prisma/client';
   })
   export class GameWsGateway {
 
+    /**
+     * The websocket server
+     */
     @WebSocketServer()
     server: Server;
 
+    /**
+     * list of active pong server
+     */
     pongs: Map<string, PongServer> = new Map;
 
-    constructor(private prismaGameService: PrismaGameService) {}
+    /**
+     * list of user wait matchmaking
+     */
+    matchmakings: Array<matchmakingPlayer> = [];
+
+    constructor(private prismaGameService: PrismaGameService, private gameService : GameService) {}
 
     async handleDisconnect(client: Socket) 
     {
@@ -118,6 +133,10 @@ import { Game, StatusGame } from '@prisma/client';
       else {
         pong = <PongServer>this.pongs.get(room_name);
       }
+
+      this.server.in(room_name).emit('joinGame',
+        game
+      );
 
     }
 
@@ -234,19 +253,84 @@ import { Game, StatusGame } from '@prisma/client';
     }
 
 
+    /**
+     * leave the matchmaking
+     * 
+     * @param data { user_id : integer }
+     */
     @SubscribeMessage('leaveMatchmakingGame')
     leaveMatchmaking(@MessageBody() data: any) {
 
       console.log('leaveMatchmakingGame', data);
-   
+
+      for (let index = 0; index < this.matchmakings.length; index++) {
+        const element = this.matchmakings[index];
+        if (element.user_id == data.user_id) {
+          this.matchmakings.splice(index, 1);
+        }
+      }
+
     }
 
+    /**
+     * join a matchmaking
+     * 
+     * @param data { user_id : integer }
+     */
     @SubscribeMessage('joinMatchmakingGame')
-    joinMatchmaking(@MessageBody() data: any) {
+    async joinMatchmaking(@MessageBody() data: any, @ConnectedSocket() client: Socket) {
 
       console.log('joinMatchmakingGame', data);
-   
-    }
+
+      // check if exists a game without player two
+      let games : Array<Game> = await this.prismaGameService.search({ status : StatusGame.READY, player_two: null, NOT : { player_one_id : data.user_id } } );
+      
+      if (games.length > 0) {
+
+        games[0].player_two_id = data.user_id;
+        this.prismaGameService.update(games[0]);
+
+        this.server.emit('gotoGame', { user_id: data.user_id, game_id : games[0].id });
+
+      } else {
+
+        // check if exists a soon another player in match making
+        if (this.matchmakings.length > 0) {
+
+          // dont join same user
+          if (this.matchmakings[0].user_id != data.user_id)
+          {
+            const player : matchmakingPlayer = <matchmakingPlayer>this.matchmakings.shift();
   
+            const game : Game = await this.gameService.create(TypeGame.CLASSIC, player.user_id, data.user_id);
+            
+            console.log({ user_id : data.user_id, game_id :  game.id });
+            this.server.emit('gotoGame', { user_id : data.user_id, game_id :  game.id });
+            console.log({ user_id : player.user_id, game_id :  game.id });
+            this.server.emit('gotoGame', { user_id : player.user_id, game_id :  game.id });
+            
+            return;
+
+          }
+
+        } 
+
+        let exists : boolean = false;
+
+        for (let index = 0; index < this.matchmakings.length; index++) {
+          const element = this.matchmakings[index];
+          if (element.user_id == data.user_id) {
+            exists = true;
+            break;
+          }
+        }
+
+        if (!exists) {
+          this.matchmakings.push({socket : client, user_id : data.user_id});
+        }
+
+      
+      }
+    }
   }
   

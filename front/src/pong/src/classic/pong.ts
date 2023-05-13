@@ -11,7 +11,7 @@ import Bound from './bound';
 import Text from './text';
 import Dash from './dash';
 import { GameEvent, NetMessage, NetMessagePlayerMove, NetMessageState } from './message';
-import { Socket } from 'socket.io-client';
+import { type Socket } from 'socket.io-client';
 
 export enum GameStatus {
 
@@ -52,8 +52,9 @@ export default class Pong
     gameId : number = 0;
     interval : any;
 
-    constructor(_width : number, _height : number, _context : CanvasRenderingContext2D | null | undefined)
+    constructor(_width : number, _height : number, _context : CanvasRenderingContext2D | null | undefined, socket : Socket)
     {
+        this.socket = socket;
         this.context = <CanvasRenderingContext2D>_context;
 
         this.size = new Size(_width, _height);

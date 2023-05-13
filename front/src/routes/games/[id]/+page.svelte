@@ -12,6 +12,7 @@
 	import gameservice from "../../../services/GameService";
 	import { loop } from "svelte/internal";
 	import userservice from "../../../services/UserService";
+	import GamesType from "../../../components/GamesType.svelte";
 
     let socket : Socket;
     let canvas : HTMLCanvasElement;
@@ -45,29 +46,38 @@
         {
             socket.emit("joinGame", {game_id: $page.params.id, user_id: user.id})
 
-            console.log(game);
+            socket.on("joinGame", async (game : GamesType) => {
 
-            pong = (new Pong(800, 500, canvas.getContext('2d')));
-
-            if (game.player_one_id === user.id) {
-                console.log(user.id);
-                pong.setPlayerController(0);
-                userOne = user;
-            }
-
-            if (game.player_two_id === user.id) {
-                pong.setPlayerController(1);
-                userTwo = user;
-            } else {
-
-                if (game.player_two_id) {
-                    userTwo = await userservice.getUser(game.player_two_id);
+                if (game.player_one_id === user.id) {
+                    userOne = user;
+                } else {
+                    if (game.player_one_id) {
+                        userOne = await userservice.getUser(game.player_one_id);
+                    }
                 }
 
+                if (game.player_two_id === user.id) {
+                    userTwo = user;
+                } else {
+                    if (game.player_two_id) {
+                        userTwo = await userservice.getUser(game.player_two_id);
+                    }
+                }
+
+            });
+
+            console.log(game);
+
+            pong = (new Pong(800, 500, canvas.getContext('2d'), socket));
+
+            if (game.player_one_id === user.id) {
+                pong.setPlayerController(0);
+            }
+            if (game.player_two_id === user.id) {
+                pong.setPlayerController(1);
             }
 
-            pong.setSocket(socket)
-                .connectGame(parseInt($page.params.id));
+            pong.connectGame(parseInt($page.params.id));
 
             pong.run();
 

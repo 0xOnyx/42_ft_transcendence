@@ -53,6 +53,15 @@
                 path: "/gamews/"
         });
 
+        socket.on('gotoGame', (data : any) => {
+
+            console.log('gotoGame', data);
+
+            if (data.user_id == user.id)
+                goto("/games/" + data.game_id);
+
+        });
+
         user = await userservice.getCurrentUser();
         friends = await userservice.getFriends();
 
@@ -91,12 +100,21 @@
 
                     <div class="relative lg:flex lg:w-1/3 mx-5">
 
-						<div class="lg:flex lg:flex-col grow my-10 lg:ml-10 bg-thread-blue">
+						<div class="lg:flex lg:flex-col grow my-10 lg:ml-10 bg-thread-blue  rounded-xl">
 							<h2 class="mt-10">Join server</h2>
-                            <div class="lg:grow m-5 bg-color5">
+                            <div class="lg:grow m-5 bg-color5 rounded-xl">
 
                                 <div class="p-5">
-                                    Wait for a game...
+                                    {#if join}
+
+                                        Wait for a game...
+
+                                    {:else}
+
+                                        Press the button join to wait a game in matchmaking
+
+                                    {/if}
+
                                 </div>
 
                             </div>
@@ -114,7 +132,7 @@
 
 					<div class="relative lg:flex lg:w-2/3 mx-5">
 
-						<div class="lg:flex lg:flex-col grow my-10 lg:mr-10 bg-thread-blue">
+						<div class="lg:flex lg:flex-col grow my-10 lg:mr-10 bg-thread-blue rounded-xl">
                             <h2 class="mt-10">New game</h2>
                             <div class="lg:grow m-5 grid grid-cols-2">
 
