@@ -233,7 +233,7 @@ export default class PongServer
         let ret = false;
         if(this.status == GameStatus.WAIT)
         {
-            if (this.players[0].ready || this.players[1].ready )
+            if (this.players[0].ready && this.players[1].ready )
             {
                 this.status = GameStatus.RUN;
                 ret = true;
