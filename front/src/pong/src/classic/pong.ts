@@ -358,6 +358,14 @@ export default class Pong
             }
         }
 
+        if (this.status === GameStatus.FINISHED)
+        {
+            let txt : Text = new Text();
+            txt.setPosition(this.size.w / 2, this.size.h / 2);
+            txt.content = <string>'GAME OVER';
+            txt.draw(this.context);
+        }
+
         for (let index = 0; index < this.meshes.length; index++) {
             const mesh = this.meshes[index];
             mesh.draw(this.context);
