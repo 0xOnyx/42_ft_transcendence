@@ -7,8 +7,9 @@ export class PrismaGameService {
     constructor(private prisma: PrismaService) {}
 
     /**
+     * get first game with id
      * 
-     * @param params specifiy ine 
+     * @param game_id id of game
      * @returns 
      */
     async find(game_id: number) {
@@ -20,6 +21,27 @@ export class PrismaGameService {
 
     }
 
+    /**
+     * search any game with query
+     * 
+     * @param query 
+     * @returns 
+     */
+    async search(query: Prisma.GameWhereInput) {
+        
+        return this.prisma.game.findMany({
+            where: query
+        });
+
+    }
+
+    /**
+     * get all specified game defined with query 
+     * 
+     * @param where 
+     * @param include 
+     * @returns 
+     */
     async get(
         where?: Prisma.GameWhereUniqueInput,
         include?: Prisma.GameInclude) {
@@ -29,6 +51,14 @@ export class PrismaGameService {
         });
     }
 
+    /**
+     * create a new game
+     * 
+     * @param map_type 
+     * @param player_one_id 
+     * @param player_two_id 
+     * @returns 
+     */
     async create(map_type: TypeGame, 
                 player_one_id : number,
                 player_two_id? : number) {
@@ -59,6 +89,12 @@ export class PrismaGameService {
 
     }
 
+    /**
+     * delete a game
+     * 
+     * @param where 
+     * @returns 
+     */
     async delete(where: Prisma.GameWhereUniqueInput)
     {
         return this.prisma.game.delete({
@@ -67,6 +103,12 @@ export class PrismaGameService {
     }
 
 
+    /**
+     * update a game 
+     * 
+     * @param game 
+     * @returns 
+     */
     async update(game: Game)
     {
         return this.prisma.game.update({
