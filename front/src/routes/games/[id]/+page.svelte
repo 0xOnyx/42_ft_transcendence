@@ -5,12 +5,13 @@
 	import UserInfo from '../../../components/UserInfo.svelte';
 	import NavBar from '../../../components/NavBar.svelte';
     import Pong, { GameStatus } from "../../../pong/src/classic/pong";
+	import PongBlackhole from "../../../pong/src/classic/pong.blackhole";
     import { page } from '$app/stores';
 	import { onDestroy, onMount } from 'svelte';
 	import gameservice from "../../../services/GameService";
 	import userservice from "../../../services/UserService";
-	import type GamesType from "../../../components/GamesType.svelte";
 	import { goto } from "$app/navigation";
+	import { GameType, type Game } from "../../../types/game";
 
     let socket : Socket;
     let canvas : HTMLCanvasElement;
@@ -48,7 +49,7 @@
         {
             socket.emit("joinGame", {game_id: $page.params.id, user_id: user.id})
 
-            socket.on("joinGame", async (game : GamesType) => {
+            socket.on("joinGame", async (game : Game) => {
 
                 if (game.player_one_id === user.id) {
                     userOne = user;
@@ -70,34 +71,43 @@
 
             console.log(game);
 
-            pong = (new Pong(800, 500, canvas.getContext('2d'), socket));
-
-            if (game.player_one_id === user.id) {
-                pong.setPlayerController(0);
+            if (game.map_type == GameType.CLASSIC) {
+                pong = <Pong>(new Pong(800, 500, canvas.getContext('2d'), socket));
             }
-            if (game.player_two_id === user.id) {
-                pong.setPlayerController(1);
+            if (game.map_type == GameType.BLACKHOLE) {
+                pong = <Pong>(new PongBlackhole(800, 500, canvas.getContext('2d'), socket));
             }
 
-            pong.connectGame(parseInt($page.params.id));
-
-            pong.run();
-
-            pong.addChangeListener((pong : Pong) => {
-
-                if (pong.status == GameStatus.FINISHED) {
-                    if (pong.controllers.space()) {
-                        goto('/games');
-                    }
+            if (pong)
+            {
+                if (game.player_one_id === user.id) {
+                    pong.setPlayerController(0);
+                }
+                if (game.player_two_id === user.id) {
+                    pong.setPlayerController(1);
                 }
 
-            });
+                pong.connectGame(parseInt($page.params.id));
 
-            socket.on('eventGame', (data : any) => {
-                pong?.setNetworkMessage(data);
-            });
+                pong.run();
 
-            user = await userservice.getCurrentUser();
+                pong.addChangeListener((pong : Pong) => {
+
+                    if (pong.status == GameStatus.FINISHED) {
+                        if (pong.controllers.space()) {
+                            goto('/games');
+                        }
+                    }
+
+                });
+
+                socket.on('eventGame', (data : any) => {
+                    pong?.setNetworkMessage(data);
+                });
+
+                user = await userservice.getCurrentUser();
+
+            }
 
         }
 
