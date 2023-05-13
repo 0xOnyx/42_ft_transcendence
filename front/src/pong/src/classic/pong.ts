@@ -115,7 +115,7 @@ export default class Pong
     emitChange()
     {
         for (let index = 0; index < this.change.length; index++) {
-            this.change[index]();
+            this.change[index](this);
         }
     }
 
@@ -274,7 +274,20 @@ export default class Pong
 
                 }
             }
+        } else {
+
+            if (this.controllers.hasChange()) {
+
+                if (this.controllers.space()) {
+
+                    this.emitChange();
+
+                }
+            }
+
         }
+
+
     }
 
     checkBallMeshCollision(meshB : Mesh) : void
@@ -363,6 +376,12 @@ export default class Pong
             let txt : Text = new Text();
             txt.setPosition(this.size.w / 2, this.size.h / 2);
             txt.content = <string>'GAME OVER';
+            txt.draw(this.context);
+
+
+            txt.setPosition(this.size.w / 2, (this.size.h * 3) / 4);
+            txt.font_size = 32;
+            txt.content = <string>'Press space to continue';
             txt.draw(this.context);
         }
 
