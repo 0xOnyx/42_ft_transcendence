@@ -3,21 +3,26 @@
     import NavBar from '../../components/NavBar.svelte';
     import Icon from '../../components/Icon.svelte';
     import type {User} from '../../types/user';
-    import  userservice from '../../services/UserService';
+    import userservice from '../../services/UserService';
 	import Checkbox from "../../components/Checkbox.svelte";
 	import ItemName from "../../components/Itemname.svelte";
 	import GamesType from "../../components/GamesType.svelte";
 	import gameservice from "../../services/GameService";
 	import { goto } from "$app/navigation";
 	import { Socket, io } from "socket.io-client";
+	import Popup from "../../components/Popup.svelte";
+	import type { GameTypeSelection } from "../../types/game";
 
     let socket : Socket;
     let user : User;
     let search_value : string = '';
     let friends : Array<User> = new Array;
     let search : Array<User> = new Array;
-    let closeWarningUnbanUser = -1;
     let join : boolean = false;
+    let hidePopup : boolean = true;
+    let gameType : GameTypeSelection | null = null;
+    let userSelection : User | null = null;
+    let refresh : boolean = false;
 
     async function searchUser()
     {
@@ -26,10 +31,44 @@
 
     async function startGame()
     {
-        let game_id : number |null = await gameservice.create(user.id);
-        if(game_id) {
-            goto("/games/" + game_id);
+        if (gameType == null) {
+
+            hidePopup = false;
+
+        } else {
+
+            let game_id : number | null = await gameservice.create(user.id);
+
+            if(game_id) {
+                goto("/games/" + game_id);
+            }
+
         }
+
+    }
+
+    function selectUser(event: CustomEvent)
+    {
+        if (!userSelection) {
+            userSelection = event.detail;
+        } else {
+            if (userSelection.id == event.detail.id)
+                userSelection = null;
+            else
+                userSelection = event.detail;
+        }
+        refresh = !refresh;
+    }
+
+    function isSelectedUser(user : User) : boolean
+    {
+        if(userSelection && userSelection.id == user.id) {
+            return true;
+        }
+        else {
+            return false;
+        }
+
     }
 
     function joinMatchmakingGame()
@@ -89,6 +128,10 @@
 
 <NavBar user={user} />
 
+{#if !hidePopup}
+    <Popup on:closePopUp={() => { hidePopup = true }} title="Error" description="Please select a game type" ></Popup>
+{/if}
+
 <div class="h-full py-7 md:py-10 xl:py-10">
 
     <div class="lg:h-[85%] mx-[2%] self-center py-1">
@@ -145,7 +188,7 @@
                                     </h2>
 
                                     <div class="mt-2 overflow-auto">
-                                        <GamesType></GamesType>
+                                        <GamesType on:change={(event) => { gameType = event.detail.gameType }}></GamesType>
                                     </div>
 
                                 </div>
@@ -167,7 +210,9 @@
                                                 <p>NO FRIEND</p>  <!-- CREATE THIS -->
                                             {:else}
                                                 {#each friends as friend}
-                                                    <ItemName user={friend}></ItemName>
+                                                    {#key refresh}
+                                                        <ItemName user={friend} on:userClicked={selectUser} checkbox={true} checked={isSelectedUser(friend)}></ItemName>
+                                                    {/key}
                                                 {/each}
                                             {/if}
                                         {:else}
@@ -175,7 +220,9 @@
                                                 <p>no user found :/</p>  <!-- CREATE THIS -->
                                             {:else}
                                                 {#each search as user}
-                                                    <ItemName user={user}></ItemName>
+                                                    {#key refresh}
+                                                        <ItemName user={user} on:userClicked={selectUser} checkbox={true} checked={isSelectedUser(user)}></ItemName>
+                                                    {/key}
                                                 {/each}
                                             {/if}
                                         {/if}
@@ -186,7 +233,7 @@
 
                             <div class="p-5">
 
-                                <button on:click={startGame} class="bg-color2 border-2 border-color2 px-8 py-1 w-full rounded-md inline-block text-black">Start</button>
+                                <button on:click={startGame} class="bg-color2 border-2 border-color2 px-8 py-1 w-full rounded-md inline-block text-black">Start {#if gameType} {gameType.name} {#if userSelection} with {userSelection.name} {:else} with someone {/if} {/if}</button>
 
                             </div>
 
