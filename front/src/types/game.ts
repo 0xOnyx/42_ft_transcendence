@@ -13,3 +13,9 @@ export type Game =
     score_one: number;
     score_two: number;
 }
+
+export type GameTypeSelection = {
+    id: string,
+    name : string,
+    checked : boolean
+}
