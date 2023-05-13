@@ -37,7 +37,13 @@
 
         } else {
 
-            let game_id : number | null = await gameservice.create(user.id);
+            let user_two_id : undefined | number;
+
+            if (userSelection) {
+                user_two_id = userSelection.id;
+            }
+
+            let game_id : number | null = await gameservice.create(gameType.id, user.id, user_two_id);
 
             if(game_id) {
                 goto("/games/" + game_id);

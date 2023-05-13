@@ -16,11 +16,12 @@ export class GameService
      * @param user_id
      * @returns
      */
-    async create(user_id: number) : Promise<number|null>
+    async create(map_type: string, player_one_id: number, player_two_id: undefined | number) : Promise<number|null>
     {
         const params = {
-            map_type: 'CLASSIC',
-            player_one_id: user_id
+            map_type: map_type,
+            player_one_id: player_one_id,
+            player_two_id: player_two_id
         };
 
         let res: Response = await fetch(`${PUBLIC_API_URI}/games/create`, {
