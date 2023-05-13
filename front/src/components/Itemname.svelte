@@ -7,16 +7,17 @@
     import {Socket} from "socket.io-client";
 	import { imageUrl } from '../services/Utilities';
 	import { createEventDispatcher } from 'svelte';
+	import Checkbox from './Checkbox.svelte';
 
 	const dispatch = createEventDispatcher();
 
     //bg-green-600
     export let user : User;
+    export let checkbox : boolean = false;
+    export let checked : boolean = false;
 
 	async function handleClick() {
-		dispatch('userClicked', {
-			id: user.id
-		})
+		dispatch('userClicked', user )
 	}
 
     function getColor(status: Status)
@@ -30,7 +31,7 @@
     }
 </script>
 
-<div on:click={handleClick} class="cursor-pointer rounded-xl bg-color5 p-5 flex items-center mt-1">
+<button on:click={handleClick} class="cursor-pointer rounded-xl bg-color5 p-5 flex items-center mt-1 w-full">
 
     <div class="mx-2 flex-shrink">
         <div class="w-[40px] h-[40px] bg-cover  rounded-full mx-auto"
@@ -48,4 +49,8 @@
         </div>
     {/if}
 
-</div>
+    {#if checkbox}
+    <Checkbox disable={true} bind:checked={checked}></Checkbox>
+    {/if}
+
+</button>
