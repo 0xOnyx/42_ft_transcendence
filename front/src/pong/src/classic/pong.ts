@@ -371,8 +371,8 @@ export default class Pong
             mesh.draw(this.context);
         }
 
-        this.drawPlayerVector(this.players[0], -1);
-        this.drawPlayerVector(this.players[1], 1);
+        // this.drawPlayerVector(this.players[0], -1);
+        // this.drawPlayerVector(this.players[1], 1);
 
     }
 
