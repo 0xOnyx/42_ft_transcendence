@@ -5,14 +5,13 @@
 	import UserStat from '../../../components/UserStat.svelte';
 	import UserInfo from '../../../components/UserInfo.svelte';
 	import NavBar from '../../../components/NavBar.svelte';
-    import Pong, { GameStatus } from "../../../pong/src/classic/pong";
+    import Pong from "../../../pong/src/classic/pong";
     import { page } from '$app/stores';
 	import { onDestroy, onMount } from 'svelte';
-	import type { NetMessage } from "../../../pong/src/classic/message";
 	import gameservice from "../../../services/GameService";
-	import { loop } from "svelte/internal";
 	import userservice from "../../../services/UserService";
-	import GamesType from "../../../components/GamesType.svelte";
+	import type GamesType from "../../../components/GamesType.svelte";
+	import { goto } from "$app/navigation";
 
     let socket : Socket;
     let canvas : HTMLCanvasElement;
@@ -34,6 +33,10 @@
     let userTwo : User;
 
 	onMount(async () => {
+
+        // check if user is logged
+        if(! await userservice.isLogged())
+            await goto("/");
 
         socket = io('/events', {
                 path: "/gamews/"

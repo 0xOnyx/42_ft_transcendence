@@ -1,11 +1,8 @@
 <script lang="ts">
     import {onDestroy, onMount} from "svelte";
-    import type { PageData } from './$types';
-
     import NavBar from '../../components/NavBar.svelte';
     import Icon from '../../components/Icon.svelte';
     import type {User} from '../../types/user';
-
     import  userservice from '../../services/UserService';
 	import Checkbox from "../../components/Checkbox.svelte";
 	import ItemName from "../../components/Itemname.svelte";
@@ -48,6 +45,10 @@
     }
 
 	onMount(async () => {
+
+        // check if user is logged
+        if(! await userservice.isLogged())
+            await goto("/");
 
         socket = io('/events', {
                 path: "/gamews/"
