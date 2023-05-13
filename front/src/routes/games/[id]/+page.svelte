@@ -1,5 +1,4 @@
 <script lang="ts">
-    import {PUBLIC_API_URI} from "$env/static/public";
     import {io, type Socket} from "socket.io-client";
     import type {User, UserStats} from '../../../types/user';
 	import UserStat from '../../../components/UserStat.svelte';
