@@ -4,7 +4,7 @@ import Rectangle from './rectangle';
 import Timer from './timer';
 import Vector from './vector';
 import Player from './player';
-import Ball from './ball';
+import BallSphere from './ballsphere';
 import Size from './size';
 import Controller from './controller';
 import Bound from './bound';
@@ -12,6 +12,8 @@ import Text from './text';
 import Dash from './dash';
 import { GameEvent, NetMessage, NetMessagePlayerMove, NetMessageState } from './message';
 import { type Socket } from 'socket.io-client';
+import blackholeImage from '../../../storages/blackhole.jpg'
+import Blackhole from './blackhole';
 
 export enum GameStatus {
 
@@ -25,7 +27,7 @@ export enum GameStatus {
 
 }
 
-export default class Pong
+export default class PongBlackhole
 {
     context : CanvasRenderingContext2D;
     keyboard : Keyboard = new Keyboard();
@@ -35,7 +37,7 @@ export default class Pong
     players : Array<Player> = [];
     controllers : Controller;
     overBounds : Array<Bound> = [];
-    ball : Ball;
+    ball : BallSphere;
     size : Size;
     status : GameStatus = GameStatus.INIT;
     gutter : number = 20.0;
@@ -49,6 +51,8 @@ export default class Pong
     playerIndex : number = -1;
     gameId : number = 0;
     interval : any;
+    background : HTMLImageElement = new Image();
+    blackhole : Blackhole;
 
     constructor(_width : number, _height : number, _context : CanvasRenderingContext2D | null | undefined, socket : Socket)
     {
@@ -57,29 +61,35 @@ export default class Pong
 
         this.size = new Size(_width, _height);
 
-        this.ball = new Ball(this.size, this.timer);
+        this.ball = new BallSphere(this.size, this.timer);
+        this.ball.setColor('#f9e966');
 
         const rect_top : Rectangle = new Rectangle();
         rect_top.setSize(_width - 60.0, 10.0);
         rect_top.setPosition(30.0, 10.0);
-        rect_top.setColor('white');
+        rect_top.setColor('#000');
 
         this.colliders.push(rect_top);
 
         const rect_bottom : Rectangle = new Rectangle();
         rect_bottom.setSize(_width - 60.0, 10.0);
         rect_bottom.setPosition(30.0, this.size.h - 20.0);
-        rect_bottom.setColor('white');
+        rect_bottom.setColor('#000');
 
         const line : Dash = new Dash(this.size.w / 2, 10, this.size.w / 2, this.size.h - 10);
         line.setColor('white');
 
         this.colliders.push(rect_bottom);
 
+        this.blackhole = new Blackhole(this.timer);
+        this.blackhole.setPosition(this.size.w / 2, this.size.h / 2 + 10);
+
+
         this.meshes.push(rect_top);
         this.meshes.push(rect_bottom);
-        this.meshes.push(line);
+        // this.meshes.push(line);
         this.meshes.push(this.ball);
+        this.meshes.push(this.blackhole);
 
         this.overBounds.push(new Bound(0,0,this.gutter,this.size.h));
         this.overBounds.push(new Bound(this.size.w - this.gutter,0,this.size.w,this.size.h));
@@ -89,21 +99,23 @@ export default class Pong
 
         this.controllers = new Controller(this.keyboard);
 
+        this.background.src = blackholeImage;
+
     }
 
-    setSocket(socket: Socket) : Pong
+    setSocket(socket: Socket) : PongBlackhole
     {
         this.socket = socket;
         return this;
     }
 
-    setServer(serv: boolean) : Pong
+    setServer(serv: boolean) : PongBlackhole
     {
         this.server = serv;
         return this;
     }
 
-    addChangeListener(fn : Function) : Pong
+    addChangeListener(fn : Function) : PongBlackhole
     {
         this.change.push(fn);
         return this;
@@ -116,7 +128,7 @@ export default class Pong
         }
     }
 
-    setNetworkMessage(mes: NetMessage) : Pong
+    setNetworkMessage(mes: NetMessage) : PongBlackhole
     {
         if ( mes.event == GameEvent.UPDATE )
         {
@@ -153,10 +165,10 @@ export default class Pong
         if (this.players.length == 0)
         {
             player.setPosition(this.gutter, (this.size.h - player.size.h) / 2);
-            player.setColor('red');
+            player.setColor('#ffa233');
         } else {
             player.setPosition(this.size.w - this.gutter - player.size.w, (this.size.h - player.size.h) / 2);
-            player.setColor('yellow');
+            player.setColor('#ff7733');
         }
 
         this.players.push(player);
@@ -185,14 +197,14 @@ export default class Pong
         clearInterval(this.interval);
     }
 
-    setPlayerController(playerIndex: number) : Pong
+    setPlayerController(playerIndex: number) : PongBlackhole
     {
         this.playerIndex = playerIndex;
 
         return this;
     }
 
-    connectGame(game_id: number) : Pong
+    connectGame(game_id: number) : PongBlackhole
     {
 
         this.gameId = game_id;
@@ -338,15 +350,24 @@ export default class Pong
 
     clear() : void
     {
-        this.context.clearRect(0, 0, this.size.w, this.size.h);
+        //this.context.clearRect(0, 0, this.size.w, this.size.h);
+
+        this.context.drawImage(this.background, 0, 0, this.background.width, this.background.height);
+
     }
 
     draw() : void
     {
 
+        for (let index = 0; index < this.meshes.length; index++) {
+            const mesh = this.meshes[index];
+            mesh.draw(this.context);
+        }
+
         if (this.status === GameStatus.WAIT || this.status === GameStatus.RUN || this.status === GameStatus.FINISHED) {
             for (let index = 0; index < this.players.length; index++) {
                 let txt : Text = new Text();
+                txt.color = '#ff5533';
                 txt.setPosition(this.size.w / 4 + ((this.size.w / 2) * index), this.size.h / 4);
                 txt.content = <string>'' + this.players[index].score;
                 txt.draw(this.context);
@@ -358,6 +379,7 @@ export default class Pong
             for (let index = 0; index < this.players.length; index++) {
                 const playerReady = this.players[index];
                 let txt : Text = new Text();
+                txt.color = '#ff5533';
                 txt.setPosition(this.size.w / 4 + ((this.size.w / 2) * index), this.size.h / 2);
                 if (!playerReady.ready)
                     txt.content = <string>'PRESS SPACE';
@@ -370,20 +392,17 @@ export default class Pong
         if (this.status === GameStatus.FINISHED)
         {
             let txt : Text = new Text();
+            txt.color = '#ff5533';
             txt.setPosition(this.size.w / 2, this.size.h / 2);
             txt.content = <string>'GAME OVER';
             txt.draw(this.context);
 
 
             txt.setPosition(this.size.w / 2, (this.size.h * 3) / 4);
+            txt.color = '#ff5533';
             txt.font_size = 32;
             txt.content = <string>'Press space to continue';
             txt.draw(this.context);
-        }
-
-        for (let index = 0; index < this.meshes.length; index++) {
-            const mesh = this.meshes[index];
-            mesh.draw(this.context);
         }
 
         // this.drawPlayerVector(this.players[0], -1);

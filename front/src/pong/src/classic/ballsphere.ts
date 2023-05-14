@@ -1,10 +1,10 @@
-import Rectangle from './rectangle.js';
+import Sphere from './sphere.js';
 import type Timer from './timer.js';
 import type Size from './size.js';
 import Vector from './vector.js';
 import type { NetMessage } from './message.js';
 
-export default class Ball extends Rectangle
+export default class BallSphere extends Sphere
 {
     canvas : Size;
     timer : Timer;
@@ -18,13 +18,13 @@ export default class Ball extends Rectangle
         this.canvas = _canvas;
         this.timer = _timer;
 
-        this.setSize(10.0, 10.0);
+        this.setRadius(8.0);
         this.color = 'white';
 
         this.vector.x = 1;
         this.vector.y = 0;
 
-        this.origin = new Vector(this.size.w / 2, this.size.h / 2);
+        this.origin = new Vector(this.radius / 2, this.radius / 2);
     }
 
     getNextPosition() : Vector

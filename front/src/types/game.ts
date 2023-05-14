@@ -19,3 +19,8 @@ export type GameTypeSelection = {
     name : string,
     checked : boolean
 }
+
+export enum GameType {
+	CLASSIC = 'CLASSIC',
+	BLACKHOLE = 'BLACKHOLE'
+}
