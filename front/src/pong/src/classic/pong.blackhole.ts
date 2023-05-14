@@ -12,7 +12,8 @@ import Text from './text';
 import Dash from './dash';
 import { GameEvent, NetMessage, NetMessagePlayerMove, NetMessageState } from './message';
 import { type Socket } from 'socket.io-client';
-import blackhole from '../../../storages/blackhole.jpg'
+import blackholeImage from '../../../storages/blackhole.jpg'
+import Blackhole from './blackhole';
 
 export enum GameStatus {
 
@@ -51,6 +52,7 @@ export default class PongBlackhole
     gameId : number = 0;
     interval : any;
     background : HTMLImageElement = new Image();
+    blackhole : Blackhole;
 
     constructor(_width : number, _height : number, _context : CanvasRenderingContext2D | null | undefined, socket : Socket)
     {
@@ -79,10 +81,15 @@ export default class PongBlackhole
 
         this.colliders.push(rect_bottom);
 
+        this.blackhole = new Blackhole(this.timer);
+        this.blackhole.setPosition(this.size.w / 2, this.size.h / 2 + 10);
+
+
         this.meshes.push(rect_top);
         this.meshes.push(rect_bottom);
         // this.meshes.push(line);
         this.meshes.push(this.ball);
+        this.meshes.push(this.blackhole);
 
         this.overBounds.push(new Bound(0,0,this.gutter,this.size.h));
         this.overBounds.push(new Bound(this.size.w - this.gutter,0,this.size.w,this.size.h));
@@ -92,7 +99,7 @@ export default class PongBlackhole
 
         this.controllers = new Controller(this.keyboard);
 
-        this.background.src = blackhole;
+        this.background.src = blackholeImage;
 
     }
 
@@ -352,6 +359,11 @@ export default class PongBlackhole
     draw() : void
     {
 
+        for (let index = 0; index < this.meshes.length; index++) {
+            const mesh = this.meshes[index];
+            mesh.draw(this.context);
+        }
+
         if (this.status === GameStatus.WAIT || this.status === GameStatus.RUN || this.status === GameStatus.FINISHED) {
             for (let index = 0; index < this.players.length; index++) {
                 let txt : Text = new Text();
@@ -391,11 +403,6 @@ export default class PongBlackhole
             txt.font_size = 32;
             txt.content = <string>'Press space to continue';
             txt.draw(this.context);
-        }
-
-        for (let index = 0; index < this.meshes.length; index++) {
-            const mesh = this.meshes[index];
-            mesh.draw(this.context);
         }
 
         // this.drawPlayerVector(this.players[0], -1);
