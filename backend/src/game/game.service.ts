@@ -36,6 +36,11 @@ export class GameService {
         return game;
     }
 
+    async sendMessageInvite(game: Game)
+    {
+        this.eventEmitter.emit('invite_to_game', game);
+    }
+
     async delete(id: number)
     {
         const game : Game | null = await this.find(id);

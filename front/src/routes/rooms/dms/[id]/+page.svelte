@@ -144,6 +144,7 @@
         })
 
         socket.on("message", (data: {send_user_id: number, room_id: number, message: (Messages & {user: User}), message_type: string})=>{
+            console.log(data);
             if (data.room_id === id_room)
                 room_message.push(data.message);
             else

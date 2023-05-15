@@ -39,6 +39,9 @@ export class GameController {
             +body.player_one_id,
             body.player_two_id);
 
+        if (body.player_two_id)
+            await this.gameService.sendMessageInvite(game);
+
         if(game)
             return game;
          else
