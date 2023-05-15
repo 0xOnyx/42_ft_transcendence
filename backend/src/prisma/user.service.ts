@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
-import { User, Prisma} from '@prisma/client';
+import { User, Prisma, StatusGame} from '@prisma/client';
 
 @Injectable()
 export class UserService {
@@ -174,4 +174,26 @@ export class UserService {
 			}
 		})
 	}
+
+	async getGameHistory(user_where: Prisma.UserWhereUniqueInput)
+	{
+		return await this.prisma.game.findMany({
+			where: {
+				OR: [
+					{
+						player_one: user_where,
+					},
+					{
+						player_two: user_where,
+					}
+				],
+				status: StatusGame.FINISHED,
+			},
+			orderBy: {
+				created_at: Prisma.SortOrder.desc
+			}
+		})
+	}
+
+
 }
