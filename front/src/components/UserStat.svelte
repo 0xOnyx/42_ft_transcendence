@@ -2,8 +2,14 @@
 <script lang="ts">
 	import type { UserStats } from "../types/user";
 	import LeagueBadge from "./LeagueBadge.svelte";
+	import { createEventDispatcher } from "svelte";
 
+	const dispatch = createEventDispatcher();
     export let userstats : UserStats;
+
+	function showHistory() {
+		dispatch("showHistory");
+	}
 </script>
 
 
@@ -15,6 +21,7 @@
 
 	<p class="">Rank : <span>{userstats?.level || "loading.."}</span></p>
 
+	<button on:click={showHistory} class="rounded-full bg-thread-blue self-center p-3">History</button>
 	<div class="flex justify-center">
 		<LeagueBadge league={userstats?.league || "gold"} /> <!-- remove '|| "gold"' once userstats.league ok -->
 	</div>

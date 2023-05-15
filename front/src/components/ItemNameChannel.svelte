@@ -3,14 +3,19 @@
     import type {Rooms, RoomUser} from "../types/room";
     import {goto} from "$app/navigation"
     import {Socket} from "socket.io-client";
+	import { createEventDispatcher } from "svelte";
 
+	const dispatch = createEventDispatcher();
     //bg-green-600
     export let all_channels: Rooms[];
     export let channel : Rooms;
-    export let io: Socket;
-    export let requestPassword: Function;
+    export let io : Socket;
 
-
+	function requestPassword( id : number ) {
+		dispatch('requestPassword', {
+			id: id
+		})
+	}
 
     async function getRoom()
     {

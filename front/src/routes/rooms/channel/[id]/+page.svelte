@@ -30,6 +30,8 @@
     import PopUpAskPassword from "../../../../components/PopUpAskPassword.svelte";
     import PopUpAskTime from "../../../../components/PopUpAskTime.svelte";
 
+	import RoomList from '../../../../components/RoomList/RoomList.svelte';
+
     let id;
 
     const MAX_MESSAGE = 20
@@ -55,10 +57,17 @@
 
         let res: Response;
 
-        if (!await userservice.isLogged())
-            await goto("/");
+        if (!await userservice.isLogged()) {
+            await goto("/");}
 
-        user = await userservice.getCurrentUser();
+		const urlSegments = $page.url.toString().split('/');
+		console.log(urlSegments);
+
+		if (urlSegments.length < 5 || !(urlSegments[3] === 'rooms' && urlSegments[4] === 'channel')) {
+			console.log($page.url.toString());
+			return;
+		}
+		user = await userservice.getCurrentUser();
 
         res = await fetch(`${PUBLIC_API_URI}/user/friend`, {
             method: 'GET',
@@ -219,16 +228,6 @@
 
     })
 
-    let search : Rooms[] = [];
-    async function searchUser()
-    {
-        const res: Response = await fetch(`${PUBLIC_API_URI}/message/search/room?skip=0&take=8&element=name&value=${search_value}`, {
-            method: 'GET',
-            credentials: 'include'
-        });
-        search = await res.json();
-    }
-
     async function sendMessage()
     {
         if (message_value.length <= 0)
@@ -360,6 +359,10 @@
         currentRoomUserSelect = null;
     }
 
+	function handleRoomCreation() {
+		console.log("event received");
+		closePopupCreateRoom = true;
+	}
 
 </script>
 
@@ -427,172 +430,126 @@
                 buttonAccecpt={acceptUnbanUser} buttonDecline={()=>{closeWarningUnbanUser = -1}}></WarningAsk>
 {/if}
 
-{#if closePopupCreateRoom}
-    <PopUpCreateDm createRoom={createRoom} close={()=>{closePopupCreateRoom = false}}/>
-{/if}
-
 {#if closeRequestPassword > 0}
     <PopUpAskPassword joinChannel={joinChannel} close={()=>{closeRequestPassword = -1}}></PopUpAskPassword>
 {/if}
 
 
-<NavBar user={user} />
 
+<div class="flex-col">
+	<NavBar user={user} />
 
-<div class="h-full container md:py-5 xl:py-10 mx-auto">
+	<div class="flex py-2 landscape:py-0 md:py-10 xl:py-10">
 
-    <div class="h-[85%] bg-color3 self-center md:border-4 border-black rounded p-1 pb-3 xl:p-8">
+		<div class="h-[80vh] grow sm:h-screen mobile-landscape:h-screen w-full px-[5%] self-center py-1 grid overflow-hidden">
 
-        <div class="md:flex h-full text-center align-middle m-1">
-            <div class=" md:w-1/3 lg:w-1/4 md:flex md:flex-col justify-start justify-between">
-                <div class="  md:flex md:flex-col justify-start">
+			<div class="flex h-full sm:max-h-[85%] text-center align-middle m-1">
+				<div id="RoomList" class="grow w-1/4">
+				<RoomList 
+					dmList={false}
+					user={user}
+					socket={socket}
+					friends={friends}
+					connectedWs={connectedWs}
+					rooms={rooms}
+					id_room={id_room}/>
+				</div>
+				<div class="screen border-gray-700 shadow-lg shadow-black/50 bg-black/25 grow md:flex md:flex-col my-5 md:my-0 md:mx-5 xl:mx-8 overflow-auto rounded-xl w-1/2">
+					<div class="screen-overlay"></div>
+					<div bind:this={chatbox} class="relative overflow-x-hidden overflow-y-scroll scroll-smooth mt-3 flex-grow [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
 
+						{#if connectedWs}
+							<MessageItem socket={socket} user={user} message={room_message}></MessageItem>
+						{:else}
+							<p>CONNECTING WS..</p>
+						{/if}
 
-                    <div class="mt-2 flex mb-5">
+					</div>
 
-                        <div class="mt-2 md:w-1/2 md:pr-2"><Button width="w-full"  color="bg-color5 text-white border-2 border-color2" name="DM" url="/rooms/dms/last"></Button></div>
-                        <div class="mt-2 md:w-1/2 md:pl-2"><Button width="w-full"   name="Channel" url="/rooms/channel/last"></Button></div>
+					<div class="relative flex items-center border-1 p-8">
 
-                    </div>
+						<input disabled={rooms.length <= 0} autofocus on:keydown={(e)=>{e.key === "Enter" && sendMessage()}} bind:value={message_value} type="text" class="disabled:border-zinc-500  border-2 border-gray-700 bg-gray-500/75 rounded-md w-full p-2 pr-12 focus:outline-none" />
+						<div class="relative">
+							<button disabled={rooms.length <= 0} on:click={sendMessage} class="-top-4 -left-10 absolute disabled:bg-zinc-500 p-0 m-0 rounded-full"><Icon icon="send" css="inlinep-0 h-8 {rooms.length <= 0 ? 'stroke-zinc-500' : 'stroke-white' }  fill-gray-700"></Icon></button>
+						</div>
 
+					</div>
 
-                    <h2 class="text-left border-b-2 text-lg">Group list</h2>
+				</div>
 
-                    <div class="mt-2">
+				<div class="w-1/4 md:flex md:flex-col">
 
-                        <input class="w-full rounded-2xl py-1 px-3 bg-color5 focus:outline-none" type="text" bind:value={search_value} placeholder="Search" on:keyup={searchUser}>
-
-                    </div>
-
-                    <div class="overflow-auto mt-3">
-
-                        {#if search_value.length <= 0}
-                            {#if !connectedWs}
-                                <p>Loading..</p>
-                            {:else}
-                                {#if rooms.length <= 0}
-                                    <p>NO CHANNEL</p>  <!-- CREATE THIS -->
-                                {:else}
-                                    {#each rooms as room}
-                                       <ItemRoomChannel current={room.id === id_room} room={room}></ItemRoomChannel>
-                                    {/each}
-                                {/if}
-                            {/if}
-                        {:else}
-                            {#if search.length <= 0}
-                                <p>no channel found :/</p>  <!-- CREATE THIS -->
-                            {:else}
-                                {#each search as room}
-                                    <ItemNameChannel all_channels={rooms} requestPassword={(id)=>{closeRequestPassword = id}} io={socket} channel={room}></ItemNameChannel>
-                                {/each}
-                            {/if}
-                        {/if}
-
-                    </div>
-
-
-                </div>
-                <div class="mb-9" on:click={()=>{closePopupCreateRoom = true}} >
-                    <Button width="w-full" name="Create new Channel"></Button>
-                </div>
-            </div>
-
-            <div class="bg-color5 grow justify-around md:flex md:flex-col my-5 md:my-0 md:mx-5 xl:mx-8 overflow-auto rounded-xl">
-
-
-                <div bind:this={chatbox} class="overflow-x-hidden overflow-y-scroll scroll-smooth mt-3 flex-grow [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
-
-                    {#if connectedWs}
-                        <MessageItem socket={socket} user={user} message={room_message}></MessageItem>
-                    {:else}
-                        <p>CONNECTING WS..</p>
-                    {/if}
-
-                </div>
-
-                <div class="flex items-center border-1 p-8">
-
-                    <input disabled={rooms.length <= 0} autofocus on:keydown={(e)=>{e.key === "Enter" && sendMessage()}} bind:value={message_value} type="text" class="disabled:border-zinc-500  border border-color2 bg-color5 rounded-md w-full p-2 pr-12 focus:outline-none" />
-                    <div class="relative">
-                        <button disabled={rooms.length <= 0} on:click={sendMessage} class="-top-4 -left-10 absolute bg-color2 disabled:bg-zinc-500 p-0 m-0 rounded-xl"><Icon icon="send" css="inline p-0 h-8 {rooms.length <= 0 ? 'stroke-zinc-500' : 'stroke-color2' }  fill-white"></Icon></button>
-                    </div>
-
-                </div>
-
-            </div>
-
-            <div class="md:w-1/3 lg:w-1/4 md:flex md:flex-col">
-
-                {#if user}
-                    <UserNotification openWarning={()=>{closeWarningLeftChannel = true}} rooms={rooms} user={user}></UserNotification>
-                {:else}
-                    <p>LOADING..</p>
-                {/if}
+					{#if user}
+						<UserNotification openWarning={()=>{closeWarningLeftChannel = true}} rooms={rooms} user={user}></UserNotification>
+					{:else}
+						<p>LOADING..</p>
+					{/if}
 
 
 
-                <div class="overflow-auto mt-3 bg-color5 flex-grow  rounded-xl">
-                    {#if current_room_id >= 0 }
-                        <div class="mt-10">
-                            {#if currentRoomUserSelect}
-                                <button on:click={()=>{currentRoomUserSelect = null}}  class="bg-color2 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                                    ↩️ RETURN
-                                </button>
-                            {:else if rooms[current_room_id]?.user.find(element => element.role === RoleUser.ADMIN && element.user_id === user.id)}
-                                <ButtonElement title="Password room" on:clicker={()=>{closePassworRoom = true}}></ButtonElement>
-                                <ButtonElementWarning title="Delete room" on:clicker={()=>{closeDeleteRoom = true}}></ButtonElementWarning>
-                            {/if}
-                        </div>
-                    {/if}
+					<div class="overflow-auto mt-3 bg-color5 flex-grow  rounded-xl">
+						{#if current_room_id >= 0 }
+							<div class="mt-10">
+								{#if currentRoomUserSelect}
+									<button on:click={()=>{currentRoomUserSelect = null}}  class="bg-color2 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+										↩️ RETURN
+									</button>
+								{:else if rooms[current_room_id]?.user.find(element => element.role === RoleUser.ADMIN && element.user_id === user.id)}
+									<ButtonElement title="Password room" on:clicker={()=>{closePassworRoom = true}}></ButtonElement>
+									<ButtonElementWarning title="Delete room" on:clicker={()=>{closeDeleteRoom = true}}></ButtonElementWarning>
+								{/if}
+							</div>
+						{/if}
 
-                    <div class="mt-20">
+						<div class="mt-20">
 
-                        {#if current_room_id >= 0}
+							{#if current_room_id >= 0}
 
-                            {#if currentRoomUserSelect}
+								{#if currentRoomUserSelect}
 
-                                <UserInfo user={currentRoomUserSelect}></UserInfo>
+									<UserInfo user={currentRoomUserSelect}></UserInfo>
 
-                                <div>
-                                    <UserStat userstats={currentRoomUserSelect}></UserStat>
-                                </div>
+									<div>
+										<UserStat userstats={currentRoomUserSelect}></UserStat>
+									</div>
 
-                                <div>
-                                    {#if rooms[current_room_id]?.user.find(element => element.role === RoleUser.ADMIN && element.user_id === user.id)
-                                    && rooms[current_room_id]?.owner_id !== currentRoomUserSelect.id  && currentRoomUserSelect.id !== user.id}
-                                        {#if !rooms[current_room_id]?.user.find(element =>element.user_id === currentRoomUserSelect.id).ban}
-                                            <ButtonElement title="Kick" on:clicker={()=>{closeKickUser = true}}></ButtonElement>
-                                            <ButtonElement title="BanUser" on:clicker={()=>{closeBanUser = true}}></ButtonElement>
-                                            {#if rooms[current_room_id]?.user.find(element => element.role === RoleUser.ADMIN && element.user_id === currentRoomUserSelect.id)}
-                                                <ButtonElement title="UnsetAdmin" on:clicker={()=>{closeUnsetAdmin = true}}></ButtonElement>
-                                            {:else}
-                                                <ButtonElement title="SetAdmin" on:clicker={()=>{closeSetAdmin = true}}></ButtonElement>
-                                            {/if}
-                                            <ButtonElement title="MuteUser" on:clicker={()=>{closeMuteUser = true}}></ButtonElement>
-                                        {:else}
-                                            <ButtonElement title="Unban" on:clicker={()=>{closeUnBanUser = true}}></ButtonElement>
-                                        {/if}
-                                    {/if}
-                                </div>
-                            {:else if !rooms[current_room_id]?.user}
-                                <p>NO USER IN ROOMS</p>
-                            {:else if rooms[current_room_id]?.user.length > 0}
-                                {#each rooms[current_room_id]?.user as user}
-                                    <ItemRoomUserElement on:clicker={async ()=>{currentRoomUserSelect = await userservice.getUser(user.user_id)}} user={user}></ItemRoomUserElement>
-                                {/each}
-                            {/if}
-                        {:else}
-                            <p>NO CHANNEL SELECT</p>
-                        {/if}
-                    </div>
+									<div>
+										{#if rooms[current_room_id]?.user.find(element => element.role === RoleUser.ADMIN && element.user_id === user.id)
+										&& rooms[current_room_id]?.owner_id !== currentRoomUserSelect.id  && currentRoomUserSelect.id !== user.id}
+											{#if !rooms[current_room_id]?.user.find(element =>element.user_id === currentRoomUserSelect.id).ban}
+												<ButtonElement title="Kick" on:clicker={()=>{closeKickUser = true}}></ButtonElement>
+												<ButtonElement title="BanUser" on:clicker={()=>{closeBanUser = true}}></ButtonElement>
+												{#if rooms[current_room_id]?.user.find(element => element.role === RoleUser.ADMIN && element.user_id === currentRoomUserSelect.id)}
+													<ButtonElement title="UnsetAdmin" on:clicker={()=>{closeUnsetAdmin = true}}></ButtonElement>
+												{:else}
+													<ButtonElement title="SetAdmin" on:clicker={()=>{closeSetAdmin = true}}></ButtonElement>
+												{/if}
+												<ButtonElement title="MuteUser" on:clicker={()=>{closeMuteUser = true}}></ButtonElement>
+											{:else}
+												<ButtonElement title="Unban" on:clicker={()=>{closeUnBanUser = true}}></ButtonElement>
+											{/if}
+										{/if}
+									</div>
+								{:else if !rooms[current_room_id]?.user}
+									<p>NO USER IN ROOMS</p>
+								{:else if rooms[current_room_id]?.user.length > 0}
+									{#each rooms[current_room_id]?.user as user}
+										<ItemRoomUserElement on:clicker={async ()=>{currentRoomUserSelect = await userservice.getUser(user.user_id)}} user={user}></ItemRoomUserElement>
+									{/each}
+								{/if}
+							{:else}
+								<p>NO CHANNEL SELECT</p>
+							{/if}
+						</div>
 
 
-                </div>
+					</div>
 
-            </div>
+				</div>
 
-        </div>
+			</div>
 
-    </div>
+		</div>
 
+	</div>
 </div>

@@ -27,6 +27,7 @@
 
 	import { leftHanded } from "../../services/Stores";
 	import BlockUser from "../../components/BlockUser.svelte";
+	import { getRoom } from "../../services/Utilities";
 
     interface UserStats {
         played: number,
@@ -60,6 +61,7 @@
     let socket: Socket ;
 
 	let blockedList : boolean = false;
+	let history : boolean = false;
 
     let userstats : UserStats = {
         played : 42,
@@ -70,6 +72,8 @@
     }
 
 	$: userstats.ratio = Math.round(userstats.win / userstats.played * 100);
+
+    let closeWarningUnbanUser = -1;
 
     async function searchUser( e : CustomEvent )
     {
@@ -103,7 +107,7 @@
         friends = await userservice.getFriends();
 		locked = await userservice.getBlockedUsers();
 
-        socket = io('/events', {
+		socket = io('/events', {
             path: "/ws/"
         });
 
@@ -182,7 +186,7 @@
             _openUpdate = false;
         }
     }
-    let closeWarningUnbanUser = -1;
+
 
     async function acceptUnbanUser()
     {
@@ -192,49 +196,24 @@
             user_id: closeWarningUnbanUser
         });
         closeWarningUnbanUser = -1;
-		getRoom(id);
+		getRoom(id, socket);
     }
 
 	function unblockUser(e : CustomEvent) {
-		console.log("unblock path");
-		closeWarningUnbanUser = e.detail.id;
+		closeWarningUnbanUser = e.detail.user_id;
 	}
 
-	async function getRoom( id : number)
-    {
-		console.log("romm path");
-        const res: Response = await fetch(`${PUBLIC_API_URI}/message/getDmUser/${id}`, {
-            method: 'GET',
-            credentials: 'include'
-        });
-        let rooms: (Rooms & { user: RoomUser[] }) | undefined;
-        if (res.status == 204) {
-			let res: Response = await fetch(`${PUBLIC_API_URI}/user/isBlockedByMe/${id}`, {
-        	 method: 'GET',
-        	credentials: 'include'
-            });
-        	let status = await res.json();
-        	if (status) {
-				closeWarningUnbanUser = id;
-        	} else {
-				socket.emit("createDm", {user_id: id}, (rooms) => {
-					if (rooms)
-						goto(`/rooms/dms/${rooms.id}`);
-					})
-			}
-        }
-        if (res.status == 200) {
-            rooms = await res.json();
-            if (rooms)
-                await goto(`/rooms/dms/${rooms.id}`);
-
-        }
-	}
-
-	function itemClicked( e : CustomEvent) {
+	async function itemClicked( e : CustomEvent) {
 		const id : number = e.detail.id;
 		console.log("itemClicked:", id);
-		getRoom(id);
+		const unblockedUser = await getRoom(id, socket);
+		if (!unblockedUser) {
+			closeWarningUnbanUser = id;
+		}
+	}
+
+	function showHistory() {
+		history = true;
 	}
     //export let data: PageData;
 </script>
@@ -257,8 +236,11 @@
 </svelte:head>
 
 {#if closeWarningUnbanUser > 0}
-    <WarningAsk title="Ublock user" message="Do you want to unban this user ?."
-                buttonAccecpt={acceptUnbanUser} buttonDecline={()=>{closeWarningUnbanUser = -1}}></WarningAsk>
+    <WarningAsk title="Ublock user" 
+				message="Do you want to unban this user ?."
+                buttonAccecpt={acceptUnbanUser} 
+				buttonDecline={()=>{closeWarningUnbanUser = -1}}
+				on:unblockUser={unblockUser}></WarningAsk>
 {/if}
 {#if _openUpdate}
 <PopUp id="update" on:confirmPopUp={updateUser} on:closePopUp={updatePopUp} title="Modify username" placeholder="Username" />
@@ -315,15 +297,22 @@
 								</div>
 							</div>
 							{:else}
-							<div in:fade="{{ delay: 200, duration: 400 }}">
-							<div class="flex sm:flex-col mobile-landscape:flex-row justify-center gap-3">
-								<UserInfo portal={_openSettings} user={user} on:updateUserInfo={updatePopUp} />
-								<UserStat userstats={userstats} />
+								{#if history}
+								<div in:fade="{{ delay: 200, duration: 400 }}">
+									<p>Put history here</p>
+									<button on:click={()=> {history = false}}>Exit</button>
+								</div>
+								{:else}
+								<div in:fade="{{ delay: 200, duration: 400 }}">
+								<div class="flex sm:flex-col mobile-landscape:flex-row justify-center gap-3">
+									<UserInfo portal={_openSettings} user={user} on:updateUserInfo={updatePopUp} />
+									<UserStat userstats={userstats} on:showHistory={showHistory} />
+								</div>
+								<div class="max-h-32 overflow-scroll overscroll-contain">
+									<Achievement userstats={userstats} />
+								</div>
 							</div>
-							<div class="max-h-32 overflow-scroll overscroll-contain">
-								<Achievement userstats={userstats} />
-							</div>
-						</div>
+								{/if}
 							{/if}
 						</div>
 

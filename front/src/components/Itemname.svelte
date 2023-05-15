@@ -21,30 +21,25 @@
     function getColor(status: Status)
     {
         if (status == Status.OFFLINE)
-            return "bg-zinc-600";
+            return "border-zinc-600";
         else if (status == Status.HIDDEN)
-            return "bg-rose-600";
+            return "border-rose-600";
         else if (status == Status.ONLINE)
-            return "bg-green-600";
+            return "border-green-600 text-green-600";
     }
 </script>
 
 <div on:click={handleClick} class="cursor-pointer rounded-xl bg-color5 p-5 flex items-center mt-1">
 
     <div class="mx-2 flex-shrink">
-        <div class="w-[40px] h-[40px] bg-cover  rounded-full mx-auto"
+        <div class="w-[40px] h-[40px] bg-cover rounded-full mx-auto border-4 {getColor(user.online_status)}"
              style="background-image: url( /{user?.image_url || `image/default.png`} )">
         </div>
 
     </div>
 
-    <div class="mx-2 flex-grow text-left">
+    <div class="mx-2 flex-grow text-left truncate {getColor(user.online_status)}">
         {user.name}
     </div>
-    {#if user?.online_status}
-        <div class="mx-2">
-            <div class="h-4 w-4 rounded-full {getColor(user.online_status)}"></div>
-        </div>
-    {/if}
 
 </div>

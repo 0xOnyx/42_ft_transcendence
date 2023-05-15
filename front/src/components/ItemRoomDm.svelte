@@ -6,21 +6,35 @@
     import {onMount} from "svelte";
     import {goto} from "$app/navigation";
 	import { imageUrl } from '../services/Utilities';
+	import userservice from '../services/UserService';
 
     //bg-green-600
     export let room : (Rooms & {user: RoomUser[]});
-    export let user : User;
+	export let user : User;
     export let current: boolean;
 
-    let roomUserDm: RoomUser = room?.user.find((element: RoomUser) => element.user_id != Number(user.id));
-    let userDm: User;
+    let roomUserDm: RoomUser | undefined
+
+	$: roomUserDm = room?.user.find((element: RoomUser) => element.user_id != Number(user.id));
+    
+	let userDm: User;
 
     onMount(async ()=>{
-        let res: Response = await fetch(`${PUBLIC_API_URI}/user/id/${roomUserDm.user_id}`, {
-            method: 'GET',
-            credentials: 'include'
-        });
-        userDm = await res.json();
+		console.log("onMount");
+		console.log("User: ", user);
+		if (roomUserDm) {
+			console.log("Found room user DM");
+            try {
+				let res: Response = await fetch(`${PUBLIC_API_URI}/user/id/${roomUserDm.user_id}`, {
+					method: 'GET',
+					credentials: 'include'
+				});
+				userDm = await res.json();
+				console.log(userDm);
+			} catch (error) {
+                console.error("Error fetching user data:", error);
+            }
+		}
     })
 
     async function getRoom()
