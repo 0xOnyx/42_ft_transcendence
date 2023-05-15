@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import {UserService} from "../prisma/user.service";
-import {Prisma, User, Friend} from "@prisma/client";
-
+import {Prisma, User, Friend, Game} from "@prisma/client";
 
 @Injectable()
 export class UserServiceService {
@@ -65,4 +64,35 @@ export class UserServiceService {
         return (!!block_user.find(item=>{return(item.lock_user_id == id_user_check)}));
     }
 
+	async getGameHistory(id_user: number)
+	{
+		return await this.userService.getGameHistory({id: id_user});
+	}
+
+
+
+	async getStats(id_user: number) {
+		const history = await this.userService.getGameHistory({id: id_user});
+		if (history)
+		{
+			const win = history.filter((item: Game)=>{
+				return ((item.player_one_id == id_user && item.score_one > item.score_two)
+				|| 	(item.player_two_id == id_user && item.score_one < item.score_two))
+			}).length
+			const losses = history.filter((item: Game)=>{
+				return ((item.player_one_id == id_user && item.score_one < item.score_two)
+				|| 	(item.player_two_id == id_user && item.score_one > item.score_two))
+			}).length
+			let res = {
+				played : history.length,
+				win: win,
+				losses : losses,
+				ratio: Math.floor(win / (win + losses) * 100),
+				level: 1, //TODO : ADD THIS SHIT
+				league: "gold"
+			};
+			return (res);
+		}
+		return (undefined);
+	}
 }

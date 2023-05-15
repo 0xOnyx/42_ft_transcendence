@@ -31,6 +31,7 @@
     interface UserStats {
         played: number,
 		win: number,
+		losses : number,
         ratio: number,
         level: number,
 		league: string
@@ -61,15 +62,7 @@
 
 	let blockedList : boolean = false;
 
-    let userstats : UserStats = {
-        played : 42,
-		win: 19,
-		ratio: 84,
-        level: 21,
-		league: "gold"
-    }
-
-	$: userstats.ratio = Math.round(userstats.win / userstats.played * 100);
+    let userstats : UserStats | undefined = undefined;
 
     async function searchUser( e : CustomEvent )
     {
@@ -100,6 +93,8 @@
             await goto("/");
 
         user = await userservice.getCurrentUser();
+		userstats = await userservice.getStats(user.id);
+
         friends = await userservice.getFriends();
 		locked = await userservice.getBlockedUsers();
 
@@ -317,11 +312,17 @@
 							{:else}
 							<div in:fade="{{ delay: 200, duration: 400 }}">
 							<div class="flex sm:flex-col mobile-landscape:flex-row justify-center gap-3">
-								<UserInfo portal={_openSettings} user={user} on:updateUserInfo={updatePopUp} />
-								<UserStat userstats={userstats} />
+									<UserInfo portal={_openSettings} user={user} on:updateUserInfo={updatePopUp} />
+								{#if userstats}
+									<UserStat userstats={userstats} />
+								{:else}
+									<p>No games played</p>
+								{/if}
 							</div>
 							<div class="max-h-32 overflow-scroll overscroll-contain">
-								<Achievement userstats={userstats} />
+								{#if userstats}
+									<Achievement userstats={userstats} />
+								{/if}
 							</div>
 						</div>
 							{/if}

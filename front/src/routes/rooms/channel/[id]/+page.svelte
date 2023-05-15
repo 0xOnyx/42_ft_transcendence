@@ -554,7 +554,7 @@
                                 <UserInfo user={currentRoomUserSelect}></UserInfo>
 
                                 <div>
-                                    <UserStat userstats={currentRoomUserSelect}></UserStat>
+                                    <!-- <UserStat userstats={currentRoomUserSelect}></UserStat> -->
                                 </div>
 
                                 <div>

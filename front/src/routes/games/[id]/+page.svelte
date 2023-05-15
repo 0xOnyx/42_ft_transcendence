@@ -21,13 +21,8 @@
     let pong : Pong | undefined;
     let internal : any = null;
 
-    let userstats : UserStats = {
-        played : 42,
-        win: 5,
-        ratio: 84,
-        league: '',
-        level: 21
-    }
+    let userstats_user1 : UserStats | undefined;
+	let userstats_user2 : UserStats | undefined;
 
     let userOne : User;
     let userTwo : User;
@@ -66,6 +61,10 @@
                         userTwo = await userservice.getUser(game.player_two_id);
                     }
                 }
+
+				userstats_user1 = await userservice.getStats(userOne.id);
+				userstats_user2 = await userservice.getStats(userTwo.id);
+
 
             });
 
@@ -156,8 +155,10 @@
                             </div>
 
                             <div>
-
-                                <UserStat userstats={userstats}></UserStat>
+								{#if userstats_user1}
+								
+	                                <UserStat userstats={userstats_user1}></UserStat>
+								{/if}
 
                             </div>
 
@@ -189,7 +190,10 @@
 
                                 <div>
 
-                                    <UserStat userstats={userstats}></UserStat>
+									{#if userstats_user2}						
+	                                	<UserStat userstats={userstats_user2}></UserStat>
+									{/if}
+
 
                                 </div>
 
