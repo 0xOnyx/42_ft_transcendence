@@ -16,6 +16,7 @@ import PongServer, { GameStatus } from 'src/pong/src/classic/pongserver';
 import { PrismaGameService } from 'src/prisma/prismagame.service';
 import { Game, StatusGame, TypeGame } from '@prisma/client';
 import { GameService } from 'src/game/game.service';
+import { UserService } from 'src/prisma/user.service';
 
 
 type matchmakingPlayer = {socket : Socket, user_id : number}
@@ -43,7 +44,7 @@ type matchmakingPlayer = {socket : Socket, user_id : number}
      */
     matchmakings: Array<matchmakingPlayer> = [];
 
-    constructor(private prismaGameService: PrismaGameService, private gameService : GameService) {}
+    constructor(private prismaGameService: PrismaGameService, private gameService : GameService, private userService : UserService) {}
 
     async handleDisconnect(client: Socket) 
     {
@@ -92,14 +93,13 @@ type matchmakingPlayer = {socket : Socket, user_id : number}
               if (pong.status == GameStatus.FINISHED || pong.status == GameStatus.LOST)
               {
                 this.prismaGameService.find(pong.getGameId()).then((game) => {
-                  console.log('update game', game);
                   if (game != null)
                   {
                     if(pong.status == GameStatus.FINISHED)
-                      game.status = StatusGame.FINISHED;
+						game.status = StatusGame.FINISHED;
                     else
-                      game.status = StatusGame.RUN;
-
+					game.status = StatusGame.RUN;
+					
                     game.score_one = pong.players[0].score;
                     game.score_two = pong.players[1].score;
                     this.prismaGameService.update(game);
