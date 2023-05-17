@@ -25,6 +25,7 @@ export class updateUser {
     name: string;
 }
 
+
 const storage = multer.diskStorage({
     destination: function (req , file, cb) {
         cb(null, './')
@@ -124,6 +125,20 @@ export class UserProviderController {
     async getUser(@Request() req: any) {
         return this.userServiceServer.getUser(Number(req.user.id), {auth: true});
     }
+
+	@UseGuards(AuthenticatedGuard)
+	@Get("games/history/:id")
+	@ApiOperation({summary: "Get game history of specified user id"})
+    getHistoryGame(@Param("id") id: string) {
+        return this.userServiceServer.getGameHistory(Number(id));
+	}
+
+	@UseGuards(AuthenticatedGuard)
+	@Get("games/stats/:id")
+	@ApiOperation({summary: "Get stats of specified user id"})
+    getStats(@Param("id") id: string) {
+        return this.userServiceServer.getStats(Number(id));
+	}
 
     @UseGuards(AuthenticatedGuard)
     @Post("me/image")

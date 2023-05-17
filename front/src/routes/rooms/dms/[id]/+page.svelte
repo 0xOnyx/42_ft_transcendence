@@ -27,6 +27,15 @@
 
     let id;
 
+    interface UserStats {
+        played: number,
+		win: number,
+		losses : number,
+        ratio: number,
+        level: number,
+		league: string
+    }
+
 	const MAX_MESSAGE = 20
     let room_message: (Messages & {user: User})[]= [];
     let search_value: string = "";
@@ -41,6 +50,7 @@
     let roomUserDm: RoomUser;
 	let chatbox : HTMLDivElement;
     let error : string = ""
+	let user_state_room_user : UserStats | undefined = undefined;
 
     let id_room: number;
 
@@ -115,6 +125,9 @@
             });
 
             current_room_user = await res.json();
+
+
+			user_state_room_user = await userservice.getStats(current_room_user.id);
 
             const index = rooms.findIndex((item: (Rooms & { user: RoomUser[] })) => {
                 return (item.id === id_room)
@@ -378,7 +391,9 @@
                             <UserInfo update={false} user={current_room_user}></UserInfo>
 
                             <div>
-                                <UserStat userstats={current_room_user}></UserStat>
+								{#if user_state_room_user}
+                                	<UserStat userstats={user_state_room_user}></UserStat>
+								{/if}
                             </div>
 
 

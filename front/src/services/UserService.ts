@@ -47,6 +47,18 @@ export class UserService
         return await res.json();
     }
 
+
+	async getStats(id: number)
+	{
+
+        let res: Response = await fetch(`${PUBLIC_API_URI}/user/games/stats/${id}`, {
+            method: 'GET',
+            credentials: 'include'
+        });
+
+        return await res.json();
+	}
+	  
 	async getBlockedUsers() : Promise<Array<User>>
 	{
 		const users : Array<User> = new Array;

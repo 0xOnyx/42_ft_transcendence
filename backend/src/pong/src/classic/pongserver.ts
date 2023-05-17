@@ -281,7 +281,6 @@ export default class PongServer
                 const player = this.players[index];
                 this.checkBallPlayerCollision(player, index);
             }
-        
             this.ball.update();
         }
 
@@ -297,7 +296,6 @@ export default class PongServer
                 this.init();
             else
                 this.status = GameStatus.FINISHED;
-
             this.emitChange();
         }
 

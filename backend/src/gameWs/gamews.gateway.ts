@@ -17,6 +17,7 @@ import { PrismaGameService } from 'src/prisma/prismagame.service';
 import {Game, StatusGame, TypeGame, TypeMessage} from '@prisma/client';
 import { GameService } from 'src/game/game.service';
 import {MessageService} from "../prisma/message.service";
+import { UserService } from 'src/prisma/user.service';
 
 
 type matchmakingPlayer = {socket : Socket, user_id : number}
@@ -44,7 +45,8 @@ type matchmakingPlayer = {socket : Socket, user_id : number}
      */
     matchmakings: Array<matchmakingPlayer> = [];
 
-    constructor(private prismaGameService: PrismaGameService, private gameService : GameService, private messageService: MessageService) {}
+
+    constructor(private prismaGameService: PrismaGameService, private gameService : GameService, private userService : UserService, private messageService: MessageService) {}
 
     async handleDisconnect(client: Socket) 
     {
@@ -96,8 +98,8 @@ type matchmakingPlayer = {socket : Socket, user_id : number}
                       this.messageService.updateMessageGame({message_type: TypeMessage.INVITE_GAME, content: data.game_id.toString()}, GameStatus.FINISHED)
                     }
                     else
-                      game.status = StatusGame.RUN;
-
+             					game.status = StatusGame.RUN;
+					
                     game.score_one = pong.players[0].score;
                     game.score_two = pong.players[1].score;
                     this.prismaGameService.update(game);
