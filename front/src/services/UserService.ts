@@ -58,6 +58,17 @@ export class UserService
 
         return await res.json();
 	}
+
+	async getHistory(id: number)
+	{
+
+        let res: Response = await fetch(`${PUBLIC_API_URI}/user/games/history/${id}`, {
+            method: 'GET',
+            credentials: 'include'
+        });
+
+        return await res.json();
+	}
 	  
 	async getBlockedUsers() : Promise<Array<User>>
 	{
