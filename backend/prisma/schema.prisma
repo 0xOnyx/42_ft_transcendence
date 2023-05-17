@@ -32,7 +32,6 @@ model User {
   auth            Authenticators?
   friend          Friend[]        @relation("friend")
   symetric_friend Friend[]        @relation("symetric_friend")
-  User_State      UserState?
   log             ActivityLog[]
   messages        Messages[]
   owner_room      Rooms[]
@@ -58,15 +57,6 @@ model Friend {
   friend_user User      @relation("symetric_friend", fields: [friend_id], references: [id])
   request_at  DateTime  @default(now())
   accept_at   DateTime?
-}
-
-model UserState {
-  id      Int  @id @default(autoincrement())
-  user_id Int  @unique
-  user    User @relation(fields: [user_id], references: [id])
-  wins    Int  @default(0)
-  losses  Int  @default(0)
-  level   Int  @default(0)
 }
 
 enum Log {
@@ -150,15 +140,19 @@ model LockUsers {
   lock_user    User @relation("symetric_user_lock", fields: [lock_user_id], references: [id])
 }
 
-enum StatusGame {
-  CREATED
-  STARTED
-  FINISHED
+enum	StatusGame {
+	CREATED
+	READY
+	INIT
+	WAIT
+	RUN
+	LOST
+	FINISHED
 }
 
-enum TypeGame {
-  STANDARD
-  BLACKHOLE
+enum	TypeGame {
+	CLASSIC
+	BLACKHOLE
 }
 
 model Game {
@@ -166,12 +160,12 @@ model Game {
   status              StatusGame @default(CREATED)
   player_one_id       Int
   player_one          User       @relation("player_one", fields: [player_one_id], references: [id])
-  player_two_id       Int
-  player_two          User       @relation("player_two", fields: [player_two_id], references: [id])
+  player_two_id       Int?
+  player_two          User?      @relation("player_two", fields: [player_two_id], references: [id])
   player_one_accepted Boolean    @default(false)
   player_two_accepted Boolean    @default(false)
-  map_type            TypeGame   @default(STANDARD)
-  level               Int
+  map_type            TypeGame   @default(CLASSIC)
+  level               Int?
   created_at          DateTime   @default(now())
   score_one           Int
   score_two           Int

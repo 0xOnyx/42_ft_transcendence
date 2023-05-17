@@ -1,11 +1,12 @@
-import Timer from "./timer.js";
-import Vector from "./vector.js";
-import Size from "./size.js";
-import Bound from "./bound.js";
+import Timer from "./timer";
+import Vector from "./vector";
+import Size from "./size";
+import Bound from "./bound";
 
 export default class Mesh
 {
     position : Vector = new Vector();
+    origin : Vector = new Vector();
     size : Size = new Size();
     collider: Bound = new Bound();
     gravity : number = 20;
@@ -65,7 +66,7 @@ export default class Mesh
             pos = new Vector();
         }
 
-        let lefttop : Vector = this.position.copy().add(pos);
+        let lefttop : Vector = this.position.copy().sub(this.origin).add(pos);
         let rightbottom : Vector = lefttop.copy().add(this.size.toVector());
 
         return new Bound(lefttop,

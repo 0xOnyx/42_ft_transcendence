@@ -507,6 +507,71 @@
 
 								{#if currentRoomUserSelect}
 
+            <div class="md:w-1/3 lg:w-1/4 md:flex md:flex-col">
+
+                {#if user}
+                    <UserNotification openWarning={()=>{closeWarningLeftChannel = true}} rooms={rooms} user={user}></UserNotification>
+                {:else}
+                    <p>LOADING..</p>
+                {/if}
+
+
+
+                <div class="overflow-auto mt-3 bg-color5 flex-grow  rounded-xl">
+                    {#if current_room_id >= 0 }
+                        <div class="mt-10">
+                            {#if currentRoomUserSelect}
+                                <button on:click={()=>{currentRoomUserSelect = null}}  class="bg-color2 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                                    ↩️ RETURN
+                                </button>
+                            {:else if rooms[current_room_id]?.user.find(element => element.role === RoleUser.ADMIN && element.user_id === user.id)}
+                                <ButtonElement title="Password room" on:clicker={()=>{closePassworRoom = true}}></ButtonElement>
+                                <ButtonElementWarning title="Delete room" on:clicker={()=>{closeDeleteRoom = true}}></ButtonElementWarning>
+                            {/if}
+                        </div>
+                    {/if}
+
+                    <div class="mt-20">
+
+                        {#if current_room_id >= 0}
+
+                            {#if currentRoomUserSelect}
+
+                                <UserInfo user={currentRoomUserSelect}></UserInfo>
+
+                                <div>
+                                    <!-- <UserStat userstats={currentRoomUserSelect}></UserStat> -->
+                                </div>
+
+                                <div>
+                                    {#if rooms[current_room_id]?.user.find(element => element.role === RoleUser.ADMIN && element.user_id === user.id)
+                                    && rooms[current_room_id]?.owner_id !== currentRoomUserSelect.id  && currentRoomUserSelect.id !== user.id}
+                                        {#if !rooms[current_room_id]?.user.find(element =>element.user_id === currentRoomUserSelect.id).ban}
+                                            <ButtonElement title="Kick" on:clicker={()=>{closeKickUser = true}}></ButtonElement>
+                                            <ButtonElement title="BanUser" on:clicker={()=>{closeBanUser = true}}></ButtonElement>
+                                            {#if rooms[current_room_id]?.user.find(element => element.role === RoleUser.ADMIN && element.user_id === currentRoomUserSelect.id)}
+                                                <ButtonElement title="UnsetAdmin" on:clicker={()=>{closeUnsetAdmin = true}}></ButtonElement>
+                                            {:else}
+                                                <ButtonElement title="SetAdmin" on:clicker={()=>{closeSetAdmin = true}}></ButtonElement>
+                                            {/if}
+                                            <ButtonElement title="MuteUser" on:clicker={()=>{closeMuteUser = true}}></ButtonElement>
+                                        {:else}
+                                            <ButtonElement title="Unban" on:clicker={()=>{closeUnBanUser = true}}></ButtonElement>
+                                        {/if}
+                                    {/if}
+                                </div>
+                            {:else if !rooms[current_room_id]?.user}
+                                <p>NO USER IN ROOMS</p>
+                            {:else if rooms[current_room_id]?.user.length > 0}
+                                {#each rooms[current_room_id]?.user as user}
+                                    <ItemRoomUserElement on:clicker={async ()=>{currentRoomUserSelect = await userservice.getUser(user.user_id)}} user={user}></ItemRoomUserElement>
+                                {/each}
+                            {/if}
+                        {:else}
+                            <p>NO CHANNEL SELECT</p>
+                        {/if}
+                    </div>
+
 									<UserInfo user={currentRoomUserSelect}></UserInfo>
 
 									<div>

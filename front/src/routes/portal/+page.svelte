@@ -24,6 +24,7 @@
     import WarningAsk from '../../components/warningAsk.svelte'
 	import UsersList from "../../components/UsersList.svelte";
 	import UserSettings from "../../components/UserSettings.svelte";
+	import History from "../../components/History.svelte";
 
 	import { leftHanded } from "../../services/Stores";
 	import BlockUser from "../../components/BlockUser.svelte";
@@ -64,15 +65,7 @@
 	let blockedList : boolean = false;
 	let history : boolean = false;
 
-    let userstats : UserStats = {
-        played : 42,
-		win: 19,
-		ratio: 84,
-        level: 21,
-		league: "gold"
-    }
-
-	$: userstats.ratio = Math.round(userstats.win / userstats.played * 100);
+    let userstats : UserStats | undefined = undefined;
 
     let closeWarningUnbanUser = -1;
 
@@ -105,6 +98,8 @@
             await goto("/");
 
         user = await userservice.getCurrentUser();
+		userstats = await userservice.getStats(user.id);
+
         friends = await userservice.getFriends();
 		locked = await userservice.getBlockedUsers();
 
@@ -151,7 +146,8 @@
     let _openUpdate: boolean = false;
     let _openFile: boolean = false;
 	let _openSettings: boolean = false;
-	let _openFriends : boolean = false;
+	let _openFriends : boolean = false
+	let history : boolean = false;
 
 	const updatePopUp = ( e : CustomEvent ) => {
 		if (e.detail.text === "update") {
@@ -319,19 +315,31 @@
 								{:else}
 									{#if history}
 									<div in:fade="{{ delay: 200, duration: 400 }}">
-										<p>Put history here</p>
-										<button on:click={()=> {history = false}}>Exit</button>
+										{#if userstats}
+											<History userstats={userstats} />
+										{:else}
+											<p>No games played</p>
+										{/if}
+										<div class="flex justify-center">
+											<button on:click={()=> {history = false}} class="flex gap-2"><Icon icon="left-arrow"/>Return</button>
+										</div>
 									</div>
 									{:else}
 									<div in:fade="{{ delay: 200, duration: 400 }}">
-									<div class="flex sm:flex-col mobile-landscape:flex-row justify-center gap-3">
-										<UserInfo portal={_openSettings} user={user} on:updateUserInfo={updatePopUp} />
-										<UserStat userstats={userstats} on:showHistory={showHistory} />
+										<div class="flex sm:flex-col mobile-landscape:flex-row justify-center gap-3">
+												<UserInfo portal={_openSettings} user={user} on:updateUserInfo={updatePopUp} />
+											{#if userstats}
+												<UserStat userstats={userstats} on:showHistory={() => {history =true}}/>
+											{:else}
+												<p>No games played</p>
+											{/if}
+										</div>
+										<div class="max-h-42">
+											{#if userstats}
+												<Achievement userstats={userstats} />
+											{/if}
+										</div>
 									</div>
-									<div class="max-h-32 overflow-scroll overscroll-contain">
-										<Achievement userstats={userstats} />
-									</div>
-								</div>
 									{/if}
 								{/if}
 							</div>
@@ -376,19 +384,31 @@
 							{:else}
 								{#if history}
 								<div in:fade="{{ delay: 200, duration: 400 }}">
-									<p>Put history here</p>
-									<button on:click={()=> {history = false}}>Exit</button>
+									{#if userstats}
+										<History userstats={userstats} />
+									{:else}
+										<p>No games played</p>
+									{/if}
+									<div class="flex justify-center">
+										<button on:click={()=> {history = false}} class="flex gap-2"><Icon icon="left-arrow"/>Return</button>
+									</div>
 								</div>
 								{:else}
 								<div in:fade="{{ delay: 200, duration: 400 }}">
-								<div class="flex sm:flex-col mobile-landscape:flex-row justify-center gap-3">
-									<UserInfo portal={_openSettings} user={user} on:updateUserInfo={updatePopUp} />
-									<UserStat userstats={userstats} on:showHistory={showHistory} />
+									<div class="flex sm:flex-col mobile-landscape:flex-row justify-center gap-3">
+											<UserInfo portal={_openSettings} user={user} on:updateUserInfo={updatePopUp} />
+										{#if userstats}
+											<UserStat userstats={userstats} on:showHistory={() => {history =true}}/>
+										{:else}
+											<p>No games played</p>
+										{/if}
+									</div>
+									<div class="max-h-42">
+										{#if userstats}
+											<Achievement userstats={userstats} />
+										{/if}
+									</div>
 								</div>
-								<div class="max-h-32 overflow-scroll overscroll-contain">
-									<Achievement userstats={userstats} />
-								</div>
-							</div>
 								{/if}
 							{/if}
 						</div>
@@ -405,8 +425,3 @@
 
 	</div>
 </div>
-
-
-
-
-

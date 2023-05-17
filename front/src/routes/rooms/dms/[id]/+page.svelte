@@ -30,6 +30,14 @@
     let id;
 
 	let history : boolean = false;
+    interface UserStats {
+        played: number,
+		win: number,
+		losses : number,
+        ratio: number,
+        level: number,
+		league: string
+    }
 
 	const MAX_MESSAGE = 20
     let room_message: (Messages & {user: User})[]= [];
@@ -45,6 +53,7 @@
     let roomUserDm: RoomUser;
 	let chatbox : HTMLDivElement;
     let error : string = ""
+	let user_state_room_user : UserStats | undefined = undefined;
 
     let id_room: number;
 
@@ -127,6 +136,9 @@
 
             current_room_user = await res.json();
 
+
+			user_state_room_user = await userservice.getStats(current_room_user.id);
+
             const index = rooms.findIndex((item: (Rooms & { user: RoomUser[] })) => {
                 return (item.id === id_room)
             })
@@ -154,6 +166,7 @@
         })
 
         socket.on("message", (data: {send_user_id: number, room_id: number, message: (Messages & {user: User}), message_type: string})=>{
+            console.log(data);
             if (data.room_id === id_room)
                 room_message.push(data.message);
             else
@@ -364,15 +377,8 @@
                             <UserInfo user={current_room_user}></UserInfo>
 
                             <div>
-								{#if history}
-								<div in:fade="{{ delay: 200, duration: 400 }}">
-									<p>Put history here</p>
-									<button on:click={()=> {history = false}}>Exit</button>
-									</div>
-								{:else}
-								<div in:fade="{{ delay: 200, duration: 400 }}">
-                               		<UserStat userstats={current_room_user} on:showHistory={()=>{history = true}}></UserStat>
-								</div>
+								{#if user_state_room_user}
+                                	<UserStat userstats={user_state_room_user}></UserStat>
 								{/if}
                             </div>
 

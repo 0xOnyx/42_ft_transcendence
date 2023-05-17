@@ -54,31 +54,28 @@
 	<div class="flex py-2 landscape:py-0 md:py-10 xl:py-10">
 
 		<div class="h-[80vh] grow sm:h-screen mobile-landscape:h-screen w-full px-[5%] self-center py-1 grid overflow-hidden">
-                <div class="flex flex-col sm:flex-row sm:max-h-[85%] gap-4 sm:grid-cols-3 text-center align-middle m-1">
-                    <form bind:this={formBody} class="info-user screen grow h-1/2 sm:h-full sm:w-2/3 mobile-landscape:w-1/2 overflow-hidden flex shadow-lg shadow-black/50 bg-black/25 rounded-3xl mobile-landscape:col-span-1 sm:col-span-2">
-                        <div class="screen-overlay"></div>
-                        <div class="grow flex flex-col items-center justify-center m-auto">
-                            <div class="relative justify-center">
-                                <h1 class="text-2xl">Enter OTP to log in:</h1>
-                            </div>
-                            <div class="relative gap-3 flex flex-col p-3 grow m-auto justify-center items-center">
-                                <OTP on:inputValueChange={updateValue} />
-                            </div>
-                            <input type="text" name="code" bind:value={value} class="hidden"/>
-                            <div class="flex relative items-center justify-center flex-row-reverse">
-                                <button
-                                        on:click={sendToken}
-                                        disabled='{value.length != 6}'
-                                        type="button"
-                                        class="confirm-btn inline-flex w-full justify-center rounded-md {value.length != 6 ? 'bg-[#529167]' : 'bg-process-green hover:bg-process-green/80'} px-3 py-2 text-sm font-semibold text-white dark:text-gray-900 shadow-sm  sm:ml-3 sm:w-auto">Confirm</button>
-                                <button type="button" class="mt-3 inline-flex w-full justify-center rounded-md bg-white dark:bg-gray-900 px-3 py-2 text-sm font-semibold text-core-red shadow-sm ring-2 ring-inset ring-core-red hover:ring-4 sm:mt-0 sm:w-auto transition-all" on:click={()=>{goto("/")}}>Cancel</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-		</div>
-
-		</div>
+			<div class="flex flex-col sm:flex-row sm:max-h-[85%] gap-4 sm:grid-cols-3 text-center align-middle m-1">
+				<form bind:this={formBody} class="info-user screen grow h-1/2 sm:h-full sm:w-2/3 mobile-landscape:w-1/2 overflow-hidden flex shadow-lg shadow-black/50 bg-black/25 rounded-3xl mobile-landscape:col-span-1 sm:col-span-2">
+					<div class="screen-overlay"></div>
+					<div class="grow flex flex-col items-center justify-center m-auto">
+						<div class="relative justify-center">
+							<h1 class="text-2xl">Enter OTP to log in:</h1>
+						</div>
+						<div class="relative gap-3 flex flex-col p-3 grow m-auto justify-center items-center">
+							<OTP on:inputValueChange={updateValue} />
+						</div>
+						<input type="text" name="code" bind:value={value} class="hidden"/>
+						<div class="flex relative items-center justify-center flex-row-reverse">
+							<button
+									on:click={sendToken}
+									disabled='{value.length != 6}'
+									type="button"
+									class="confirm-btn inline-flex w-full justify-center rounded-md {value.length != 6 ? 'bg-[#529167]' : 'bg-process-green hover:bg-process-green/80'} px-3 py-2 text-sm font-semibold text-white dark:text-gray-900 shadow-sm  sm:ml-3 sm:w-auto">Confirm</button>
+							<button type="button" class="mt-3 inline-flex w-full justify-center rounded-md bg-white dark:bg-gray-900 px-3 py-2 text-sm font-semibold text-core-red shadow-sm ring-2 ring-inset ring-core-red hover:ring-4 sm:mt-0 sm:w-auto transition-all" on:click={()=>{goto("/")}}>Cancel</button>
+						</div>
+					</div>
+				</form>
+			</div>
 		</div>
 	</div>
 </div>

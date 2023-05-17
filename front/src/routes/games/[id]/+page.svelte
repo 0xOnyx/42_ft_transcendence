@@ -1,140 +1,132 @@
 <script lang="ts">
-    import {PUBLIC_API_URI} from "$env/static/public";
-    import {io, Socket} from "socket.io-client";
-
-
-    import {Status, type User} from '../../../types/user';
-    import type {UserStats} from '../../../types/user';
-    import {MessageRole, type Messages, type Rooms} from '../../../types/room';
-    import  {UserRole, RoomType} from '../../../types/room';
+    import {io, type Socket} from "socket.io-client";
+    import type {User, UserStats} from '../../../types/user';
 	import UserStat from '../../../components/UserStat.svelte';
 	import UserInfo from '../../../components/UserInfo.svelte';
 	import NavBar from '../../../components/NavBar.svelte';
+    import Pong, { GameStatus } from "../../../pong/src/classic/pong";
+	import PongBlackhole from "../../../pong/src/classic/pong.blackhole";
+    import { page } from '$app/stores';
+	import { onDestroy, onMount } from 'svelte';
+	import gameservice from "../../../services/GameService";
+	import userservice from "../../../services/UserService";
+	import { goto } from "$app/navigation";
+	import { GameType, type Game } from "../../../types/game";
 
-    import Pong from '../../../pong/classic/pong';
+    let socket : Socket;
+    let canvas : HTMLCanvasElement;
 
-    import type { PageData } from './$types';
-	import { onMount } from 'svelte';
+    let game : any;
+    let user : User;
+    let pong : Pong | undefined;
+    let internal : any = null;
 
-    let socket : Socket = io('/events', {
-            path: "/api/gamews/"
-    });
+    let userstats_user1 : UserStats | undefined;
+	let userstats_user2 : UserStats | undefined;
 
-    //PageData.id;
-
-
-
-
-    let search_value: string = "";
-    let connectedWs: Boolean = true;
-    let room_message: (Messages & {user: User})[]= [
-        {
-            "id": 1,
-            "room_id": 40,
-            "user_id": 1,
-            "message_type": MessageRole.MESSAGE,
-            "content": "asdf",
-            "created_at": "2023-04-18T14:50:05.942Z",
-            "user": {
-                "id": 1,
-                "name": "jer",
-                "email": "jerdos-s@student.42lausanne.ch",
-                "first_name": "Jérémy",
-                "last_name": "Dos santos",
-                "image_url": "image/jerdos-s.png",
-                "oauth_42_login": "jerdos-s",
-                "oauth_42_id": 116337,
-                "last_login": "2023-04-17T15:44:38.719Z",
-                "online_status": Status.ONLINE
-            }
-        },
-        {
-            "id": 2,
-            "room_id": 40,
-            "user_id": 1,
-            "message_type": MessageRole.MESSAGE,
-            "content": "asdf",
-            "created_at": "2023-04-18T14:50:06.709Z",
-            "user": {
-                "id": 1,
-                "name": "jer",
-                "email": "jerdos-s@student.42lausanne.ch",
-                "first_name": "Jérémy",
-                "last_name": "Dos santos",
-                "image_url": "image/jerdos-s.png",
-                "oauth_42_login": "jerdos-s",
-                "oauth_42_id": 116337,
-                "last_login": "2023-04-17T15:44:38.719Z",
-                "online_status": Status.ONLINE
-            }
-        },
-    ];
-
-
-    let rooms : Array<Rooms> = [
-
-        {
-            id: 1,
-            owner_id: 1,
-            name: "Room 1",
-            type: RoomType.SINGLE_CHAT,
-            last_message_id: 4,
-            count_messages: 2,
-            users: [
-                {
-                    id: 1,
-                    room_id: 1,
-                    user_id: 1,
-                    role: UserRole.ADMIN,
-                    user: {
-                        id: 1,
-                        name: 'Jacob Jones',
-                        image_url: 'image/default.png'
-                    }
-                },
-        		{
-                    id: 2,
-                    room_id: 1,
-                    user_id: 2,
-                    role: UserRole.USER,
-                    user: {
-                        id: 2,
-                        name: 'Leslie Alexander',
-                        image_url: 'image/default.png'
-                    }
-                },
-            ],
-
-        }
-    ]
-
-    let user : User = { id: 1, name: 'Jacob Jones', image_url: 'image/default.png' };
-
-    let userstats : UserStats = {
-        played : 42,
-        ratio: 84,
-        league: '',
-        level: 21
-    }
-
+    let userOne : User;
+    let userTwo : User;
 
 	onMount(async () => {
-        let pong : Pong = new Pong();
 
-        pong.run();
+        // check if user is logged
+        if(! await userservice.isLogged())
+            await goto("/");
+
+        socket = io('/events', {
+                path: "/gamews/"
+        });
+
+        user = await userservice.getCurrentUser();
+        game = await gameservice.get(parseInt($page.params.id));
+
+        if (game != null && user != null)
+        {
+            socket.emit("joinGame", {game_id: $page.params.id, user_id: user.id})
+
+            socket.on("joinGame", async (game : Game) => {
+
+                if (game.player_one_id === user.id) {
+                    userOne = user;
+                } else {
+                    if (game.player_one_id) {
+                        userOne = await userservice.getUser(game.player_one_id);
+                    }
+                }
+
+                if (game.player_two_id === user.id) {
+                    userTwo = user;
+                } else {
+                    if (game.player_two_id) {
+                        userTwo = await userservice.getUser(game.player_two_id);
+                    }
+                }
+
+				userstats_user1 = await userservice.getStats(userOne.id);
+				userstats_user2 = await userservice.getStats(userTwo.id);
+
+
+            });
+
+            console.log(game);
+
+            if (game.map_type == GameType.CLASSIC) {
+                pong = <Pong>(new Pong(800, 500, canvas.getContext('2d'), socket));
+            }
+            if (game.map_type == GameType.BLACKHOLE) {
+                pong = <Pong>(new PongBlackhole(800, 500, canvas.getContext('2d'), socket));
+            }
+
+            if (pong)
+            {
+                if (game.player_one_id === user.id) {
+                    pong.setPlayerController(0);
+                }
+                if (game.player_two_id === user.id) {
+                    pong.setPlayerController(1);
+                }
+
+                pong.connectGame(parseInt($page.params.id));
+
+                pong.run();
+
+                pong.addChangeListener((pong : Pong) => {
+
+                    if (pong.status == GameStatus.FINISHED) {
+                        if (pong.controllers.space()) {
+                            goto('/games');
+                        }
+                    }
+
+                });
+
+                socket.on('eventGame', (data : any) => {
+                    pong?.setNetworkMessage(data);
+                });
+
+                user = await userservice.getCurrentUser();
+
+            }
+
+        }
+
 	});
 
-    let _openUpdate : boolean = false;
-    let _openFile : boolean = false;
+    onDestroy(async () => {
 
-	const updatePopUp = ( _popup : string ) => {
-		if (_popup === "update") {
-			_openUpdate = !_openUpdate;
-		} else if ( _popup === "file" ) {
-			_openFile = !_openFile;
-		}
-	}
+        if (pong)
+        {
+            if (pong.players[0].connected == false && pong.players[1].connected == false)
+            {
+                pong.stop();
+            }
+        }
 
+        socket.emit("leaveGame", {game_id: $page.params.id});
+
+        socket.close();
+
+    });
 
 </script>
 
@@ -158,13 +150,15 @@
 
                             <div  class="mt-20">
 
-                                <UserInfo portal=true user={user} update={updatePopUp} />
+                                <UserInfo portal={true} user={userOne} />
 
                             </div>
 
                             <div>
-
-                                <UserStat userstats={userstats}></UserStat>
+								{#if userstats_user1}
+								
+	                                <UserStat userstats={userstats_user1}></UserStat>
+								{/if}
 
                             </div>
 
@@ -174,8 +168,11 @@
 
                     <div class=" grow justify-around lg:flex lg:flex-col my-5 lg:my-0 lg:mx-5 xl:mx-8 overflow-auto rounded-xl -order-1 lg:order-none">
 
-                        <canvas class="w-full" id="pong" width="800" height="500">
-                        </canvas >
+                        <canvas class="w-full"
+                            bind:this={canvas}
+                            width={800}
+                            height={500}
+                        ></canvas>
 
                     </div>
 
@@ -184,18 +181,23 @@
 
                         <div class="overflow-auto bg-color5 flex-grow rounded-xl">
 
-                            <div class="mt-20">
+                            {#if userTwo}
+                                <div class="mt-20">
 
-                                <UserInfo portal=true user={user} update={updatePopUp} />
+                                    <UserInfo portal={true} user={userTwo} />
 
-                            </div>
+                                </div>
 
-                            <div>
+                                <div>
 
-                                <UserStat userstats={userstats}></UserStat>
+									{#if userstats_user2}						
+	                                	<UserStat userstats={userstats_user2}></UserStat>
+									{/if}
 
-                            </div>
 
+                                </div>
+
+                            {/if}
                         </div>
 
                     </div>

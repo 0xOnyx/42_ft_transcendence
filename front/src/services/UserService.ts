@@ -46,6 +46,18 @@ export class UserService
 
         return await res.json();
     }
+
+
+	async getStats(id: number)
+	{
+
+        let res: Response = await fetch(`${PUBLIC_API_URI}/user/games/stats/${id}`, {
+            method: 'GET',
+            credentials: 'include'
+        });
+
+        return await res.json();
+	}
 	  
 	async getBlockedUsers() : Promise<Array<User>>
 	{
@@ -88,8 +100,9 @@ export class UserService
 
         const friends_list: Array<Friend> = (await res.json()).friend;
 
+        const user = await this.getCurrentUser();
         for (const item of friends_list) {
-            let id = item.friend_id;
+            let id = item.friend_id == user.id ? item.user_id : item.friend_id ;
             try {
                 if (item.accept_at == null)
                     continue;

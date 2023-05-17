@@ -9,12 +9,13 @@ import {
   ConnectedSocket,
   WsException
 } from '@nestjs/websockets';
+import { OnEvent } from '@nestjs/event-emitter';
 import { Server, Socket } from 'socket.io';
 import { IncomingMessage } from 'http';
 import { ActivitylogService } from "../prisma/activitylog.service";
 import { UserService } from "../prisma/user.service";
 import { MessageService } from "../prisma/message.service";
-import { TypeRoom, RoleUser, Log, Status, TypeMessage, Friend, Rooms, RoomUser, User } from "@prisma/client"
+import {TypeRoom, RoleUser, Log, Status, TypeMessage, Friend, Rooms, RoomUser, User, Game} from "@prisma/client"
 import sessionMiddleware from '../sessions'
 import * as passport from "passport";
 import {Prisma, Messages} from ".prisma/client";
@@ -515,5 +516,20 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
     const userFriend = await this.userService.user({id: data.user_id});
     if (userFriend)
       this.server.in(userFriend.oauth_42_id.toString()).emit("LostFriend", {id: client.request.user.id});
+  }
+
+  @OnEvent('invite_to_game')
+  async sendInvite(game: Game)
+  {
+    const dmUser: (Rooms & {user: RoomUser[]})[] = await this.messageService.getDmUser({id: game.player_one_id});
+    let room = undefined;
+    if (!dmUser || !(room = dmUser.find((element: (Rooms & {user: RoomUser[]})) => {
+      return !!element.user.find((element: RoomUser) => element.user_id == Number(game.player_one_id))})))
+      throw new WsException("dm not exist");
+    const message = game.id.toString();
+    const message_db: (Messages & {user: User}) = await this.messageService.createMessage({id: game.player_one_id}, {id: room.id}, TypeMessage.INVITE_GAME, message)
+    const to_send_data: {send_user_id: number, room_id: number, message: Messages, message_type: string}
+        = {send_user_id: game.player_one_id, room_id: room.id, message: message_db, message_type: TypeMessage.INVITE_GAME}
+    this.server.in(room.id.toString()).emit("message", to_send_data);
   }
 }
