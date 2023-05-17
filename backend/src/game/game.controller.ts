@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, Post, UseGuards, ForbiddenException, Res,
 import { AuthenticatedGuard } from "../auth/guards/authenticated.guard";
 import { GameService } from './game.service';
 import { ApiOperation } from '@nestjs/swagger';
-import { TypeGame } from '@prisma/client';
+import { Game, StatusGame, TypeGame } from '@prisma/client';
 import { CreateGameValidator } from './validators/create.validator';
 import { Response } from 'express';
 
@@ -15,7 +15,7 @@ export class GameController {
     @Get() 
     all()
     {
-        return this.gameService.get();
+        return this.gameService.get(undefined);
     }
 
     @UseGuards(AuthenticatedGuard)
@@ -35,12 +35,29 @@ export class GameController {
     @Post('create')
     async create(@Body() body: CreateGameValidator )
     {
-        const game = await this.gameService.create( <TypeGame>body.map_type, 
-            +body.player_one_id,
-            body.player_two_id);
+        let game : Game | null = null;
 
-        if (body.player_two_id)
-            await this.gameService.sendMessageInvite(game);
+        // test si il y a deja un jeu actif avec aucun partenaire
+        if (!body.player_two_id) {
+            let games : Array<Game> = await this.gameService.get({ status: StatusGame.READY, player_one_id: body.player_one_id, player_two: null });
+            if (games.length > 0) {
+                game = games[0];
+                game.map_type = <TypeGame>body.map_type;
+                this.gameService.update(game);
+            }
+        }
+
+
+        if (!game) {
+
+            game = await this.gameService.create( <TypeGame>body.map_type, 
+                body.player_one_id,
+                body.player_two_id);
+    
+            if (body.player_two_id)
+                await this.gameService.sendMessageInvite(game);
+
+        }
 
         if(game)
             return game;

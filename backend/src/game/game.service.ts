@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { TypeGame, Game } from '@prisma/client';
+import { TypeGame, Game, Prisma } from '@prisma/client';
 import { PrismaGameService } from 'src/prisma/prismagame.service';
 
 @Injectable()
@@ -13,9 +13,9 @@ export class GameService {
         return this.prismaGameService.find(id);
     }
 
-    get()
+    get(query: Prisma.GameWhereInput | undefined)
     {
-        return this.prismaGameService.get();
+        return this.prismaGameService.search(query);
     }
     
     async create( map_type: TypeGame, 
@@ -55,6 +55,11 @@ export class GameService {
         } 
 
         return game;
+    }
+
+    async update(game: Game)
+    {
+        await this.prismaGameService.update(game);
     }
     
 }
