@@ -319,7 +319,7 @@
 									<p>No games played</p>
 								{/if}
 							</div>
-							<div class="max-h-32 overflow-scroll overscroll-contain">
+							<div class="max-h-42">
 								{#if userstats}
 									<Achievement userstats={userstats} />
 								{/if}

@@ -6,7 +6,7 @@
 </script>
 
 
-<div class="flex max-w-xl mx-auto items-center gap-2 overflow-x-auto">
+<div class="flex max-w-xl mx-auto items-center gap-2">
 	<div class="flex justify-center grow">	
 		<div class="achievement_badge">
 			{#if userstats.win >= 100}
