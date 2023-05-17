@@ -5,11 +5,11 @@
 	export let curUser : User;
 	export let gamehistory : GameHistory;
 </script>
-<table>
+<table class="w-full">
 	
 	{#each gamehistory as g}
 	<tr>
-		<td>{g.player_one_id} vs {g.player_two_id}</td>
+		<td>{g.player_one.name} vs {g.player_two.name}</td>
 		<td>{g.score_one} - {g.score_two}</td>
 		<td><DateElement created_at={new Date(g.created_at)}></DateElement> </td>
 		{#if (curUser.id == g.player_one_id && g.score_one > g.score_two) ||
