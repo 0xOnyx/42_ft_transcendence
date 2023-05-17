@@ -14,6 +14,7 @@
 	import { fly, slide } from "svelte/transition";
 	import type { Socket } from "socket.io-client";
 	import { getRoom } from "../../services/Utilities";
+	import WarningAsk from "../warningAsk.svelte";
 
 	import DmList from "./DmList.svelte";
 	import ChannelList from "./ChannelList.svelte";
@@ -74,10 +75,27 @@
 		closePopupCreateRoom = true;
 	}
 
-	function itemClicked( e : CustomEvent) {
+	let closeWarningUnblockUser = -1;
+
+
+	async function acceptUnblockUser()
+    {
+		const id : number = closeWarningUnblockUser;
+		console.log(id);
+        await socket.emit("unblockUser", {
+            user_id: closeWarningUnblockUser
+        });
+        closeWarningUnblockUser = -1;
+		getRoom(id, socket);
+	}
+
+	async function itemClicked( e : CustomEvent) {
 		const id : number = e.detail.id;
 		console.log("itemClicked:", id);
-		getRoom(id, socket);
+		const unblockedUser = await getRoom(id, socket);
+		if (!unblockedUser) {
+			closeWarningUnblockUser = id;
+		}
 	}
 
 	async function createRoom(room_name: string, password: string)
@@ -92,7 +110,19 @@
         closePopupCreateRoom = false;
     }
 
+	function unblockUser(e : CustomEvent) {
+		closeWarningUnblockUser = e.detail.user_id;
+	}
+
 </script>
+
+{#if closeWarningUnblockUser > 0}
+    <WarningAsk title="Unblock user" 
+				message="Do you want to unblock this user ?."
+                buttonAccecpt={acceptUnblockUser} 
+				buttonDecline={()=>{closeWarningUnblockUser = -1}}
+				on:unblockUser={unblockUser}></WarningAsk>
+{/if}
 
 {#if closePopupCreateRoom}
     <PopUpCreateDm createRoom={createRoom} close={()=>{closePopupCreateRoom = false}}/>

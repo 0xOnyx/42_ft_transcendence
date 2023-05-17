@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {PUBLIC_API_URI} from "$env/static/public";
+	import {PUBLIC_API_URI} from "$env/static/public";
 
     import Button from '../../components/Button.svelte';
     import ItemName from '../../components/Itemname.svelte';
@@ -32,6 +32,7 @@
     interface UserStats {
         played: number,
 		win: number,
+		losses : number,
         ratio: number,
         level: number,
 		league: string
