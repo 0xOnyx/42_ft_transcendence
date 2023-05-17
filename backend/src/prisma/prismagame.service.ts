@@ -27,7 +27,7 @@ export class PrismaGameService {
      * @param query 
      * @returns 
      */
-    async search(query: Prisma.GameWhereInput) {
+    async search(query: Prisma.GameWhereInput | undefined) {
         
         return this.prisma.game.findMany({
             where: query
