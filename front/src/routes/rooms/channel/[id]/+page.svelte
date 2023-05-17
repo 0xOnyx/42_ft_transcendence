@@ -50,11 +50,12 @@
     let chatbox : HTMLDivElement;
     let unread_message: Number = 0;
     let error : string = ""
+    let refresh : boolean = false;
 
     let id_room: number;
 
     let loadValue = async ()=>{
-
+        console.log("LOAD OK");
         let res: Response;
 
         if (!await userservice.isLogged()) {
@@ -96,15 +97,12 @@
 
         console.log("CURRENT VALUE")
 
-        if (rooms.length <= 0)
-        {
             console.log("REFETCH");
             res = await fetch(`${PUBLIC_API_URI}/message/rooms`, {
                 method: 'GET',
                 credentials: 'include'
             })
             rooms = await res.json();
-        }
         console.log(rooms);
         console.log(current_room_id);
         if ($page.params.id == "last")
@@ -124,6 +122,7 @@
         )})
         current_room_id = rooms.findIndex((item: (Rooms & {user: RoomUser[]}))=>{return (item.id === id_room)});
 
+        console.log("ID ROOM +> ", current_room_id);
 
         if (current_room_id == -1 && $page.params.id != "last")
         {
@@ -195,16 +194,20 @@
                 rooms[index] = room;
             rooms = rooms;
             console.log(rooms);
+            refresh = !refresh;
         })
 
         socket.on("leftRoom", (room: (Rooms & {user: RoomUser[]})) =>{
             console.log("left room");
+            if (rooms)
+                return ;
             const room_id_current = rooms[current_room_id].id;
             rooms = rooms.filter(item=>{
                 return item.id != room.id
             })
             if (room.id === room_id_current)
                 room_message = [];
+            refresh = !refresh;
         })
 
         socket.on("NewFriend", (user: User)=>{
@@ -435,7 +438,7 @@
 {/if}
 
 
-
+{#key refresh}
 <div class="flex-col">
 	<NavBar user={user} />
 
@@ -553,3 +556,4 @@
 
 	</div>
 </div>
+{/key}
