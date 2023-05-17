@@ -54,7 +54,10 @@ export class UserServiceService {
     updateUser(id: number, data: Prisma.UserUpdateInput) {
         let to_change: Prisma.UserUpdateInput = {};
         if (data.name)
-            to_change.name = data.name;
+        {
+            to_change.name = data.name as string;
+            to_change.name = to_change.name.substring(0, 20)
+        }
         return this.userService.updateUser({where: {id: id}, data: to_change});
     }
 
@@ -69,6 +72,13 @@ export class UserServiceService {
 		return await this.userService.getGameHistory({id: id_user});
 	}
 
+    get_level(xp: number)
+    {
+        let level = 0
+        while (xp >= (5 * (level ** 2) + (50 * level) + 100))
+            level += 1
+        return level
+    }
 
 
 	async getStats(id_user: number) {
@@ -88,7 +98,7 @@ export class UserServiceService {
 				win: win,
 				losses : losses,
 				ratio: Math.floor(win / (win + losses) * 100),
-				level: 1, //TODO : ADD THIS SHIT
+				level: this.get_level(win * 100 + losses * 50),
 				league: "gold"
 			};
 			return (res);
