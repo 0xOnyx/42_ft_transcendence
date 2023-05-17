@@ -64,10 +64,10 @@
     let socket: Socket ;
 
 	let blockedList : boolean = false;
-	let history : boolean = false;
+
 
     let userstats : UserStats | undefined = undefined;
-  	let gamehistory : GameHistory | undefined = undefined;
+  	let gamehistory : GameHistory[] = [];
     let closeWarningUnbanUser = -1;
 
     async function searchUser( e : CustomEvent )
@@ -101,7 +101,6 @@
         user = await userservice.getCurrentUser();
 		userstats = await userservice.getStats(user.id);
 		gamehistory = await userservice.getHistory(user.id);
-
         friends = await userservice.getFriends();
 		locked = await userservice.getBlockedUsers();
 
@@ -387,7 +386,7 @@
 								{#if history}
 								<div in:fade="{{ delay: 200, duration: 400 }}">
 									{#if userstats}
-										<History userstats={userstats} />
+										<History curUser={user} gamehistory={gamehistory} />
 									{:else}
 										<p>No games played</p>
 									{/if}
