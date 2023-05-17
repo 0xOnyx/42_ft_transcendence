@@ -31,6 +31,20 @@ export type UserStats = {
 	level: number,
 }
 
+export type GameHistory = {
+	id: number;
+    status:	string;
+    player_one_id: number;
+    player_two_id: number | null;
+    player_one_accepted: boolean;
+    player_two_accepted: boolean;
+    map_type:	string;
+    level: number | null;
+    created_at:	string;
+    score_one: number;
+    score_two: number;
+}
+
 export enum RoleUser {
     ADMIN =  'ADMIN',
     USER =  'USER'
