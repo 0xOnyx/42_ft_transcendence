@@ -11,7 +11,7 @@
 
 	<p class="">Game played : <span>{userstats?.played || "No data"}</span></p>
 
-	<p class="">Win ratio : <span>{userstats?.ratio || "No data"}%</span></p>
+	<p class="">Win ratio : <span>{userstats?.ratio == null ?  "No data" : userstats?.ratio + "%"}</span></p>
 
 	<p class="">Rank : <span>{userstats?.level || "No data"}</span></p>
 
