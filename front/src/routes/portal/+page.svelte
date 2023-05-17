@@ -4,7 +4,7 @@
     import Button from '../../components/Button.svelte';
     import ItemName from '../../components/Itemname.svelte';
 
-    import type {User, Status, UserStats} from '../../types/user';
+    import type {User, Status, UserStats, GameHistory} from '../../types/user';
     import type {Friend} from '../../types/friend';
 
 	import { fade, fly, slide } from 'svelte/transition';
@@ -20,7 +20,7 @@
 	import NavBar from "../../components/NavBar.svelte";
 	import Icon from "../../components/Icon.svelte";
 	import Achievement from "../../components/Achievement.svelte";
-	import userservice from "../../services/UserService";
+	import userservice, { UserService } from "../../services/UserService";
     import WarningAsk from '../../components/warningAsk.svelte'
 	import UsersList from "../../components/UsersList.svelte";
 	import UserSettings from "../../components/UserSettings.svelte";
@@ -28,6 +28,7 @@
 
 	import { leftHanded } from "../../services/Stores";
 	import BlockUser from "../../components/BlockUser.svelte";
+	import gameservice from "../../services/GameService";
 
     interface UserStats {
         played: number,
@@ -65,6 +66,8 @@
 
     let userstats : UserStats | undefined = undefined;
 
+	let gamehistory : GameHistory | undefined = undefined;
+
     async function searchUser( e : CustomEvent )
     {
 	    search_value = e.detail.text;
@@ -95,6 +98,7 @@
 
         user = await userservice.getCurrentUser();
 		userstats = await userservice.getStats(user.id);
+		gamehistory = await userservice.getHistory(user.id);
 
         friends = await userservice.getFriends();
 		locked = await userservice.getBlockedUsers();
@@ -334,7 +338,7 @@
 									{#if history}
 									<div in:fade="{{ delay: 200, duration: 400 }}">
 										{#if userstats}
-											<History userstats={userstats} />
+											<History curUser={user} gamehistory={gamehistory} />
 										{:else}
 											<p>No games played</p>
 										{/if}
