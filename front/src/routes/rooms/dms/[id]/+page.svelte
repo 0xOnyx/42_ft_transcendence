@@ -22,11 +22,14 @@
     import DeleteFriend from "../../../../components/DeleteFriend.svelte";
     import BlockUser from "../../../../components/BlockUser.svelte";
 	import NavBar from '../../../../components/NavBar.svelte';
+	import { fade } from 'svelte/transition';
 
     import userservice from '../../../../services/UserService';
+	import RoomList from '../../../../components/RoomList/RoomList.svelte';
 
     let id;
 
+	let history : boolean = false;
     interface UserStats {
         played: number,
 		win: number,
@@ -62,6 +65,7 @@
             await goto("/");
 
         user = await userservice.getCurrentUser();
+		console.log("User obtained: ", user);
 
         res = await fetch(`${PUBLIC_API_URI}/user/friend`, {
             method: 'GET',
@@ -87,6 +91,12 @@
                 console.error(err);
             }
         }
+
+		const urlSegments = $page.url.toString().split('/');
+	
+		if (urlSegments.length < 5 || !(urlSegments[3] === 'rooms' && urlSegments[4] === 'dms')) {
+			return;
+		}
 
         if (rooms.length <= 0)
         {
@@ -146,8 +156,7 @@
     onMount(async ()=>{
 
         loadValue();
-
-
+		console.log("DM Page - User: ", user);
         socket = io('/events', {
             path: "/ws/"
         });
@@ -261,6 +270,13 @@
         closeWarningUnbanUser = -1;
     }
 
+	function itemClicked( e : CustomEvent) {
+		console.log("dispatch received");
+		const id : number = e.detail.id;
+		console.log("itemClicked:", id);
+		getRoom(id);
+	}
+	
 </script>
 
 {#if error.length > 0}
@@ -305,48 +321,18 @@
         <div class="md:flex h-full text-center align-middle m-1">
 
             <div class="md:w-1/3 lg:w-1/4 md:flex md:flex-col">
-
-
-                <div class="mt-2 flex mb-5">
-
-                    <div class="mt-2 md:w-1/2 md:pr-2"><Button width="w-full"  name="DM" url="/rooms/dms/last"></Button></div>
-                    <div class="mt-2 md:w-1/2 md:pl-2"><Button width="w-full"  color="bg-color5 text-white border-2 border-color2" name="Channel" url="/rooms/channel/last"></Button></div>
-
-                </div>
-
-
-                <h2 class="text-left border-b-2 text-lg">DM list</h2>
-
-                <div class="mt-2">
-
-                    <input class="w-full rounded-2xl py-1 px-3 bg-color5 focus:outline-none" type="text" bind:value={search_value} placeholder="Search" on:keyup={searchUser}>
-
-                </div>
-
-                <div class="overflow-auto mt-3">
-
-                    {#if search_value.length <= 0}
-                        {#if !connectedWs}
-                            <p>Loading..</p>
-                        {:else}
-                            {#if rooms.length <= 0}
-                                <p>NO DM</p>  <!-- CREATE THIS -->
-                            {:else}
-                                {#each rooms as room}
-                                    <ItemRoomDm current={room.id === id_room} user={user} room={room}></ItemRoomDm>
-                                {/each}
-                            {/if}
-                        {/if}
-                    {:else}
-                        {#if search.length <= 0}
-                            <p>no user found :/</p>  <!-- CREATE THIS -->
-                        {:else}
-                            {#each search as user}
-                                <ItemName on:requestUnblock user={user}></ItemName>
-                            {/each}
-                        {/if}
-                    {/if}
-                </div>
+				{#if user}
+					<RoomList 
+					dmList={true}
+					user={user}
+					socket={socket}
+					friends={friends}
+					connectedWs={connectedWs}
+					id_room={id_room}
+					on:userClicked={itemClicked}/>
+				{:else}
+					<p>LOADING..</p>
+				{/if}
             </div>
 
             <div class="bg-color5 grow justify-around md:flex md:flex-col my-5 md:my-0 md:mx-5 xl:mx-8 overflow-auto rounded-xl">
@@ -383,12 +369,12 @@
 
 
 
-                <div class="overflow-auto mt-3 bg-core-red flex-grow  rounded-xl">
+                <div class="overflow-auto mt-3 flex-grow  rounded-xl">
                     <div class="mt-20">
                         {#if rooms.length <= 0}
                             <p>NO DM</p>
                         {:else}
-                            <UserInfo update={false} user={current_room_user}></UserInfo>
+                            <UserInfo user={current_room_user}></UserInfo>
 
                             <div>
 								{#if user_state_room_user}

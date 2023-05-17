@@ -25,6 +25,7 @@
 	<div class="flex justify-center hover:scale-110 transition-all duration-200">
 		<button on:click={showHistory} class="flex gap-2"><span>Player History</span><Icon icon="history"/></button>
 	</div>
+
 	<div class="flex justify-center">
 		<LeagueBadge league={userstats?.league || "gold"} /> <!-- remove '|| "gold"' once userstats.league ok -->
 	</div>
