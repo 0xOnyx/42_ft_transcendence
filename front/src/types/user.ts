@@ -1,3 +1,5 @@
+import type Player from "../pong/src/classic/player"
+
 export type User =
 {
     id: number,
@@ -43,6 +45,8 @@ export type GameHistory = {
     created_at:	string;
     score_one: number;
     score_two: number;
+	player_one: User;
+	player_two: User;
 }
 
 export enum RoleUser {
