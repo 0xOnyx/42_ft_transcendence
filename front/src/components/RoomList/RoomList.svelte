@@ -33,15 +33,6 @@
 		users : []
 	};
 
-	interface ActiveRooms {
-		channel: (Rooms & {user: RoomUser[]})[];
-		dms: (Rooms & {user: RoomUser[]})[];
-	};
-	let currentRooms : ActiveRooms = {
-		channel : [],
-		dms : []
-	};
-
     async function searchRoom()
     {
         const res: Response = await fetch(`${PUBLIC_API_URI}/message/search/room?skip=0&take=8&element=name&value=${search_value}`, {

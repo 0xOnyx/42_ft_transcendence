@@ -77,7 +77,10 @@
 			{#if rooms.length <= 0}
 				<p>NO CHANNEL</p>  <!-- CREATE THIS -->
 			{:else}
-				{#each rooms.sort((a,b) => (b.last_message_id || 0) - (a.last_message_id || 0)) as room}
+				{#each rooms.sort((a,b) => {    if (b.messages && b.messages.length > 0 && a.messages && a.messages.length > 0) {
+					return b.messages[0].id - a.messages[0].id;
+				}
+				return 0;}) as room}
 					<ItemRoomChannel current={room.id === id_room} room={room}></ItemRoomChannel>
 				{/each}
 			{/if}

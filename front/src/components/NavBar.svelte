@@ -1,15 +1,63 @@
 <script lang="ts">
+	import {PUBLIC_API_URI} from "$env/static/public";
 	import type { User } from "../types/user";
 	import Switch from './Switch.svelte';
 	import Icon from "./Icon.svelte";
 	import { imageUrl } from "../services/Utilities";
 	import { leftHanded } from "../services/Stores";
 
+	import type { Rooms, RoomUser } from "../types/room";
+	import { beforeNavigate } from "$app/navigation";
+	import { onMount } from "svelte";
+
     export let user : User;
-	let totalDM : number = 3;
-	let totalCHAN : number = 5;
 
 	let scale : boolean = false;
+
+	interface ActiveRooms {
+		channel: (Rooms & {user: RoomUser[]})[];
+		dms: (Rooms & {user: RoomUser[]})[];
+	};
+	let rooms : ActiveRooms = {
+		channel : [],
+		dms : []
+	};
+
+	let loadValue = async () => {
+		let res : Response;
+
+		if (rooms.dms.length <= 0)
+		{
+			res = await fetch(`${PUBLIC_API_URI}/message/getAllDm`, {
+				method: 'GET',
+				credentials: 'include'
+			})
+			rooms.dms = await res.json();
+		}
+		if (rooms.channel.length <= 0)
+		{
+			console.log("REFETCH child");
+			res = await fetch(`${PUBLIC_API_URI}/message/rooms`, {
+				method: 'GET',
+				credentials: 'include'
+			})
+			rooms.channel = await res.json();
+		}
+		rooms.channel = rooms.channel.filter((item: (Rooms & {user: RoomUser[]}))=>{return (
+			!(item.user.find(element=>element.user_id == user.id).ban)
+		)})
+	}
+
+	beforeNavigate(loadValue)
+	onMount(async () => {
+		loadValue
+	})
+
+	let totalDM : number;
+	let totalCHAN : number;
+
+	$: totalCHAN = rooms.channel.reduce((accumulator, currentValue) => accumulator + currentValue.count_messages, 0);
+	$: totalDM = rooms.dms.reduce((accumulator, currentValue) => accumulator + currentValue.count_messages, 0);
 
 	function handleClick() {
 		scale = !scale;
@@ -21,11 +69,11 @@
 
 <!-- Mobile Navigation bar-->
 <div class="absolute h-full w-full flex items-end mobile-landscape:items-center {$leftHanded ? 'justify-start' : 'justify-end'} sm:hidden mobile-landscape:flex">
-	<div class="bg-gradient-to-t from-black/25 to-transparent grid grid-cols-3 w-full h-20 mobile-landscape:grid-cols-1 mobile-landscape:grid-rows-6 mobile-landscape:w-20 mobile-landscape:h-full mobile-landscape:bg-gradient-to-l {$leftHanded ? 'mobile-landscape:from-transparent mobile-landscape:to-black/25' : ''}">
+	<div class="bg-gradient-to-t from-black/25 to-transparent grid grid-cols-3 w-full bottom-0 h-20 mobile-landscape:grid-cols-1 mobile-landscape:grid-rows-6 mobile-landscape:w-20 mobile-landscape:h-full mobile-landscape:bg-gradient-to-l {$leftHanded ? 'mobile-landscape:from-transparent mobile-landscape:to-black/25' : ''}">
 		<a class="hidden mobile-landscape:flex items-center" href="/portal">
 			<div class="w-8 h-8 bg-cover rounded-full mx-auto"style="background-image: url( {imageUrl(user?.image_url)} )"></div>
 		</a>
-		<a class=" hover:scale-110 transition-all flex flex-col justify-center items-center" href="/games">
+		<a class="hover:scale-110 transition-all flex flex-col justify-center items-center" href="/games">
 			<Icon icon="game" height="40" width="40" />
 			<span class="text-2xs">Game</span>
 		</a>
