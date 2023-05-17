@@ -24,7 +24,6 @@
     import WarningAsk from '../../components/warningAsk.svelte'
 	import UsersList from "../../components/UsersList.svelte";
 	import UserSettings from "../../components/UserSettings.svelte";
-	import History from "../../components/History.svelte";
 
 	import { leftHanded } from "../../services/Stores";
 	import BlockUser from "../../components/BlockUser.svelte";
@@ -142,8 +141,6 @@
     let _openUpdate: boolean = false;
     let _openFile: boolean = false;
 	let _openSettings: boolean = false;
-	let _openFriends : boolean = false
-	let history : boolean = false;
 
 	const updatePopUp = ( e : CustomEvent ) => {
 		if (e.detail.text === "update") {
@@ -286,100 +283,13 @@
 <div class="flex-col">
 	<NavBar user={user} />
 
-	<div class="flex sm:hidden py-2 landscape:py-0 md:py-10 xl:py-10">
-
-		<div class="h-[80vh] grow w-full px-[5%] self-center py-1 grid overflow-hidden">
-			
-			<div class="flex flex-col text-center align-middle m-1">
-
-				{#if _openFriends}
-				<div in:fly="{{ x: 200, delay: 500, duration: 400 }}" out:fly="{{ x: 200, duration: 400 }}" class="relative flex-col space-y-4 h-full">
-					<div  class="flex items-center justify-start">
-						<button on:click={() => {_openFriends = false}} class="flex">
-							<Icon icon="left-arrow"/>
-							<Icon icon="settings"/>
-						</button>
-					</div>
-					<UsersList user={user} bind:friends={friends} bind:locked={locked} bind:search={search} socket={socket} on:userClicked={itemClicked} on:unblock={unblockUser} on:search={searchUser} />		
-				</div>
-				{:else}
-				<div in:fly="{{ x: -200, delay: 500, duration: 400 }}" out:fly="{{ x: -200, duration: 400 }}" class="relative flex-col space-y-4 h-full">
-					<div  class="flex items-center justify-end">
-						<button on:click={() => {_openFriends = true}} class="flex">
-							<Icon icon="friends"/>
-							<Icon icon="right-arrow"/>
-						</button>
-					</div>
-					<div class="info-user screen border-gray-700 grow h-[65vh] overflow-hidden flex shadow-lg shadow-black/50 bg-black/25 rounded-3xl">
-						<div class="screen-overlay"></div>
-						<div class="absolute flex w-full justify-between">
-							<button on:click={() => { _openSettings = false}} class="transition-opacity duration-300 grow p-3 border-gray-700 {_openSettings ? "border-b-[3px] bg-black/50 text-gray-500" : "border-r-[3px]"}">
-								Statistics
-							</button>
-							<button on:click={() => { _openSettings = true}} class="transition-opacity duration-300 grow p-3 border-gray-700  {_openSettings ? "border-l-[3px]" : "border-b-[3px] bg-black/50 text-gray-500"}">
-								Settings
-							</button>
-						</div>
-						<div class="grow flex">
-
-							<div class="relative top-6 gap-3 flex flex-col grow m-auto p-t-6">
-								{#if _openSettings}
-								<div in:fade="{{ delay: 200, duration: 400 }}">
-									<div class="flex sm:flex-col mobile-landscape:flex-row justify-center gap-3">
-										<UserInfo portal={_openSettings} user={user} on:updateUserInfo={updatePopUp} />
-										<UserSettings user={user} />
-									</div>
-								</div>
-								{:else}
-									{#if history}
-									<div in:fade="{{ delay: 200, duration: 400 }}">
-										{#if userstats}
-											<History userstats={userstats} />
-										{:else}
-											<p>No games played</p>
-										{/if}
-										<div class="flex justify-center">
-											<button on:click={()=> {history = false}} class="flex gap-2"><Icon icon="left-arrow"/>Return</button>
-										</div>
-									</div>
-									{:else}
-									<div in:fade="{{ delay: 200, duration: 400 }}">
-										<div class="flex sm:flex-col mobile-landscape:flex-row justify-center gap-3">
-												<UserInfo portal={_openSettings} user={user} on:updateUserInfo={updatePopUp} />
-											{#if userstats}
-												<UserStat userstats={userstats} on:showHistory={() => {history =true}}/>
-											{:else}
-												<p>No games played</p>
-											{/if}
-										</div>
-										<div class="max-h-42">
-											{#if userstats}
-												<Achievement userstats={userstats} />
-											{/if}
-										</div>
-									</div>
-									{/if}
-								{/if}
-							</div>
-						</div>
-					</div>
-				</div>
-			{/if}
-
-			</div>
-
-		</div>
-
-	</div>
-
-	<!-- Screen version-->
-	<div class="hidden sm:flex py-2 landscape:py-0 md:py-10 xl:py-10">
+	<div class="flex py-2 landscape:py-0 md:py-10 xl:py-10">
 
 		<div class="h-[80vh] grow sm:h-screen mobile-landscape:h-screen w-full px-[5%] self-center py-1 grid overflow-hidden">
 			
 			<div class="flex flex-col sm:flex-row sm:max-h-[85%] gap-4 {$leftHanded ? 'mobile-landscape:pl-[3.75rem]' : 'mobile-landscape:pr-[3.75rem]'} sm:grid-cols-3 text-center align-middle m-1">
 
-				<div class="info-user screen border-gray-700 grow h-1/2 sm:h-full sm:w-2/3 mobile-landscape:w-1/2 overflow-hidden flex shadow-lg shadow-black/50 bg-black/25 rounded-3xl">
+				<div class="info-user screen border-gray-700 grow h-1/2 sm:h-full sm:w-2/3 mobile-landscape:w-1/2 overflow-hidden flex shadow-lg shadow-black/50 bg-black/25 rounded-3xl mobile-landscape:col-span-1 sm:col-span-2">
 					<div class="screen-overlay"></div>
 					<div class="absolute flex w-full justify-between">
 						<button on:click={() => { _openSettings = !_openSettings}} class="transition-opacity duration-300 grow p-3 border-gray-700 {_openSettings ? "border-b-[3px] bg-black/50 text-gray-500" : "border-r-[3px]"}">
@@ -400,34 +310,21 @@
 								</div>
 							</div>
 							{:else}
-								{#if history}
-								<div in:fade="{{ delay: 200, duration: 400 }}">
-									{#if userstats}
-										<History userstats={userstats} />
-									{:else}
-										<p>No games played</p>
-									{/if}
-									<div class="flex justify-center">
-										<button on:click={()=> {history = false}} class="flex gap-2"><Icon icon="left-arrow"/>Return</button>
-									</div>
-								</div>
+							<div in:fade="{{ delay: 200, duration: 400 }}">
+							<div class="flex sm:flex-col mobile-landscape:flex-row justify-center gap-3">
+									<UserInfo portal={_openSettings} user={user} on:updateUserInfo={updatePopUp} />
+								{#if userstats}
+									<UserStat userstats={userstats} />
 								{:else}
-								<div in:fade="{{ delay: 200, duration: 400 }}">
-									<div class="flex sm:flex-col mobile-landscape:flex-row justify-center gap-3">
-											<UserInfo portal={_openSettings} user={user} on:updateUserInfo={updatePopUp} />
-										{#if userstats}
-											<UserStat userstats={userstats} on:showHistory={() => {history =true}}/>
-										{:else}
-											<p>No games played</p>
-										{/if}
-									</div>
-									<div class="max-h-42">
-										{#if userstats}
-											<Achievement userstats={userstats} />
-										{/if}
-									</div>
-								</div>
+									<p>No games played</p>
 								{/if}
+							</div>
+							<div class="max-h-42">
+								{#if userstats}
+									<Achievement userstats={userstats} />
+								{/if}
+							</div>
+						</div>
 							{/if}
 						</div>
 
@@ -443,3 +340,8 @@
 
 	</div>
 </div>
+
+
+
+
+
