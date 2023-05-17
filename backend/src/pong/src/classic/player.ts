@@ -31,7 +31,6 @@ export default class Player extends Rectangle
         const new_pos : Vector = this.position.copy();
 
         if (controller.up()) {
-            console.log('up');
             let value : number = this.speed * this.timer.delta;
             new_pos.add((new Vector).up().scalarMulti(this.speed * this.timer.delta));
         }

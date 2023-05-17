@@ -204,6 +204,10 @@ type matchmakingPlayer = {socket : Socket, user_id : number}
             pong.players[data.player].connected = false;
           }
 
+          if (!pong.players[0].connected && !pong.players[1].connected) {
+            this.gameService.delete(pong.getGameId());
+          }
+
         }
 
       }

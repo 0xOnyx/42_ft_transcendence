@@ -8,7 +8,7 @@
 
 
 <div class="z-100 absolute w-full px-4 min-h-screen md:flex md:items-center md:justify-center">
-    <div class="bg-black opacity-75 w-full h-full absolute z-10 inset-0"></div>
+    <div class="fixed bg-black opacity-75 w-full h-full z-10 inset-0"></div>
     <div class="bg-white rounded-lg md:max-w-md md:mx-auto p-4 fixed inset-x-0 bottom-0 z-50 mb-4 mx-4 md:relative">
         <div class="md:flex items-center">
 

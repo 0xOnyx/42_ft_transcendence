@@ -10,6 +10,7 @@
 	import type { Socket } from "socket.io-client";
 	import { loop_guard } from "svelte/internal";
 	import {goto} from "$app/navigation"
+	import { getRoom } from "../services/Utilities";
 	
 	let blockedList : boolean = false;
 
