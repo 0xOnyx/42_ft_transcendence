@@ -24,6 +24,7 @@
     import WarningAsk from '../../components/warningAsk.svelte'
 	import UsersList from "../../components/UsersList.svelte";
 	import UserSettings from "../../components/UserSettings.svelte";
+	import History from "../../components/History.svelte";
 
 	import { leftHanded } from "../../services/Stores";
 	import BlockUser from "../../components/BlockUser.svelte";
@@ -141,6 +142,7 @@
     let _openUpdate: boolean = false;
     let _openFile: boolean = false;
 	let _openSettings: boolean = false;
+	let history : boolean = false;
 
 	const updatePopUp = ( e : CustomEvent ) => {
 		if (e.detail.text === "update") {
@@ -310,21 +312,34 @@
 								</div>
 							</div>
 							{:else}
-							<div in:fade="{{ delay: 200, duration: 400 }}">
-							<div class="flex sm:flex-col mobile-landscape:flex-row justify-center gap-3">
-									<UserInfo portal={_openSettings} user={user} on:updateUserInfo={updatePopUp} />
-								{#if userstats}
-									<UserStat userstats={userstats} />
+								{#if history}
+								<div in:fade="{{ delay: 200, duration: 400 }}">
+									{#if userstats}
+										<History userstats={userstats} />
+									{:else}
+										<p>No games played</p>
+									{/if}
+									<div class="flex justify-center">
+										<button on:click={()=> {history = false}} class="flex gap-2"><Icon icon="left-arrow"/>Return</button>
+									</div>
+								</div>
 								{:else}
-									<p>No games played</p>
+								<div in:fade="{{ delay: 200, duration: 400 }}">
+									<div class="flex sm:flex-col mobile-landscape:flex-row justify-center gap-3">
+											<UserInfo portal={_openSettings} user={user} on:updateUserInfo={updatePopUp} />
+										{#if userstats}
+											<UserStat userstats={userstats} on:showHistory={() => {history =true}}/>
+										{:else}
+											<p>No games played</p>
+										{/if}
+									</div>
+									<div class="max-h-42">
+										{#if userstats}
+											<Achievement userstats={userstats} />
+										{/if}
+									</div>
+								</div>
 								{/if}
-							</div>
-							<div class="max-h-42">
-								{#if userstats}
-									<Achievement userstats={userstats} />
-								{/if}
-							</div>
-						</div>
 							{/if}
 						</div>
 
