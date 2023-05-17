@@ -245,4 +245,15 @@ export class MessageService {
             include  : { user: true}
         })
     }
+
+    async updateMessageGame(messageInput: Prisma.MessagesWhereInput, newMessage: string)
+    {
+        return this.prisma.messages.updateMany({
+            where: messageInput,
+            data: {
+                content: newMessage,
+            }
+        })
+
+    }
 }

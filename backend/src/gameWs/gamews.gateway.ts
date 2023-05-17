@@ -14,8 +14,9 @@ import { GameEvent } from 'src/pong/src/classic/message';
 import { NetMessagePlayerMove } from 'src/pong/src/classic/message';
 import PongServer, { GameStatus } from 'src/pong/src/classic/pongserver';
 import { PrismaGameService } from 'src/prisma/prismagame.service';
-import { Game, StatusGame, TypeGame } from '@prisma/client';
+import {Game, StatusGame, TypeGame, TypeMessage} from '@prisma/client';
 import { GameService } from 'src/game/game.service';
+import {MessageService} from "../prisma/message.service";
 import { UserService } from 'src/prisma/user.service';
 
 
@@ -44,16 +45,17 @@ type matchmakingPlayer = {socket : Socket, user_id : number}
      */
     matchmakings: Array<matchmakingPlayer> = [];
 
-    constructor(private prismaGameService: PrismaGameService, private gameService : GameService, private userService : UserService) {}
+
+    constructor(private prismaGameService: PrismaGameService, private gameService : GameService, private userService : UserService, private messageService: MessageService) {}
 
     async handleDisconnect(client: Socket) 
     {
-      console.log("disconnection game socket", Socket);
+
     }
 
     async handleConnection(client: Socket) 
     {
-      console.log("connection game socket", Socket);
+
     }
 
     /**
@@ -66,9 +68,6 @@ type matchmakingPlayer = {socket : Socket, user_id : number}
     @SubscribeMessage('joinGame')
     async join(@MessageBody() data: any, @ConnectedSocket() client: Socket ) 
     {
-
-      console.log('joinGame', data);
-    
       let room_name : string = 'game_' + <string>(data.game_id);
       let game : Game = <Game>await this.prismaGameService.find(parseInt(data.game_id));
       let pong : PongServer;
@@ -76,8 +75,6 @@ type matchmakingPlayer = {socket : Socket, user_id : number}
       client.join(room_name);
     
       if (!this.pongs.has(room_name)) {
-
-        console.log('create pong');
 
         pong = new PongServer(800, 500);
 
@@ -96,9 +93,12 @@ type matchmakingPlayer = {socket : Socket, user_id : number}
                   if (game != null)
                   {
                     if(pong.status == GameStatus.FINISHED)
-						game.status = StatusGame.FINISHED;
+                    {
+                      game.status = StatusGame.FINISHED;
+                      this.messageService.updateMessageGame({message_type: TypeMessage.INVITE_GAME, content: data.game_id.toString()}, GameStatus.FINISHED)
+                    }
                     else
-					game.status = StatusGame.RUN;
+             					game.status = StatusGame.RUN;
 					
                     game.score_one = pong.players[0].score;
                     game.score_two = pong.players[1].score;
@@ -121,7 +121,6 @@ type matchmakingPlayer = {socket : Socket, user_id : number}
         this.pongs.set(room_name, pong);
 
         this.prismaGameService.find(pong.getGameId()).then((game) => {
-          console.log('update game', game);
           if (game != null)
           {
             game.status = StatusGame.READY;
@@ -148,8 +147,6 @@ type matchmakingPlayer = {socket : Socket, user_id : number}
      */
     @SubscribeMessage('eventGame')
     event(@MessageBody() data: NetMessage, @ConnectedSocket() client: Socket ): any {
-
-      console.log('eventGame', data) ;
 
       let room : string = 'game_' + data.game_id;
 
@@ -189,7 +186,6 @@ type matchmakingPlayer = {socket : Socket, user_id : number}
             if(pong.checkReady())
             {
               this.prismaGameService.find(pong.getGameId()).then((game) => {
-                console.log('update game', game);
                 if (game != null)
                 {
                   game.status = StatusGame.RUN;
@@ -222,9 +218,6 @@ type matchmakingPlayer = {socket : Socket, user_id : number}
      */
     @SubscribeMessage('leaveGame')
     leave(@MessageBody() data: any) {
-
-      console.log('leaveGame', data);
-      
       let room : string = 'game_' + data.game_id;
 
       if (this.pongs.has(room)) {
@@ -283,9 +276,6 @@ type matchmakingPlayer = {socket : Socket, user_id : number}
      */
     @SubscribeMessage('leaveMatchmakingGame')
     leaveMatchmaking(@MessageBody() data: any) {
-
-      console.log('leaveMatchmakingGame', data);
-
       for (let index = 0; index < this.matchmakings.length; index++) {
         const element = this.matchmakings[index];
         if (element.user_id == data.user_id) {
@@ -302,9 +292,6 @@ type matchmakingPlayer = {socket : Socket, user_id : number}
      */
     @SubscribeMessage('joinMatchmakingGame')
     async joinMatchmaking(@MessageBody() data: any, @ConnectedSocket() client: Socket) {
-
-      console.log('joinMatchmakingGame', data);
-
       // check if exists a game without player two
       let games : Array<Game> = await this.prismaGameService.search({ status : StatusGame.READY, player_two: null, NOT : { player_one_id : data.user_id } } );
       
