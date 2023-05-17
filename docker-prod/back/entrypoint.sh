@@ -2,5 +2,5 @@
 cd /app
 npm install
 npm run build
-npx prisma migrate dev --name init
+npx prisma migrate deploy
 node dist/src/main.js
