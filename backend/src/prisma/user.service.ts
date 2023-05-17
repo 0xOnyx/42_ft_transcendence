@@ -178,6 +178,7 @@ export class UserService {
 	async getGameHistory(user_where: Prisma.UserWhereUniqueInput)
 	{
 		return await this.prisma.game.findMany({
+			include: {player_one: true, player_two: true},
 			where: {
 				OR: [
 					{
@@ -191,7 +192,8 @@ export class UserService {
 			},
 			orderBy: {
 				created_at: Prisma.SortOrder.desc
-			}
+			},
+
 		})
 	}
 

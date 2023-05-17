@@ -4,7 +4,7 @@
     import Button from '../../components/Button.svelte';
     import ItemName from '../../components/Itemname.svelte';
 
-    import type {User, Status, UserStats} from '../../types/user';
+    import type {User, Status, UserStats, GameHistory} from '../../types/user';
     import type {Friend} from '../../types/friend';
 
 	import { fade, fly, slide } from 'svelte/transition';
@@ -20,7 +20,7 @@
 	import NavBar from "../../components/NavBar.svelte";
 	import Icon from "../../components/Icon.svelte";
 	import Achievement from "../../components/Achievement.svelte";
-	import userservice from "../../services/UserService";
+	import userservice, { UserService } from "../../services/UserService";
     import WarningAsk from '../../components/warningAsk.svelte'
 	import UsersList from "../../components/UsersList.svelte";
 	import UserSettings from "../../components/UserSettings.svelte";
@@ -28,6 +28,7 @@
 
 	import { leftHanded } from "../../services/Stores";
 	import BlockUser from "../../components/BlockUser.svelte";
+	import gameservice from "../../services/GameService";
 	import { getRoom } from "../../services/Utilities";
 
     interface UserStats {
@@ -57,7 +58,7 @@
     let search_value: string = "";
     let search : User[] = [];
     let friends : User[] = [];
-	let locked : User[] = [];
+	  let locked : User[] = [];
     let user : User;
     let connectedWs: Boolean = false;
     let socket: Socket ;
@@ -66,7 +67,7 @@
 	let history : boolean = false;
 
     let userstats : UserStats | undefined = undefined;
-
+  	let gamehistory : GameHistory | undefined = undefined;
     let closeWarningUnbanUser = -1;
 
     async function searchUser( e : CustomEvent )
@@ -99,6 +100,7 @@
 
         user = await userservice.getCurrentUser();
 		userstats = await userservice.getStats(user.id);
+		gamehistory = await userservice.getHistory(user.id);
 
         friends = await userservice.getFriends();
 		locked = await userservice.getBlockedUsers();
@@ -315,8 +317,8 @@
 								{:else}
 									{#if history}
 									<div in:fade="{{ delay: 200, duration: 400 }}">
-										{#if userstats}
-											<History userstats={userstats} />
+										{#if gamehistory && user}
+											<History curUser={user} gamehistory={gamehistory} />
 										{:else}
 											<p>No games played</p>
 										{/if}
