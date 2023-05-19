@@ -3,6 +3,7 @@ import {PUBLIC_API_URI} from "$env/static/public";
 import { goto } from "$app/navigation";
 import type { Rooms, RoomUser } from "../types/room";
 import type { Socket } from "socket.io-client";
+import { Status } from "../types/user";
 
 export function imageUrl(image: string | undefined) : string
 {
@@ -47,4 +48,14 @@ export async function getRoom( id : number, socket : Socket) : Promise<Boolean>
 			await goto(`/rooms/dms/${rooms.id}`);
 	}
 	return true;
+}
+
+export function getColor(status: Status)
+{
+	if (status == Status.OFFLINE)
+		return "border-zinc-600";
+	else if (status == Status.HIDDEN)
+		return "border-rose-600";
+	else if (status == Status.ONLINE)
+		return "border-green-600 text-green-600";
 }

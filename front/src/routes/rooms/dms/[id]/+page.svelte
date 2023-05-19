@@ -348,11 +348,11 @@
 
                 </div>
 
-                <div class="flex items-center border-1 p-8">
+                <div class="flex items-center border-1 border-black p-8">
 
-                    <input disabled={rooms.length <= 0} autofocus on:keydown={(e)=>{e.key === "Enter" && sendMessage()}} bind:value={message_value} type="text" class="disabled:border-zinc-500  border border-color2 bg-color5 rounded-md w-full p-2 pr-12 focus:outline-none" />
+                    <input disabled={rooms.length <= 0} on:keydown={(e)=>{e.key === "Enter" && sendMessage()}} bind:value={message_value} type="text" class="disabled:border-zinc-500  border border-color2 bg-color5 rounded-md w-full p-2 pr-12 focus:outline-none" />
                     <div class="relative">
-                        <button disabled={rooms.length <= 0} on:click={sendMessage} class="-top-4 -left-10 absolute bg-color2 disabled:bg-zinc-500 p-0 m-0 rounded-xl"><Icon icon="send" css="inline p-0 h-8 {rooms.length <= 0 ? 'stroke-zinc-500' : 'stroke-color2' }  fill-white"></Icon></button>
+                        <button disabled={rooms.length <= 0} on:click={sendMessage} class="-top-4 -left-10 absolute bg-color2 disabled:bg-zinc-500 p-0 m-0 rounded-xl"><Icon icon="settings" css="inline p-0 h-8 {rooms.length <= 0 ? 'stroke-zinc-500' : 'stroke-color2' }"></Icon></button>
                     </div>
 
                 </div>

@@ -444,9 +444,9 @@
 
 	<div class="flex py-2 landscape:py-0 md:py-10 xl:py-10">
 
-		<div class="h-[80vh] grow sm:h-screen mobile-landscape:h-screen w-full px-[5%] self-center py-1 grid overflow-hidden">
+		<div class="h-[80vh] grow sm:h-[90vh] mobile-landscape:h-screen w-full px-[5%] self-center py-1 grid overflow-hidden">
 
-			<div class="flex h-full sm:max-h-[85%] text-center align-middle m-1">
+			<div class="flex h-full sm:max-h-[85%] text-center align-middle m-1 overflow-hidden">
 				<div id="RoomList" class="grow w-1/4">
 				<RoomList
 					dmList={false}
@@ -471,9 +471,9 @@
 
 					<div class="relative flex items-center border-1 p-8">
 
-						<input disabled={rooms.length <= 0} autofocus on:keydown={(e)=>{e.key === "Enter" && sendMessage()}} bind:value={message_value} type="text" class="disabled:border-zinc-500  border-2 border-gray-700 bg-gray-500/75 rounded-md w-full p-2 pr-12 focus:outline-none" />
+						<input disabled={rooms.length <= 0} on:keydown={(e)=>{e.key === "Enter" && sendMessage()}} bind:value={message_value} type="text" class="disabled:border-zinc-500  border-2 border-gray-700 bg-gray-500/75 rounded-md w-full p-2 pr-12 focus:outline-none" />
 						<div class="relative">
-							<button disabled={rooms.length <= 0} on:click={sendMessage} class="-top-4 -left-10 absolute disabled:bg-zinc-500 p-0 m-0 rounded-full"><Icon icon="send" css="inlinep-0 h-8 {rooms.length <= 0 ? 'stroke-zinc-500' : 'stroke-white' }  fill-gray-700"></Icon></button>
+							<button disabled={rooms.length <= 0} on:click={sendMessage} class="-top-4 -left-10 absolute disabled:bg-zinc-500 p-0 m-0 rounded-full"><Icon icon="send" css="inlinep-0 h-8 {rooms.length <= 0 ? 'stroke-zinc-500' : 'stroke-black' }  fill-thread-blue"></Icon></button>
 						</div>
 
 					</div>
@@ -490,13 +490,15 @@
 
 
 
-					<div class="overflow-auto mt-3 bg-color5 flex-grow  rounded-xl">
+					<div class="overflow-auto mt-2 bg-color5 flex-grow  rounded-xl">
 						{#if current_room_id >= 0 }
-							<div class="mt-10">
+							<div class="mt-2 self-center">
 								{#if currentRoomUserSelect}
-									<button on:click={()=>{currentRoomUserSelect = null}}  class="bg-color2 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-										↩️ RETURN
-									</button>
+									<div class="justify-center flex">
+										<button on:click={()=>{currentRoomUserSelect = null}}  class=" hover:scale-110 text-white font-bold py-2 px-4 mx-2 rounded flex gap-2">
+											<Icon icon="left-arrow"/> <span>RETURN</span>
+										</button>
+									</div>
 								{:else if rooms[current_room_id]?.user.find(element => element.role === RoleUser.ADMIN && element.user_id === user.id)}
 									<ButtonElement title="Password room" on:clicker={()=>{closePassworRoom = true}}></ButtonElement>
 									<ButtonElementWarning title="Delete room" on:clicker={()=>{closeDeleteRoom = true}}></ButtonElementWarning>
@@ -505,7 +507,7 @@
 						{/if}
 
 
-                    <div class="mt-20">
+                    <div id="roomUsers" class="mt-5">
 
                         {#if current_room_id >= 0}
 

@@ -269,6 +269,7 @@
 <div class="flex-col">
 	<NavBar user={user} />
 
+	<!-- Mobile version-->
 	<div class="flex sm:hidden py-2 landscape:py-0 md:py-10 xl:py-10">
 
 		<div class="h-[80vh] grow w-full px-[5%] self-center py-1 grid overflow-hidden">
