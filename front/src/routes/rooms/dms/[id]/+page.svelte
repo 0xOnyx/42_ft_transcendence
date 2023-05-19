@@ -56,9 +56,10 @@
 	let user_state_room_user : UserStats | undefined = undefined;
 
     let id_room: number;
+    let refresh: boolean = false;
 
     let loadValue = async ()=>{
-
+        refresh = !refresh;
         let res: Response;
 
         if (!await userservice.isLogged())
@@ -93,7 +94,7 @@
         }
 
 		const urlSegments = $page.url.toString().split('/');
-	
+
 		if (urlSegments.length < 5 || !(urlSegments[3] === 'rooms' && urlSegments[4] === 'dms')) {
 			return;
 		}
@@ -188,12 +189,14 @@
             else
                 rooms[index] = room;
             rooms = rooms;
+            refresh = !refresh;
         })
 
         socket.on("leftRoom", (room: (Rooms & {user: RoomUser[]})) =>{
             rooms = rooms.filter(item=>{
                 return item.id != room.id
             })
+            refresh = !refresh;
         })
 
         socket.on("NewFriend", (user: User)=>{
@@ -209,6 +212,7 @@
         socket.on("updateMessage", (message: (Messages & {user: User}))=>{
             const id = room_message.findIndex(item=>{return(item.id == message.id)});
             room_message[id] = message;
+            refresh = !refresh;
         })
 
         socket.on("exception", (data: {status: string, message: string})=>{
@@ -276,7 +280,7 @@
 		console.log("itemClicked:", id);
 		getRoom(id);
 	}
-	
+
 </script>
 
 {#if error.length > 0}
@@ -311,8 +315,9 @@
                 buttonAccecpt={acceptUnbanUser} buttonDecline={()=>{closeWarningUnbanUser = -1}}></WarningAsk>
 {/if}
 
-
-<NavBar user={user} />
+{#key refresh}
+    <NavBar user={user} current_dm={current_room?.id || -1} />
+{/key}
 
 <div class="h-full container md:py-5 xl:py-10 mx-auto">
 
@@ -322,7 +327,7 @@
 
             <div class="md:w-1/3 lg:w-1/4 md:flex md:flex-col">
 				{#if user}
-					<RoomList 
+					<RoomList
 					dmList={true}
 					user={user}
 					socket={socket}
