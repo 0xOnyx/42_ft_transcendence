@@ -20,7 +20,7 @@
     import { page } from "$app/stores";
     import { onMount } from "svelte";
     import { PUBLIC_API_URI } from "$env/static/public";
-    import { goto, beforeNavigate } from "$app/navigation";
+    import { goto, beforeNavigate, invalidateAll } from "$app/navigation";
     import { io, Socket } from "socket.io-client";
     import NavBar from '../../../../components/NavBar.svelte';
     import ItemRoomUserElement from '../../../../components/ItemRoomUserElement.svelte'
@@ -55,6 +55,7 @@
     let id_room: number;
 
     let loadValue = async ()=>{
+        refresh = !refresh;
         console.log("LOAD OK");
         let res: Response;
 
@@ -195,6 +196,7 @@
             rooms = rooms;
             console.log(rooms);
             refresh = !refresh;
+            invalidateAll();
         })
 
         socket.on("leftRoom", (room: (Rooms & {user: RoomUser[]})) =>{
@@ -208,6 +210,7 @@
             if (room.id === room_id_current)
                 room_message = [];
             refresh = !refresh;
+            invalidateAll();
         })
 
         socket.on("NewFriend", (user: User)=>{
@@ -440,7 +443,7 @@
 
 {#key refresh}
 <div class="flex-col">
-	<NavBar user={user} />
+	<NavBar user={user} current_channel={rooms[current_room_id]?.id || -1}/>
 
 	<div class="flex py-2 landscape:py-0 md:py-10 xl:py-10">
 
