@@ -23,7 +23,8 @@
     import { goto, beforeNavigate, invalidateAll } from "$app/navigation";
     import { io, Socket } from "socket.io-client";
     import NavBar from '../../../../components/NavBar.svelte';
-    import ItemRoomUserElement from '../../../../components/ItemRoomUserElement.svelte'
+    import ItemRoomUserElement from '../../../../components/ItemRoomUserElement.svelte';
+	import { fade, fly } from 'svelte/transition';
 
     import userservice from '../../../../services/UserService';
     import PopUpCreateDm from "../../../../components/PopUpCreateDm.svelte";
@@ -31,6 +32,9 @@
     import PopUpAskTime from "../../../../components/PopUpAskTime.svelte";
 
 	import RoomList from '../../../../components/RoomList/RoomList.svelte';
+
+	import { leftHanded } from '../../../../services/Stores';
+	import IconButton from '../../../../components/IconButton.svelte';
 
     let id;
 
@@ -246,6 +250,9 @@
         message_value = "";
     }
 
+	let _showAllRooms : Boolean = false;
+	let _showCurrentRoom : Boolean = true;
+	let _showRoomUsers : Boolean = false;
 
     let closeWarningLeftChannel = false;
     let closeWarningBlockUser = false;
@@ -447,10 +454,147 @@
 
 	<div class="flex py-2 landscape:py-0 md:py-10 xl:py-10">
 
-		<div class="h-[80vh] grow sm:h-[90vh] mobile-landscape:h-screen w-full px-[5%] self-center py-1 grid overflow-hidden">
+		<div class="h-[80vh] grow md:h-[85vh] lg:h-[90vh] mobile-landscape:h-screen w-full px-[5%] self-center py-1 grid overflow-hidden">
 
-			<div class="flex h-full sm:max-h-[85%] text-center align-middle m-1 overflow-hidden">
-				<div id="RoomList" class="grow w-1/4">
+
+			<!-- Mobile Version-->
+			<div class="flex md:hidden h-full sm:max-h-[90vh] text-center align-middle m-1 overflow-hidden">
+				{#if _showAllRooms == true}
+				<div in:fly="{{ x: -200, delay:200, duration: 400 }}" out:fly="{{ x: -200, duration: 400 }}" class="flex-col grow relative">
+					<div class="flex justify-end pb-4">
+						<button on:click={() => {_showAllRooms = false; _showCurrentRoom = true;}} class="flex items-center gap-2">Back<Icon icon="right-arrow"/></button>
+					</div>
+					<div id="RoomList" class="flex-grow h-[90%]">
+						<RoomList
+							dmList={false}
+							user={user}
+							socket={socket}
+							friends={friends}
+							connectedWs={connectedWs}
+							rooms={rooms}
+							id_room={id_room}/>
+					</div>
+				</div>
+				{:else if _showCurrentRoom == true}
+					<div in:fly="{{ y: 200, delay: 500, duration: 400 }}" out:fly="{{ y:200, duration: 200 }}" class="flex-col grow relative h-[90%]">
+		
+						<div id="CurrenrRoom" class="screen border-gray-700 shadow-lg shadow-black/50 bg-black/25 grow flex flex-col my-5 md:my-0 md:mx-5 mx-4 xl:mx-8 overflow-auto rounded-xl h-full">
+							<div class="screen-overlay"></div>
+							<div class="grid grid-cols-3 relative py-3 bg-black/50 border-b-2 border-gray-700">
+								<button on:click={() => {_showAllRooms=true; _showCurrentRoom=false;}} class="flex items-center gap-1 justify-start pl-2 text-sm"><Icon icon="left-arrow" width="20" height="20"/><Icon icon="chatrooms" width="20" height="20"/>Rooms</button>
+								<div class="text-xl italic text-ellipsis ">{rooms[current_room_id]?.name}</div>
+								<button on:click={() => {_showCurrentRoom=false; _showRoomUsers=true;}} class="flex items-center justify-end gap-1 text-sm pr-2">Users<Icon icon="friends" width="20" height="20"/><Icon icon="right-arrow" width="20" height="20" /></button>
+							</div>
+							<div bind:this={chatbox} class="relative overflow-x-hidden overflow-y-scroll scroll-smooth mt-3 flex-grow [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+
+								{#if connectedWs}
+									<MessageItem socket={socket} user={user} message={room_message}></MessageItem>
+								{:else}
+									<p>CONNECTING WS..</p>
+								{/if}
+
+							</div>
+
+							<div id="messgae-input" class="relative flex items-center bottom-0 border-1 p-8">
+
+								<input disabled={rooms.length <= 0} on:keydown={(e)=>{e.key === "Enter" && sendMessage()}} bind:value={message_value} type="text" class="disabled:border-zinc-500  border-2 border-gray-700 bg-gray-500/75 rounded-md w-full p-2 pr-12 focus:outline-none" />
+								<div class="relative">
+									<button disabled={rooms.length <= 0} on:click={sendMessage} class="-top-4 -left-10 absolute disabled:bg-zinc-500 p-0 m-0 rounded-full"><Icon icon="send" css="inlinep-0 h-8 {rooms.length <= 0 ? 'stroke-zinc-500' : 'stroke-black' }  fill-thread-blue"></Icon></button>
+								</div>
+
+							</div>
+
+						</div>
+					</div>
+				{:else if _showRoomUsers == true}
+				<div in:fly="{{ x: 200, delay: 500, duration: 400 }}" out:fly="{{ x:200, duration: 200 }}" class="flex-col grow relative h-[90%]">
+					<div class="flex justify-start pb-4">
+						<button on:click={() => {_showRoomUsers = false; _showCurrentRoom = true;}} class="flex items-center gap-2"><Icon icon="left-arrow"/>Back</button>
+					</div>
+					<div id="RoomUsers" class="md:flex md:flex-col h-full grow mb-10">
+
+					<div class="overflow-auto mt-2 bg-color5 flex-grow h-full rounded-xl shadow-lg shadow-black mx-4">
+						<div class="flex items-center justify-end m-2">
+							<button on:click={()=>{closeWarningLeftChannel = true}} class="cursor-pointer flex text-sm gap-1 items-center">
+								Leave Room<Icon icon="exit" width="30" height="30" css="inline stroke-none fill-white"></Icon>
+							</button>
+						</div>
+						{#if current_room_id >= 0 }
+							<div class="mt-2 self-center">
+								{#if currentRoomUserSelect}
+									<div in:fly="{{ x: 200, delay: 500, duration: 400 }}" out:fly="{{ x:200, duration: 200 }}" class="justify-center flex">
+										<button on:click={()=>{currentRoomUserSelect = null}}  class="hover:scale-110 text-white font-bold py-2 px-4 mx-2 rounded flex gap-2">
+											<Icon icon="left-arrow"/> <span>RETURN</span>
+										</button>
+									</div>
+								{:else if rooms[current_room_id]?.user.find(element => element.role === RoleUser.ADMIN && element.user_id === user.id)}
+								<div in:fly="{{ x: -200, delay: 500, duration: 400 }}" out:fly="{{ x: -200, duration: 200 }}" class="flex-col justify-center items-center w-full space-y-2">
+									<IconButton on:buttonClick={()=>{closePassworRoom = true}} icon="lock" icon_size="20" primary="gray-200" secondary="gray-700" title="Password settings"/>
+									<IconButton on:buttonClick={()=>{closeDeleteRoom = true}} icon="delete" icon_size="28" primary="core-red" secondary="transparent" title="Delete room"/>
+								</div>
+								{/if}
+							</div>
+						{/if}
+
+
+                    <div id="roomUsers" class="mt-5">
+
+                        {#if current_room_id >= 0}
+
+                            {#if currentRoomUserSelect}
+							<div in:fly="{{ x: 200, delay: 500, duration: 400 }}" out:fly="{{ x:200, duration: 200 }}">
+									<UserInfo user={currentRoomUserSelect}></UserInfo>
+
+									<div>
+										<UserStat userstats={currentRoomUserSelect}></UserStat>
+									</div>
+
+									<div class="flex-col mt-4 space-y-2">
+										{#if rooms[current_room_id]?.user.find(element => element.role === RoleUser.ADMIN && element.user_id === user.id)
+										&& rooms[current_room_id]?.owner_id !== currentRoomUserSelect.id  && currentRoomUserSelect.id !== user.id}
+											{#if !rooms[current_room_id]?.user.find(element =>element.user_id === currentRoomUserSelect.id).ban}
+											{#if rooms[current_room_id]?.user.find(element => element.role === RoleUser.ADMIN && element.user_id === currentRoomUserSelect.id)}
+												<IconButton on:buttonClick={()=>{closeUnsetAdmin = true}} icon="crown" primary="core-red" secondary="transparent" title="Unset Admin"/>
+											{:else}
+												<IconButton on:buttonClick={()=>{closeSetAdmin = true}} icon="crown" primary="gray-200" secondary="gray-700" title="Set Admin"/>
+											{/if}
+												<IconButton on:buttonClick={()=>{closeKickUser = true}} icon="banUser" primary="core-red" secondary="transparent" title="Kick User"/>
+												<IconButton on:buttonClick={()=>{closeBanUser = true}} icon="banUser" primary="core-red" secondary="transparent" title="Ban User"/>
+
+												<IconButton on:buttonClick={()=>{closeMuteUser = true}} icon="mute" primary="core-red" secondary="transparent" title="Mute User"/>
+											{:else}
+												<IconButton on:buttonClick={()=>{closeUnBanUser = true}} icon="addUser" primary="process-green" secondary="transparent" title="Unban User"/>
+											{/if}
+										{/if}
+									</div>
+								</div>
+								{:else if !rooms[current_room_id]?.user}
+									<p>NO USER IN ROOMS</p>
+								{:else if rooms[current_room_id]?.user.length > 0}
+								 <div in:fly="{{ x: -200, delay: 500, duration: 400 }}" out:fly="{{ x:-200, duration: 200 }}">
+									{#each rooms[current_room_id]?.user as user}
+										<ItemRoomUserElement on:clicker={async ()=>{currentRoomUserSelect = await userservice.getUser(user.user_id)}} user={user}></ItemRoomUserElement>
+									{/each}
+								</div>
+								{/if}
+							{:else}
+								<p>NO CHANNEL SELECT</p>
+							{/if}
+						</div>
+
+
+					</div>
+					
+
+				</div>
+				</div>
+				{/if}
+
+			</div>
+
+			<!-- Computer Version-->
+			<div class="hidden md:grid md:grid-cols-4 max-h-full sm:max-h-full pb-10 mobile-landscape:max-h-full mobile-landscape:pb-2 text-center align-middle m-1 overflow-hidden {$leftHanded ? 'mobile-landscape:pl-[3.75rem]' : 'mobile-landscape:pr-[3.75rem]'} overscroll-none">
+				<div id="RoomList" class="grow">
 				<RoomList
 					dmList={false}
 					user={user}
@@ -460,7 +604,7 @@
 					rooms={rooms}
 					id_room={id_room}/>
 				</div>
-				<div class="screen border-gray-700 shadow-lg shadow-black/50 bg-black/25 grow md:flex md:flex-col my-5 md:my-0 md:mx-5 xl:mx-8 overflow-auto rounded-xl w-1/2">
+				<div id="CurrenrRoom" class="screen border-gray-700 shadow-lg shadow-black/50 bg-black/25 grow md:flex md:flex-col my-5 col-span-2 md:my-0 md:mx-5 xl:mx-8 overflow-auto rounded-xl">
 					<div class="screen-overlay"></div>
 					<div bind:this={chatbox} class="relative overflow-x-hidden overflow-y-scroll scroll-smooth mt-3 flex-grow [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
 
@@ -476,35 +620,34 @@
 
 						<input disabled={rooms.length <= 0} on:keydown={(e)=>{e.key === "Enter" && sendMessage()}} bind:value={message_value} type="text" class="disabled:border-zinc-500  border-2 border-gray-700 bg-gray-500/75 rounded-md w-full p-2 pr-12 focus:outline-none" />
 						<div class="relative">
-							<button disabled={rooms.length <= 0} on:click={sendMessage} class="-top-4 -left-10 absolute disabled:bg-zinc-500 p-0 m-0 rounded-full"><Icon icon="send" css="inlinep-0 h-8 {rooms.length <= 0 ? 'stroke-zinc-500' : 'stroke-black' }  fill-thread-blue"></Icon></button>
+							<button disabled={rooms.length <= 0} on:click={sendMessage} class="-top-4 -left-10 absolute disabled:bg-zinc-500 p-0 m-0 rounded-full"><Icon icon="send" css="inlinep-0 h-8 {rooms.length <= 0 ? 'stroke-zinc-500' : 'stroke-black' }  fill-thread-blue"/></button>
 						</div>
 
 					</div>
 
 				</div>
 
-				<div class="w-1/4 md:flex md:flex-col">
+				<div id="RoomUsers" class="md:flex md:flex-col h-full">
 
-					{#if user}
-						<UserNotification openWarning={()=>{closeWarningLeftChannel = true}} rooms={rooms} user={user}></UserNotification>
-					{:else}
-						<p>LOADING..</p>
-					{/if}
-
-
-
-					<div class="overflow-auto mt-2 bg-color5 flex-grow  rounded-xl">
+					<div class="overflow-auto bg-color5 flex-grow h-full rounded-xl shadow-lg shadow-black mr-4">
+						<div class="flex items-center justify-end m-2"> 
+							<button on:click={()=>{closeWarningLeftChannel = true}} class="cursor-pointer flex text-sm gap-1 items-center">
+								Leave Room<Icon icon="exit" width="30" height="30" css="inline stroke-none fill-white"></Icon>
+							</button>
+						</div>
 						{#if current_room_id >= 0 }
 							<div class="mt-2 self-center">
 								{#if currentRoomUserSelect}
-									<div class="justify-center flex">
-										<button on:click={()=>{currentRoomUserSelect = null}}  class=" hover:scale-110 text-white font-bold py-2 px-4 mx-2 rounded flex gap-2">
+									<div in:fly="{{ x: 200, delay: 500, duration: 400 }}" out:fly="{{ x:200, duration: 200 }}" class="justify-center flex">
+										<button on:click={()=>{currentRoomUserSelect = null}}  class="hover:scale-110 text-white font-bold py-2 px-4 mx-2 rounded flex gap-2">
 											<Icon icon="left-arrow"/> <span>RETURN</span>
 										</button>
 									</div>
 								{:else if rooms[current_room_id]?.user.find(element => element.role === RoleUser.ADMIN && element.user_id === user.id)}
-									<ButtonElement title="Password room" on:clicker={()=>{closePassworRoom = true}}></ButtonElement>
-									<ButtonElementWarning title="Delete room" on:clicker={()=>{closeDeleteRoom = true}}></ButtonElementWarning>
+								<div in:fly="{{ x: -200, delay: 500, duration: 400 }}" out:fly="{{ x: -200, duration: 200 }}" class="flex-col justify-center items-center w-full space-y-2">
+										<IconButton on:buttonClick={()=>{closePassworRoom = true}} icon="lock" icon_size="20" primary="gray-200" secondary="gray-700" title="Password settings"/>
+										<IconButton on:buttonClick={()=>{closeDeleteRoom = true}} icon="delete" primary="core-red" secondary="transparent" title="Delete room"/>
+								</div>
 								{/if}
 							</div>
 						{/if}
@@ -515,42 +658,45 @@
                         {#if current_room_id >= 0}
 
                             {#if currentRoomUserSelect}
+							<div in:fly="{{ x: 200, delay: 500, duration: 400 }}" out:fly="{{ x:200, duration: 200 }}">
 									<UserInfo user={currentRoomUserSelect}></UserInfo>
 
 									<div>
 										<UserStat userstats={currentRoomUserSelect}></UserStat>
 									</div>
 
-									<div>
+									<div class="flex-col mt-4 space-y-2">
 										{#if rooms[current_room_id]?.user.find(element => element.role === RoleUser.ADMIN && element.user_id === user.id)
 										&& rooms[current_room_id]?.owner_id !== currentRoomUserSelect.id  && currentRoomUserSelect.id !== user.id}
 											{#if !rooms[current_room_id]?.user.find(element =>element.user_id === currentRoomUserSelect.id).ban}
-												<ButtonElement title="Kick" on:clicker={()=>{closeKickUser = true}}></ButtonElement>
-												<ButtonElement title="BanUser" on:clicker={()=>{closeBanUser = true}}></ButtonElement>
-												{#if rooms[current_room_id]?.user.find(element => element.role === RoleUser.ADMIN && element.user_id === currentRoomUserSelect.id)}
-													<ButtonElement title="UnsetAdmin" on:clicker={()=>{closeUnsetAdmin = true}}></ButtonElement>
-												{:else}
-													<ButtonElement title="SetAdmin" on:clicker={()=>{closeSetAdmin = true}}></ButtonElement>
-												{/if}
-												<ButtonElement title="MuteUser" on:clicker={()=>{closeMuteUser = true}}></ButtonElement>
+											{#if rooms[current_room_id]?.user.find(element => element.role === RoleUser.ADMIN && element.user_id === currentRoomUserSelect.id)}
+												<IconButton on:buttonClick={()=>{closeUnsetAdmin = true}} icon="crown" primary="core-red" secondary="transparent" title="Unset Admin"/>
 											{:else}
-												<ButtonElement title="Unban" on:clicker={()=>{closeUnBanUser = true}}></ButtonElement>
+												<IconButton on:buttonClick={()=>{closeSetAdmin = true}} icon="crown" primary="gray-200" secondary="gray-700" title="Set Admin"/>
+											{/if}
+												<IconButton on:buttonClick={()=>{closeKickUser = true}} icon="banUser" primary="core-red" secondary="transparent" title="Kick User"/>
+												<IconButton on:buttonClick={()=>{closeBanUser = true}} icon="banUser" primary="core-red" secondary="transparent" title="Ban User"/>
+
+												<IconButton on:buttonClick={()=>{closeMuteUser = true}} icon="mute" primary="core-red" secondary="transparent" title="Mute User"/>
+											{:else}
+												<IconButton on:buttonClick={()=>{closeUnBanUser = true}} icon="addUser" primary="process-green" secondary="transparent" title="Unban User"/>
 											{/if}
 										{/if}
 									</div>
+								</div>
 								{:else if !rooms[current_room_id]?.user}
 									<p>NO USER IN ROOMS</p>
 								{:else if rooms[current_room_id]?.user.length > 0}
+								 <div in:fly="{{ x: -200, delay: 500, duration: 400 }}" out:fly="{{ x:-200, duration: 200 }}">
 									{#each rooms[current_room_id]?.user as user}
 										<ItemRoomUserElement on:clicker={async ()=>{currentRoomUserSelect = await userservice.getUser(user.user_id)}} user={user}></ItemRoomUserElement>
 									{/each}
+								</div>
 								{/if}
 							{:else}
 								<p>NO CHANNEL SELECT</p>
 							{/if}
 						</div>
-
-
 					</div>
 
 				</div>

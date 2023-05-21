@@ -128,7 +128,7 @@
     <PopUpCreateDm createRoom={createRoom} close={()=>{closePopupCreateRoom = false}}/>
 {/if}
 
-<div class="relative flex flex-col h-2/3 sm:h-full grow overflow-hidden">
+<div class="relative flex flex-col h-full sm:h-full grow overflow-hidden">
 	<div class="">
 		<div class="flex items-center justify-between border-b-2 ">
 			<button id="dm-list" on:click={ () => { dmList = true}}>
@@ -176,8 +176,8 @@
 		</div>
 	</div>
 	{#if !dmList}
-	<div in:fly="{{ x: 200, delay: 500, duration: 400 }}" out:fly="{{ x: 200, duration: 400 }}" class="py-8 px-4" on:click={handleCreateRoom} >
-		<Button width="w-full" name="New Channel"/>
+	<div in:fly="{{ x: 200, delay: 500, duration: 400 }}" out:fly="{{ x: 200, duration: 400 }}" class="px-4" on:click={handleCreateRoom} >
+		<Button width="w-full" name="New Channel"  icon="new-chat" text_color="text_white"/>
 	</div>
 	{/if}
 </div>

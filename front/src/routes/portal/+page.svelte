@@ -331,7 +331,7 @@
 										<div class="flex sm:flex-col mobile-landscape:flex-row justify-center gap-3">
 												<UserInfo portal={_openSettings} user={user} on:updateUserInfo={updatePopUp} />
 											{#if userstats}
-												<UserStat userstats={userstats} on:showHistory={() => {history =true}}/>
+												<UserStat portal={true} userstats={userstats} on:showHistory={() => {history =true}}/>
 											{:else}
 												<p>No games played</p>
 											{/if}
@@ -400,7 +400,7 @@
 									<div class="flex sm:flex-col mobile-landscape:flex-row justify-center gap-3">
 											<UserInfo portal={_openSettings} user={user} on:updateUserInfo={updatePopUp} />
 										{#if userstats}
-											<UserStat userstats={userstats} on:showHistory={() => {history =true}}/>
+											<UserStat portal={true} userstats={userstats} on:showHistory={() => {history =true}}/>
 										{:else}
 											<p>No games played</p>
 										{/if}
