@@ -458,7 +458,7 @@
 
 
 			<!-- Mobile Version-->
-			<div class="flex md:hidden h-full sm:max-h-[90vh] text-center align-middle m-1 overflow-hidden">
+			<div class="relative flex md:hidden h-full sm:max-h-[90vh] text-center align-middle m-1 overflow-hidden">
 				{#if _showAllRooms == true}
 				<div in:fly="{{ x: -200, delay:200, duration: 400 }}" out:fly="{{ x: -200, duration: 400 }}" class="flex-col grow relative">
 					<div class="flex justify-end pb-4">
@@ -529,8 +529,8 @@
 									</div>
 								{:else if rooms[current_room_id]?.user.find(element => element.role === RoleUser.ADMIN && element.user_id === user.id)}
 								<div in:fly="{{ x: -200, delay: 500, duration: 400 }}" out:fly="{{ x: -200, duration: 200 }}" class="flex-col justify-center items-center w-full space-y-2">
-									<IconButton on:buttonClick={()=>{closePassworRoom = true}} icon="lock" icon_size="20" primary="gray-200" secondary="gray-700" title="Password settings"/>
-									<IconButton on:buttonClick={()=>{closeDeleteRoom = true}} icon="delete" icon_size="28" primary="core-red" secondary="transparent" title="Delete room"/>
+									<IconButton on:buttonClick={()=>{closePassworRoom = true}} icon="lock" icon_size="20" shadow="shadow-md shadow-gray-200/50" title="Password settings"/>
+									<IconButton on:buttonClick={()=>{closeDeleteRoom = true}} icon="delete" icon_size="28" color="text-core-red border-core-red bg-transparent" shadow="shadow-md shadow-core-red/50" title="Delete room"/>
 								</div>
 								{/if}
 							</div>
@@ -554,16 +554,16 @@
 										&& rooms[current_room_id]?.owner_id !== currentRoomUserSelect.id  && currentRoomUserSelect.id !== user.id}
 											{#if !rooms[current_room_id]?.user.find(element =>element.user_id === currentRoomUserSelect.id).ban}
 											{#if rooms[current_room_id]?.user.find(element => element.role === RoleUser.ADMIN && element.user_id === currentRoomUserSelect.id)}
-												<IconButton on:buttonClick={()=>{closeUnsetAdmin = true}} icon="crown" primary="core-red" secondary="transparent" title="Unset Admin"/>
+												<IconButton on:buttonClick={()=>{closeUnsetAdmin = true}} icon="crown" color="text-core-red border-core-red bg-transparent" shadow="shadow-md shadow-core-red/50" title="Unset Admin"/>
 											{:else}
-												<IconButton on:buttonClick={()=>{closeSetAdmin = true}} icon="crown" primary="gray-200" secondary="gray-700" title="Set Admin"/>
+												<IconButton on:buttonClick={()=>{closeSetAdmin = true}} icon="crown" shadow="shadow-md shadow-gray-200/50" title="Set Admin"/>
 											{/if}
-												<IconButton on:buttonClick={()=>{closeKickUser = true}} icon="banUser" primary="core-red" secondary="transparent" title="Kick User"/>
-												<IconButton on:buttonClick={()=>{closeBanUser = true}} icon="banUser" primary="core-red" secondary="transparent" title="Ban User"/>
+												<IconButton on:buttonClick={()=>{closeKickUser = true}} icon="banUser" color="text-core-red border-core-red bg-transparent" shadow="shadow-md shadow-core-red/50" title="Kick User"/>
+												<IconButton on:buttonClick={()=>{closeBanUser = true}} icon="banUser" color="text-core-red border-core-red bg-transparent" shadow="shadow-md shadow-core-red/50" title="Ban User"/>
 
-												<IconButton on:buttonClick={()=>{closeMuteUser = true}} icon="mute" primary="core-red" secondary="transparent" title="Mute User"/>
+												<IconButton on:buttonClick={()=>{closeMuteUser = true}} icon="mute" color="text-core-red border-core-red bg-transparent" shadow="shadow-md shadow-core-red/50" title="Mute User"/>
 											{:else}
-												<IconButton on:buttonClick={()=>{closeUnBanUser = true}} icon="addUser" primary="process-green" secondary="transparent" title="Unban User"/>
+												<IconButton on:buttonClick={()=>{closeUnBanUser = true}} icon="addUser" color="text-process-green border-process-green bg-transparent" shadow="shadow-md shadow-process-green/50" title="Unban User"/>
 											{/if}
 										{/if}
 									</div>
@@ -593,7 +593,8 @@
 			</div>
 
 			<!-- Computer Version-->
-			<div class="hidden md:grid md:grid-cols-4 max-h-full sm:max-h-full pb-10 mobile-landscape:max-h-full mobile-landscape:pb-2 text-center align-middle m-1 overflow-hidden {$leftHanded ? 'mobile-landscape:pl-[3.75rem]' : 'mobile-landscape:pr-[3.75rem]'} overscroll-none">
+			<div class="relative hidden md:grid md:grid-cols-4 max-h-full sm:max-h-full pb-10 mobile-landscape:max-h-full mobile-landscape:pb-2 text-center align-middle m-1 overflow-hidden {$leftHanded ? 'mobile-landscape:pl-[3.75rem]' : 'mobile-landscape:pr-[3.75rem]'} overscroll-none">
+				<div class="md:flex md:flex-col h-full mobile-landscape:h-screen mobile-landscape:pb-9">
 				<div id="RoomList" class="grow">
 				<RoomList
 					dmList={false}
@@ -604,9 +605,11 @@
 					rooms={rooms}
 					id_room={id_room}/>
 				</div>
-				<div id="CurrenrRoom" class="screen border-gray-700 shadow-lg shadow-black/50 bg-black/25 grow md:flex md:flex-col my-5 col-span-2 md:my-0 md:mx-5 xl:mx-8 overflow-auto rounded-xl">
+			</div>
+				<div class="md:flex md:flex-col h-full col-span-2 mobile-landscape:h-screen mobile-landscape:pb-9">
+				<div id="CurrenrRoom" class="screen border-gray-700 shadow-lg shadow-black/50 bg-black/25 grow md:flex md:flex-col my-5  md:my-0 md:mx-5 xl:mx-8 overflow-auto rounded-xl">
 					<div class="screen-overlay"></div>
-					<div bind:this={chatbox} class="relative overflow-x-hidden overflow-y-scroll scroll-smooth mt-3 flex-grow [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+					<div bind:this={chatbox} class="relative overflow-x-hidden overflow-y-scroll scroll-smooth mt-3 flex-grow masked-overflow">
 
 						{#if connectedWs}
 							<MessageItem socket={socket} user={user} message={room_message}></MessageItem>
@@ -616,7 +619,7 @@
 
 					</div>
 
-					<div class="relative flex items-center border-1 p-8">
+					<div class="relative flex items-center border-1 p-8 pt-1">
 
 						<input disabled={rooms.length <= 0} on:keydown={(e)=>{e.key === "Enter" && sendMessage()}} bind:value={message_value} type="text" class="disabled:border-zinc-500  border-2 border-gray-700 bg-gray-500/75 rounded-md w-full p-2 pr-12 focus:outline-none" />
 						<div class="relative">
@@ -626,8 +629,9 @@
 					</div>
 
 				</div>
+			</div>
 
-				<div id="RoomUsers" class="md:flex md:flex-col h-full">
+				<div id="RoomUsers" class="md:flex md:flex-col h-full mobile-landscape:h-screen mobile-landscape:pb-9">
 
 					<div class="overflow-auto bg-color5 flex-grow h-full rounded-xl shadow-lg shadow-black mr-4">
 						<div class="flex items-center justify-end m-2"> 
@@ -639,21 +643,21 @@
 							<div class="mt-2 self-center">
 								{#if currentRoomUserSelect}
 									<div in:fly="{{ x: 200, delay: 500, duration: 400 }}" out:fly="{{ x:200, duration: 200 }}" class="justify-center flex">
-										<button on:click={()=>{currentRoomUserSelect = null}}  class="hover:scale-110 text-white font-bold py-2 px-4 mx-2 rounded flex gap-2">
+										<button on:click={()=>{currentRoomUserSelect = null}}  class="hover:scale-110 text-white font-bold py-2 px-4 mx-2 mobile-landscape:text-xs items-center rounded flex gap-2">
 											<Icon icon="left-arrow"/> <span>RETURN</span>
 										</button>
 									</div>
 								{:else if rooms[current_room_id]?.user.find(element => element.role === RoleUser.ADMIN && element.user_id === user.id)}
 								<div in:fly="{{ x: -200, delay: 500, duration: 400 }}" out:fly="{{ x: -200, duration: 200 }}" class="flex-col justify-center items-center w-full space-y-2">
-										<IconButton on:buttonClick={()=>{closePassworRoom = true}} icon="lock" icon_size="20" primary="gray-200" secondary="gray-700" title="Password settings"/>
-										<IconButton on:buttonClick={()=>{closeDeleteRoom = true}} icon="delete" primary="core-red" secondary="transparent" title="Delete room"/>
+										<IconButton on:buttonClick={()=>{closePassworRoom = true}} icon="lock" icon_size="20" shadow="shadow-md shadow-gray-200/50" title="Password settings"/>
+										<IconButton on:buttonClick={()=>{closeDeleteRoom = true}} icon="delete" color="text-core-red border-core-red bg-transparent" shadow="shadow-md shadow-core-red/50" title="Delete room"/>
 								</div>
 								{/if}
 							</div>
 						{/if}
 
 
-                    <div id="roomUsers" class="mt-5">
+                    <div id="roomUsers" class="mt-5 mobile-landscape:mt-1 overflow-auto">
 
                         {#if current_room_id >= 0}
 
@@ -665,21 +669,21 @@
 										<UserStat userstats={currentRoomUserSelect}></UserStat>
 									</div>
 
-									<div class="flex-col mt-4 space-y-2">
+									<div class="flex-col mt-4 mobile-landscape:mt-1 space-y-2 overflow-auto">
 										{#if rooms[current_room_id]?.user.find(element => element.role === RoleUser.ADMIN && element.user_id === user.id)
 										&& rooms[current_room_id]?.owner_id !== currentRoomUserSelect.id  && currentRoomUserSelect.id !== user.id}
 											{#if !rooms[current_room_id]?.user.find(element =>element.user_id === currentRoomUserSelect.id).ban}
 											{#if rooms[current_room_id]?.user.find(element => element.role === RoleUser.ADMIN && element.user_id === currentRoomUserSelect.id)}
-												<IconButton on:buttonClick={()=>{closeUnsetAdmin = true}} icon="crown" primary="core-red" secondary="transparent" title="Unset Admin"/>
+												<IconButton on:buttonClick={()=>{closeUnsetAdmin = true}} icon="crown" color="text-core-red border-core-red bg-transparent" shadow="shadow-md shadow-core-red/50" title="Unset Admin"/>
 											{:else}
-												<IconButton on:buttonClick={()=>{closeSetAdmin = true}} icon="crown" primary="gray-200" secondary="gray-700" title="Set Admin"/>
+												<IconButton on:buttonClick={()=>{closeSetAdmin = true}} icon="crown" shadow="shadow-md shadow-gray-200/50" title="Set Admin"/>
 											{/if}
-												<IconButton on:buttonClick={()=>{closeKickUser = true}} icon="banUser" primary="core-red" secondary="transparent" title="Kick User"/>
-												<IconButton on:buttonClick={()=>{closeBanUser = true}} icon="banUser" primary="core-red" secondary="transparent" title="Ban User"/>
+												<IconButton on:buttonClick={()=>{closeKickUser = true}} icon="banUser" color="text-core-red border-core-red bg-transparent" shadow="shadow-md shadow-core-red/50" title="Kick User"/>
+												<IconButton on:buttonClick={()=>{closeBanUser = true}} icon="banUser" color="text-core-red border-core-red bg-transparent" shadow="shadow-md shadow-core-red/50" title="Ban User"/>
 
-												<IconButton on:buttonClick={()=>{closeMuteUser = true}} icon="mute" primary="core-red" secondary="transparent" title="Mute User"/>
+												<IconButton on:buttonClick={()=>{closeMuteUser = true}} icon="mute" color="text-core-red border-core-red bg-transparent" shadow="shadow-md shadow-core-red/50" title="Mute User"/>
 											{:else}
-												<IconButton on:buttonClick={()=>{closeUnBanUser = true}} icon="addUser" primary="process-green" secondary="transparent" title="Unban User"/>
+												<IconButton on:buttonClick={()=>{closeUnBanUser = true}} icon="addUser" color="text-process-green border-process-green bg-transparent" shadow="shadow-md shadow-process-green/50" title="Unban User"/>
 											{/if}
 										{/if}
 									</div>

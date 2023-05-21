@@ -50,7 +50,7 @@
 {:else}
 <div>
 	<div class="relative border:rad">
-		<div class="relative w-[100px] h-[100px] mobile-landscape:w-[75px] mobile-landscape:h-[75px] sm:w-[75px] sm:h-[75px] lg:w-[150px] lg:h-[150px] bg-cover rounded-full mx-auto"
+		<div class="relative w-[100px] h-[100px] mobile-landscape:w-[50px] mobile-landscape:h-[50px] sm:w-[75px] sm:h-[75px] lg:w-[150px] lg:h-[150px] bg-cover rounded-full mx-auto"
 			 style="background-image: url( {imageUrl(user?.image_url)} )">
 		</div>
 	</div>

@@ -20,6 +20,7 @@
 	import ChannelList from "./ChannelList.svelte";
 
 	import PopUpCreateDm from "../PopUpCreateDm.svelte";
+	import IconButton from "../IconButton.svelte";
 	
 	export let dmList : boolean = true;
 
@@ -177,7 +178,7 @@
 	</div>
 	{#if !dmList}
 	<div in:fly="{{ x: 200, delay: 500, duration: 400 }}" out:fly="{{ x: 200, duration: 400 }}" class="px-4" on:click={handleCreateRoom} >
-		<Button width="w-full" name="New Channel"  icon="new-chat" text_color="text_white"/>
+		<IconButton color="bg-thread-blue/75 border-gray-700 text-gray-700 shadow-md shadow-black/50 mb-2" icon="new-chat" icon_size="20" title="New Channel"/>
 	</div>
 	{/if}
 </div>

@@ -33,7 +33,7 @@
 
 </div>
 {:else}
-<div class="flex flex-col gap-2 pt-2 text-sm md:text-2xs mobile-landscape:text-sm lg:text-base">
+<div class="flex flex-col gap-2 pt-2 text-sm md:text-2xs mobile-landscape:text-2xs mobile-landscape:gap-1 lg:text-base">
 
 	<p class="">Game played : <span>{userstats?.played || "No data"}</span></p>
 
