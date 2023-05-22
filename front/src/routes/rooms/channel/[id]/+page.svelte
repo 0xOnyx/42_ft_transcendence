@@ -58,10 +58,18 @@
 
     let id_room: number;
 
+	let _showAllRooms : Boolean = false;
+	let _showCurrentRoom : Boolean = true;
+	let _showRoomUsers : Boolean = false;
+
     let loadValue = async ()=>{
         refresh = !refresh;
         console.log("LOAD OK");
         let res: Response;
+
+		_showCurrentRoom = true;
+		_showAllRooms = false;
+		_showRoomUsers = false;
 
         if (!await userservice.isLogged()) {
             await goto("/");}
@@ -154,8 +162,6 @@
         }
         else
             room_message = [];
-        if (chatbox)
-            chatbox.scrollTop = chatbox.scrollHeight;
     }
 
 
@@ -250,9 +256,7 @@
         message_value = "";
     }
 
-	let _showAllRooms : Boolean = false;
-	let _showCurrentRoom : Boolean = true;
-	let _showRoomUsers : Boolean = false;
+
 
     let closeWarningLeftChannel = false;
     let closeWarningBlockUser = false;
@@ -452,13 +456,13 @@
 <div class="flex-col">
 	<NavBar user={user} current_channel={rooms[current_room_id]?.id || -1}/>
 
-	<div class="flex py-2 landscape:py-0 md:py-10 xl:py-10">
+	<div class="flex py-2 landscape:py-0 md:pt-10 xl:pt-10">
 
-		<div class="h-[80vh] grow md:h-[85vh] lg:h-[90vh] mobile-landscape:h-screen w-full px-[5%] self-center py-1 grid overflow-hidden">
+		<div class="h-[80vh] md:h-screen md:pb-[7rem] lg:pb-0 grow mobile-landscape:h-screen mobile-landscape:pb-0 w-full px-[5%] self-center py-1 grid overflow-hidden">
 
 
 			<!-- Mobile Version-->
-			<div class="relative flex md:hidden h-full sm:max-h-[90vh] text-center align-middle m-1 overflow-hidden">
+			<div class="relative flex md:hidden h-screen pb-[15rem] text-center align-middle m-1 overflow-hidden">
 				{#if _showAllRooms == true}
 				<div in:fly="{{ x: -200, delay:200, duration: 400 }}" out:fly="{{ x: -200, duration: 400 }}" class="flex-col grow relative">
 					<div class="flex justify-end pb-4">
@@ -476,16 +480,16 @@
 					</div>
 				</div>
 				{:else if _showCurrentRoom == true}
-					<div in:fly="{{ y: 200, delay: 500, duration: 400 }}" out:fly="{{ y:200, duration: 200 }}" class="flex-col grow relative h-[90%]">
+					<div in:fly="{{ y: 200, delay: 500, duration: 400 }}" out:fly="{{ y:200, duration: 200 }}" class="flex-col grow relative h-full">
 		
 						<div id="CurrenrRoom" class="screen border-gray-700 shadow-lg shadow-black/50 bg-black/25 grow flex flex-col my-5 md:my-0 md:mx-5 mx-4 xl:mx-8 overflow-auto rounded-xl h-full">
 							<div class="screen-overlay"></div>
 							<div class="grid grid-cols-3 relative py-3 bg-black/50 border-b-2 border-gray-700">
-								<button on:click={() => {_showAllRooms=true; _showCurrentRoom=false;}} class="flex items-center gap-1 justify-start pl-2 text-sm"><Icon icon="left-arrow" width="20" height="20"/><Icon icon="chatrooms" width="20" height="20"/>Rooms</button>
-								<div class="text-xl italic text-ellipsis ">{rooms[current_room_id]?.name}</div>
-								<button on:click={() => {_showCurrentRoom=false; _showRoomUsers=true;}} class="flex items-center justify-end gap-1 text-sm pr-2">Users<Icon icon="friends" width="20" height="20"/><Icon icon="right-arrow" width="20" height="20" /></button>
+								<button on:click={() => {_showAllRooms=true; _showCurrentRoom=false;}} class="flex items-center gap-1 justify-start pl-2 text-sm"><Icon icon="left-arrow" width="20" height="20"/><Icon icon="chatrooms" width="20" height="20"/></button>
+								<div class="text-xl italic truncate ">{rooms[current_room_id]?.name}</div>
+								<button on:click={() => {_showCurrentRoom=false; _showRoomUsers=true;}} class="flex items-center justify-end gap-1 text-sm pr-2"><Icon icon="friends" width="20" height="20"/><Icon icon="right-arrow" width="20" height="20" /></button>
 							</div>
-							<div bind:this={chatbox} class="relative overflow-x-hidden overflow-y-scroll scroll-smooth mt-3 flex-grow [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+							<div bind:this={chatbox} class="relative mt-3 flex-grow overflow-x-hidden overflow-y-scroll">
 
 								{#if connectedWs}
 									<MessageItem socket={socket} user={user} message={room_message}></MessageItem>
@@ -495,7 +499,7 @@
 
 							</div>
 
-							<div id="messgae-input" class="relative flex items-center bottom-0 border-1 p-8">
+							<div id="message-input" class="relative flex items-center bottom-0 border-1 p-8">
 
 								<input disabled={rooms.length <= 0} on:keydown={(e)=>{e.key === "Enter" && sendMessage()}} bind:value={message_value} type="text" class="disabled:border-zinc-500  border-2 border-gray-700 bg-gray-500/75 rounded-md w-full p-2 pr-12 focus:outline-none" />
 								<div class="relative">
@@ -507,7 +511,7 @@
 						</div>
 					</div>
 				{:else if _showRoomUsers == true}
-				<div in:fly="{{ x: 200, delay: 500, duration: 400 }}" out:fly="{{ x:200, duration: 200 }}" class="flex-col grow relative h-[90%]">
+				<div in:fly="{{ x: 200, delay: 500, duration: 400 }}" out:fly="{{ x:200, duration: 200 }}" class="flex-col grow relative h-full pb-5">
 					<div class="flex justify-start pb-4">
 						<button on:click={() => {_showRoomUsers = false; _showCurrentRoom = true;}} class="flex items-center gap-2"><Icon icon="left-arrow"/>Back</button>
 					</div>
@@ -594,7 +598,7 @@
 
 			<!-- Computer Version-->
 			<div class="relative hidden md:grid md:grid-cols-4 max-h-full sm:max-h-full pb-10 mobile-landscape:max-h-full mobile-landscape:pb-2 text-center align-middle m-1 overflow-hidden {$leftHanded ? 'mobile-landscape:pl-[3.75rem]' : 'mobile-landscape:pr-[3.75rem]'} overscroll-none">
-				<div class="md:flex md:flex-col h-full mobile-landscape:h-screen mobile-landscape:pb-9">
+				<div class="md:flex md:flex-col h-screen md:pb-[9rem] lg:pb-[8rem] mobile-landscape:pb-9">
 				<div id="RoomList" class="grow">
 				<RoomList
 					dmList={false}
@@ -606,10 +610,10 @@
 					id_room={id_room}/>
 				</div>
 			</div>
-				<div class="md:flex md:flex-col h-full col-span-2 mobile-landscape:h-screen mobile-landscape:pb-9">
+				<div class="md:flex md:flex-col col-span-2 h-screen md:pb-[9rem] lg:pb-[8rem] mobile-landscape:pb-9 ">
 				<div id="CurrenrRoom" class="screen border-gray-700 shadow-lg shadow-black/50 bg-black/25 grow md:flex md:flex-col my-5  md:my-0 md:mx-5 xl:mx-8 overflow-auto rounded-xl">
 					<div class="screen-overlay"></div>
-					<div bind:this={chatbox} class="relative overflow-x-hidden overflow-y-scroll scroll-smooth mt-3 flex-grow masked-overflow">
+					<div bind:this={chatbox} class="relative overflow-x-hidden overflow-y-scroll scroll-smooth mt-3 flex-grow">
 
 						{#if connectedWs}
 							<MessageItem socket={socket} user={user} message={room_message}></MessageItem>
@@ -631,7 +635,7 @@
 				</div>
 			</div>
 
-				<div id="RoomUsers" class="md:flex md:flex-col h-full mobile-landscape:h-screen mobile-landscape:pb-9">
+				<div id="RoomUsers" class="md:flex md:flex-col h-screen md:pb-[9rem] lg:pb-[8rem] mobile-landscape:pb-9">
 
 					<div class="overflow-auto bg-color5 flex-grow h-full rounded-xl shadow-lg shadow-black mr-4">
 						<div class="flex items-center justify-end m-2"> 

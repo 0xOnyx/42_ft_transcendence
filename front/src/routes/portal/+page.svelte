@@ -386,7 +386,7 @@
 							{:else}
 								{#if history}
 								<div in:fade="{{ delay: 200, duration: 400 }}">
-									{#if userstats}
+									{#if gamehistory && user}
 										<History curUser={user} gamehistory={gamehistory} />
 									{:else}
 										<p>No games played</p>

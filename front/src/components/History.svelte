@@ -3,8 +3,9 @@
 	import DateElement from "./DateElement.svelte";
 	export let curUser : User;
 	export let gamehistory : GameHistory[];
+	console.log(gamehistory);
 </script>
-<table class="w-full">
+<table class="w-full min-h-[30px]">
 	{#each gamehistory as g}
 		<tr>
 			<td>{g.player_one.name} vs {g.player_two.name}</td>

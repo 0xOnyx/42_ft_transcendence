@@ -50,6 +50,10 @@ export async function getRoom( id : number, socket : Socket) : Promise<Boolean>
 	return true;
 }
 
+export async function getChannel( id : number) {
+	await goto(`/rooms/channel/${id}`);
+}
+
 export function getColor(status: Status)
 {
 	if (status == Status.OFFLINE)

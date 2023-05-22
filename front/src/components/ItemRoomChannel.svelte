@@ -21,7 +21,7 @@
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<div on:click={getRoom} class="border-color2  border-2 cursor-pointer rounded-xl {current ? 'bg-color2 ' : 'bg-color5 italic'} p-5 flex items-center self-center mt-1 transition-all duration-200">
+<div on:click={getRoom} class="border-gray-700 border-[3px] cursor-pointer rounded-xl {current ? 'bg-color2' : 'bg-gray-400 opacity-50 italic'} p-5 flex items-center self-center mt-1 transition-all duration-200">
 
     <!--<div class="mx-2 flex-shrink">
         <div class="w-[40px] h-[40px] bg-cover rounded-full mx-auto"
