@@ -2,6 +2,7 @@
 	import type { GameTypeSelection } from "../types/game";
 	import Checkbox from "./Checkbox.svelte";
     import { createEventDispatcher, onMount } from 'svelte';
+	import Icon from "./Icon.svelte";
 
     const dispatch = createEventDispatcher();
 
@@ -20,7 +21,7 @@
             },
             {
                 "id": "BLACKHOLE",
-                "name" : "Blackhole Pong",
+                "name" : "Blackhole pong",
                 "checked" : false
             }
 
@@ -66,19 +67,22 @@
 
 {#each games as game}
 
-    <div class="flex rounded-lg bg-color5 mb-4 cursor-pointer" on:click={() => select(game)} on:keypress={(event) => keySelect(event, game)}>
+    <div class="flex rounded-lg bg-color5 hover:-translate-y-1 shadow-md border-2 m-2 {game.id === "BLACKHOLE" ? 'border-orange-500 shadow-orange-500/50 text-orange-500' : 'shadow-white/50'} mb-4 items-center space-x-1 cursor-pointer transition-all duration-300" on:click={() => select(game)} on:keypress={(event) => keySelect(event, game)}>
 
-        <div class="flex items-center mx-3">
-            <div class="bg-white w-8 h-8">
+		<div class="pl-3">
+			{#if game.id === "CLASSIC"}
+		
+				<Icon icon="game" />
+			{:else if game.id === "BLACKHOLE"}
+				<Icon icon="blackhole" />
+			{/if}
+		</div>
 
-            </div>
-        </div>
-
-        <div class="flex-grow p-4 text-left">
+        <div class="flex-grow py-4 text-xs text-left">
             {game.name}
         </div>
 
-        <div class="flex items-center mx-3">
+        <div class="flex items-center pr-3">
             {#key refresh} <!-- little hack to force refresh component -->
                 <Checkbox disable={true} bind:checked={game.checked}></Checkbox>
             {/key}
