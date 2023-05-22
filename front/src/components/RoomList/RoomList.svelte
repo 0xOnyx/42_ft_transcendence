@@ -81,7 +81,7 @@
 	async function acceptUnblockUser()
     {
 		const id : number = closeWarningUnblockUser;
-		console.log(id);
+		// console.log(id);
         await socket.emit("unblockUser", {
             user_id: closeWarningUnblockUser
         });
@@ -91,7 +91,7 @@
 
 	async function itemClicked( e : CustomEvent) {
 		const id : number = e.detail.id;
-		console.log("itemClicked:", id);
+		// console.log("itemClicked:", id);
 		const unblockedUser = await getRoom(id, socket);
 		if (!unblockedUser) {
 			closeWarningUnblockUser = id;
@@ -104,7 +104,7 @@
         if (password.length > 0)
             data.password = password;
         await socket.emit("createRoomPublic", data, (data)=>{
-			console.log("Emit data: ", data);
+			// console.log("Emit data: ", data);
             goto(`/rooms/channel/${data}`);
         })
         closePopupCreateRoom = false;

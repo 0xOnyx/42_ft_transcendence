@@ -55,17 +55,17 @@
     let id_room: number;
 
     let loadValue = async ()=>{
-        console.log("LOAD OK");
+        // console.log("LOAD OK");
         let res: Response;
 
         if (!await userservice.isLogged()) {
             await goto("/");}
 
 		const urlSegments = $page.url.toString().split('/');
-		console.log(urlSegments);
+		// console.log(urlSegments);
 
 		if (urlSegments.length < 5 || !(urlSegments[3] === 'rooms' && urlSegments[4] === 'channel')) {
-			console.log($page.url.toString());
+			// console.log($page.url.toString());
 			return;
 		}
 		user = await userservice.getCurrentUser();
@@ -95,22 +95,22 @@
             }
         }
 
-        console.log("CURRENT VALUE")
+        // console.log("CURRENT VALUE")
 
-            console.log("REFETCH");
+            // console.log("REFETCH");
             res = await fetch(`${PUBLIC_API_URI}/message/rooms`, {
                 method: 'GET',
                 credentials: 'include'
             })
             rooms = await res.json();
-        console.log(rooms);
-        console.log(current_room_id);
+        // console.log(rooms);
+        // console.log(current_room_id);
         if ($page.params.id == "last")
         {
             if (!rooms || rooms.length <= 0) {
                 current_room_id = -1;
-                console.log("RETURN")
-                console.log(current_room_id)
+                // console.log("RETURN")
+                // console.log(current_room_id)
                 return;
             }
             id_room = rooms[0].id;
@@ -122,7 +122,7 @@
         )})
         current_room_id = rooms.findIndex((item: (Rooms & {user: RoomUser[]}))=>{return (item.id === id_room)});
 
-        console.log("ID ROOM +> ", current_room_id);
+        // console.log("ID ROOM +> ", current_room_id);
 
         if (current_room_id == -1 && $page.params.id != "last")
         {
@@ -186,19 +186,19 @@
 
         socket.on("updateRoom", (room: (Rooms & {user: RoomUser[]})) =>{
             let index: number;
-            console.log("NEW UPDATE ROOM")
-            console.log(room);
+            // console.log("NEW UPDATE ROOM")
+            // console.log(room);
             if ((index = rooms.findIndex(item => item.id === room.id)) == -1)
                 rooms.push(room);
             else
                 rooms[index] = room;
             rooms = rooms;
-            console.log(rooms);
+            // console.log(rooms);
             refresh = !refresh;
         })
 
         socket.on("leftRoom", (room: (Rooms & {user: RoomUser[]})) =>{
-            console.log("left room");
+            // console.log("left room");
             if (rooms)
                 return ;
             const room_id_current = rooms[current_room_id].id;
@@ -363,7 +363,7 @@
     }
 
 	function handleRoomCreation() {
-		console.log("event received");
+		// console.log("event received");
 		closePopupCreateRoom = true;
 	}
 

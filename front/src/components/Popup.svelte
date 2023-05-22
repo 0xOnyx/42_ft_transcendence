@@ -27,7 +27,7 @@
 	}
 
 	function  confirmPopUp ( value : string ) {
-		console.log("hello there");
+		// console.log("hello there");
 
 		dispatch('confirmPopUp', {
 			text: value,

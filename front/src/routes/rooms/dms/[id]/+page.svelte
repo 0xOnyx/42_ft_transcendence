@@ -65,7 +65,7 @@
             await goto("/");
 
         user = await userservice.getCurrentUser();
-		console.log("User obtained: ", user);
+		// console.log("User obtained: ", user);
 
         res = await fetch(`${PUBLIC_API_URI}/user/friend`, {
             method: 'GET',
@@ -117,7 +117,7 @@
         else
             id_room = Number($page.params.id);
         current_room = rooms.find((item: (Rooms & {user: RoomUser[]}))=>{return (item.id === id_room)}) as (Rooms & {user: RoomUser[]});
-        console.log(current_room);
+        // console.log(current_room);
         if (!current_room && $page.params.id != "last")
         {
             await goto("/rooms/dms/last");
@@ -156,7 +156,7 @@
     onMount(async ()=>{
 
         loadValue();
-		console.log("DM Page - User: ", user);
+		// console.log("DM Page - User: ", user);
         socket = io('/events', {
             path: "/ws/"
         });
@@ -166,7 +166,7 @@
         })
 
         socket.on("message", (data: {send_user_id: number, room_id: number, message: (Messages & {user: User}), message_type: string})=>{
-            console.log(data);
+            // console.log(data);
             if (data.room_id === id_room)
                 room_message.push(data.message);
             else
@@ -271,9 +271,9 @@
     }
 
 	function itemClicked( e : CustomEvent) {
-		console.log("dispatch received");
+		// console.log("dispatch received");
 		const id : number = e.detail.id;
-		console.log("itemClicked:", id);
+		// console.log("itemClicked:", id);
 		getRoom(id);
 	}
 	
