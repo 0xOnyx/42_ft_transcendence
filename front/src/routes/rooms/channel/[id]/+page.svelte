@@ -435,7 +435,7 @@
 		<NavBar user={user} current_channel={rooms[current_room_id]?.id || -1}/>
 	{/if}
 
-	<div class="flex py-2 landscape:py-0 md:pt-10 xl:pt-10">
+	<div class="flex py-2 landscape:py-0 md:pt-2 xl:pt-10">
 
 		<div class="h-[80vh] md:h-screen md:pb-[7rem] lg:pb-0 grow mobile-landscape:h-screen mobile-landscape:pb-0 w-full px-[5%] self-center py-1 grid overflow-hidden">
 

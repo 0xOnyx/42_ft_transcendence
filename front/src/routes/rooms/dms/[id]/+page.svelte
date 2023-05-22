@@ -355,7 +355,7 @@
 	<NavBar user={user} current_channel={current_room?.id || -1}/>
 	{/if}
 	
-	<div class="flex py-2 landscape:py-0 md:pt-10 xl:pt-10">
+	<div class="flex py-2 landscape:py-0 md:pt-2 xl:pt-10">
 	
 		<div class="h-[80vh] md:h-screen md:pb-[7rem] lg:pb-0 grow mobile-landscape:h-screen mobile-landscape:pb-0 w-full px-[5%] self-center py-1 grid overflow-hidden">
 
@@ -502,7 +502,7 @@
 </div>
 
 	<div id="RoomUsers" class="md:flex md:flex-col h-screen md:pb-[9rem] lg:pb-[8rem] mobile-landscape:pb-9">
-		<div class="overflow-auto mt-2 bg-color5 flex-grow h-full rounded-xl shadow-lg shadow-black mx-4">
+		<div class="overflow-auto bg-color5 flex-grow h-full rounded-xl shadow-lg shadow-black mx-4">
 			<div class="mt-5">
 				{#if rooms.length <= 0}
 				<p>NO DM</p>
