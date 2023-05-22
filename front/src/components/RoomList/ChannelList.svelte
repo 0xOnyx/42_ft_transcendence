@@ -81,7 +81,7 @@
 					return b.messages[0].id - a.messages[0].id;
 				}
 				return 0;}) as room}
-					<ItemRoomChannel current={room.id === id_room} room={room}></ItemRoomChannel>
+					<ItemRoomChannel on:requestPassword current={room.id === id_room} room={room}></ItemRoomChannel>
 				{/each}
 			{/if}
 		{/if}

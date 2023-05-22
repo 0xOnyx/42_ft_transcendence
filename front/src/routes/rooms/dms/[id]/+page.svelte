@@ -31,6 +31,7 @@
 	import { imageUrl } from '../../../../services/Utilities';
 	import { afterUpdate } from 'svelte';
 	import { leftHanded } from '../../../../services/Stores';
+	import PopUpAskPassword from '../../../../components/PopUpAskPassword.svelte';
 
     let id;
 
@@ -251,9 +252,10 @@
 	let _showCurrentRoom : Boolean = true;
 	let _showRoomUser : Boolean = false;
 
-    let closeWarningLeftDm = false;
-    let closeWarningBlockUser = false;
+    let closeWarningLeftDm : Boolean = false;
+    let closeWarningBlockUser : Boolean  = false;
     let closeWarningUnbanUser = -1;
+
 
     async function acceptLeftDm()
     {
@@ -305,6 +307,7 @@
 		getRoom(id, socket);
 	}
 
+
 </script>
 
 {#if error.length > 0}
@@ -339,6 +342,7 @@
                 buttonAccecpt={acceptUnbanUser} buttonDecline={()=>{closeWarningUnbanUser = -1}}></WarningAsk>
 {/if}
 
+
 {#key refresh}
 <div class="flex-col">
 	<NavBar user={user} current_channel={current_room?.id || -1}/>
@@ -363,7 +367,8 @@
 							friends={friends}
 							connectedWs={connectedWs}
 							id_room={id_room}
-							on:userClicked={itemClicked}/>
+							on:userClicked={itemClicked}
+							on:requestPassword={() => {console.log("coucou ter");}}/>
 						{:else}
 							<p>LOADING..</p>
 						{/if}

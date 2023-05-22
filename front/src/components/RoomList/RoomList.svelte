@@ -21,6 +21,7 @@
 
 	import PopUpCreateDm from "../PopUpCreateDm.svelte";
 	import IconButton from "../IconButton.svelte";
+	import PopUpAskPassword from "../PopUpAskPassword.svelte";
 	
 	export let dmList : boolean = true;
 
@@ -63,6 +64,7 @@
 	export let id_room : Number;
 
 	let closePopupCreateRoom = false;
+	let closeRequestPassword = -1;
 
 	const dispatch = createEventDispatcher();
 
@@ -115,6 +117,24 @@
 		closeWarningUnblockUser = e.detail.user_id;
 	}
 
+
+	async function joinChannel(password : string)
+    {
+        socket.emit("joinRoomPublic", {room_id: closeRequestPassword, password: password}, async (room)=>{
+            if (room)
+            {
+                closeRequestPassword = -1;
+                search_value = "";
+                await goto(`/rooms/channel/${room.id}`)
+            }
+        })
+    }
+
+	function passwordNeeded(e : CustomEvent) {
+		console.log("PASSWORD for ", e.detail.id);
+		closeRequestPassword = e.detail.id;
+	}
+
 </script>
 
 {#if closeWarningUnblockUser > 0}
@@ -127,6 +147,9 @@
 
 {#if closePopupCreateRoom}
     <PopUpCreateDm createRoom={createRoom} close={()=>{closePopupCreateRoom = false}}/>
+{/if}
+{#if closeRequestPassword > 0}
+    <PopUpAskPassword joinChannel={joinChannel} close={()=>{closeRequestPassword = -1}}></PopUpAskPassword>
 {/if}
 
 <div class="relative flex flex-col h-full sm:h-full grow overflow-hidden">
@@ -171,7 +194,8 @@
 					user={user}
 					socket={socket}
 					connectedWs={connectedWs}
-					on:userClicked={itemClicked}/>
+					on:userClicked={itemClicked}
+					on:requestPassword={passwordNeeded}/>
 			</div>
 			{/if}
 		</div>

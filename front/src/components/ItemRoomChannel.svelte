@@ -2,8 +2,10 @@
 
     import type {Rooms, RoomUser} from '../types/room';
     import {PUBLIC_API_URI} from "$env/static/public";
-    import {onMount} from "svelte";
+    import {createEventDispatcher, onMount} from "svelte";
     import {goto} from "$app/navigation";
+
+	const dispatch = createEventDispatcher();
 
     //bg-green-600
     export let room : (Rooms & {user: RoomUser[]});
@@ -13,7 +15,13 @@
 
     async function getRoom()
     {
-        await goto(`/rooms/channel/${room.id}`);
+		if (room.password) {
+			dispatch('requestPassword', {
+				id: room.id
+			})
+		} else {
+        	await goto(`/rooms/channel/${room.id}`);
+		}
     }
 
 
@@ -30,8 +38,8 @@
     </div>-->
 
     <div class="mx-2 flex-grow text-center truncate ">
-        {room?.name || "loading.."}
-        {room.password ? "🔒" : ""}
+		{room.password ? "🔒" : ""}
+		{room?.name || "loading.."}
     </div>
 
     {#if room.count_messages}
