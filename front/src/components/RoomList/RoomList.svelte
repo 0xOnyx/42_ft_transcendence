@@ -24,6 +24,7 @@
 	import PopUpAskPassword from "../PopUpAskPassword.svelte";
 	
 	export let dmList : boolean = true;
+	export let fromDM : Boolean = true;
 
 	let search_value: string = "";
 
@@ -120,11 +121,14 @@
 
 	async function joinChannel(password : string)
     {
+		console.log("emit id: ", closeRequestPassword);
         socket.emit("joinRoomPublic", {room_id: closeRequestPassword, password: password}, async (room)=>{
-            if (room)
+            console.log("Room: ", room);
+			if (room)
             {
                 closeRequestPassword = -1;
                 search_value = "";
+				console.log("ROOM ID ", room.id);
                 await goto(`/rooms/channel/${room.id}`)
             }
         })
@@ -152,7 +156,7 @@
     <PopUpAskPassword joinChannel={joinChannel} close={()=>{closeRequestPassword = -1}}></PopUpAskPassword>
 {/if}
 
-<div class="relative flex flex-col h-full sm:h-full grow overflow-hidden">
+<div class="relative flex flex-col h-screen md:pb-[9rem] lg:pb-[8rem] mobile-landscape:pb-9 grow overflow-hidden">
 	<div class="">
 		<div class="flex items-center justify-between border-b-2 ">
 			<button id="dm-list" on:click={ () => { dmList = true}}>
@@ -174,17 +178,22 @@
 		<input class="w-[95%] z-30 rounded-2xl py-1 px-3 bg-color5 focus:outline-none focus:shadow-lg focus:border-[1px] focus-border-white focus:shadow-thread-blue" type="text" bind:value={search_value} placeholder={dmList ? "Search user" : "Search room"} on:keyup={dmList ? searchUser() : searchRoom()}>
 	</div>
 
-	<div class="h-[95%] masked-overflow overscroll-contain">
+	<div class="h-full overflow-auto overscroll-contain masked-overflow">
 
-		<div class="flex pt-5">
+		<div class="flex pt-5 overflow-auto pb-6">
 			{#if dmList}
 			<div in:fly="{{ x: -200, delay: 500, duration: 400 }}" out:fly="{{ x: -200, duration: 400 }}" class="flex-grow max-h-full overflow-auto pl-4 overscroll-contain">
+				{#if id_room && user && socket}
 				<DmList bind:search_value={search_value}
 						search={search.users}
 						id_room={id_room}
 						user={user}
 						socket={socket}
+						DMPage={fromDM}
 						on:userClicked={itemClicked}/>
+				{:else}
+					<p>CONNECTING..</p>	
+				{/if}	
 			</div>
 			{:else}
 			<div in:fly="{{ x: 200, delay: 500, duration: 400 }}" out:fly="{{ x: 200, duration: 400 }}" class="flex-grow max-h-full overflow-auto pl-4 overscroll-contain">
@@ -194,7 +203,7 @@
 					user={user}
 					socket={socket}
 					connectedWs={connectedWs}
-					on:userClicked={itemClicked}
+					DMPage={fromDM}
 					on:requestPassword={passwordNeeded}/>
 			</div>
 			{/if}

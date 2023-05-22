@@ -16,6 +16,7 @@
 	export let id_room : Number;
 	export let user : User;
 	export let socket : Socket;
+	export let DMPage : boolean;
 
 	let loadValue = async () => {
 		let res : Response;
@@ -58,7 +59,7 @@
 	{:else}
 		<div transition:slide class="">
 			{#each rooms as room}
-				<ItemRoomDm current={room.id === id_room} user={user} room={room}/>
+				<ItemRoomDm current={room.id === id_room && DMPage} user={user} room={room}/>
 			{/each}
 		</div>
 	{/if}

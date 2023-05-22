@@ -15,13 +15,7 @@
 
     async function getRoom()
     {
-		if (room.password) {
-			dispatch('requestPassword', {
-				id: room.id
-			})
-		} else {
-        	await goto(`/rooms/channel/${room.id}`);
-		}
+        await goto(`/rooms/channel/${room.id}`);
     }
 
 

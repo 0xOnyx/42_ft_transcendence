@@ -262,7 +262,6 @@
     let closeWarningBlockUser = false;
     let closeWarningUnbanUser = -1;
     let closePopupCreateRoom = false;
-    let closeRequestPassword = -1;
 
     let closeKickUser = false;
     let closeBanUser = false;
@@ -308,18 +307,6 @@
             goto(`/rooms/channel/${data}`);
         })
         closePopupCreateRoom = false;
-    }
-
-    async function joinChannel(password)
-    {
-        socket.emit("joinRoomPublic", {room_id: closeRequestPassword, password: password}, async (room)=>{
-            if (room)
-            {
-                closeRequestPassword = -1;
-                search_value = "";
-                await goto(`/rooms/channel/${room.id}`)
-            }
-        })
     }
 
     async function changePassword(event)
@@ -447,10 +434,6 @@
                 buttonAccecpt={acceptUnbanUser} buttonDecline={()=>{closeWarningUnbanUser = -1}}></WarningAsk>
 {/if}
 
-{#if closeRequestPassword > 0}
-    <PopUpAskPassword joinChannel={joinChannel} close={()=>{closeRequestPassword = -1}}></PopUpAskPassword>
-{/if}
-
 
 {#key refresh}
 <div class="flex-col">
@@ -471,6 +454,7 @@
 					<div id="RoomList" class="flex-grow h-[90%]">
 						<RoomList
 							dmList={false}
+							fromDM={false}
 							user={user}
 							socket={socket}
 							friends={friends}
@@ -598,17 +582,24 @@
 
 			<!-- Computer Version-->
 			<div class="relative hidden md:grid md:grid-cols-4 max-h-full sm:max-h-full pb-10 mobile-landscape:max-h-full mobile-landscape:pb-2 text-center align-middle m-1 overflow-hidden {$leftHanded ? 'mobile-landscape:pl-[3.75rem]' : 'mobile-landscape:pr-[3.75rem]'} overscroll-none">
-				<div class="md:flex md:flex-col h-screen md:pb-[9rem] lg:pb-[8rem] mobile-landscape:pb-9">
+				<div class="md:flex md:flex-col max-h-screen md:pb-[9rem] lg:pb-[8rem] mobile-landscape:pb-9">
 				<div id="RoomList" class="grow">
-				<RoomList
-					dmList={false}
-					user={user}
-					socket={socket}
-					friends={friends}
-					connectedWs={connectedWs}
-					rooms={rooms}
-					id_room={id_room}/>
+					{#if user && socket && friends && connectedWs && rooms && id_room}
+						<RoomList
+							dmList={false}
+							fromDM={false}
+							user={user}
+							socket={socket}
+							friends={friends}
+							connectedWs={connectedWs}
+							rooms={rooms}
+							id_room={id_room}/>
+						{:else}	
+							<p>CONNECTING..</p>	
+						{/if}				
 				</div>
+
+
 			</div>
 				<div class="md:flex md:flex-col col-span-2 h-screen md:pb-[9rem] lg:pb-[8rem] mobile-landscape:pb-9 ">
 				<div id="CurrenrRoom" class="screen border-gray-700 shadow-lg shadow-black/50 bg-black/25 grow md:flex md:flex-col my-5  md:my-0 md:mx-5 xl:mx-8 overflow-auto rounded-xl">

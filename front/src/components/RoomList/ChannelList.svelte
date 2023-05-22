@@ -21,6 +21,7 @@
 	export let user : User;
 	export let socket : Socket;
 	export let connectedWs : Boolean;
+	export let DMPage : Boolean;
 
 	let loadValue = async () => {
 		let res : Response;
@@ -69,7 +70,7 @@
 	})
 </script>
 
-<div class="flex-grow max-h-full overflow-auto overscroll-contain ">
+<div class="flex-grow">
 	{#if search_value.length <= 0}
 		{#if !connectedWs}
 			<p>Loading..</p>
@@ -81,7 +82,7 @@
 					return b.messages[0].id - a.messages[0].id;
 				}
 				return 0;}) as room}
-					<ItemRoomChannel on:requestPassword current={room.id === id_room} room={room}></ItemRoomChannel>
+					<ItemRoomChannel current={room.id === id_room && !DMPage} room={room}></ItemRoomChannel>
 				{/each}
 			{/if}
 		{/if}

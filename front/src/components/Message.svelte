@@ -18,8 +18,9 @@
 	let scrollContainer : HTMLDivElement;
 
 	async function scrollToLastMessage() {
-		scrollContainer.scrollTop = scrollContainer.scrollHeight
-    }
+		if (scrollContainer)
+			scrollContainer.scrollTop = scrollContainer.scrollHeight;
+    };
 
 	onMount( () => {
 		scrollToLastMessage();

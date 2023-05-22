@@ -219,7 +219,8 @@
         })
 
         socket.on("exception", (data: {status: string, message: string})=>{
-            error = data.message;
+            console.log("EXCEPION");
+			error = data.message;
         });
 
     })

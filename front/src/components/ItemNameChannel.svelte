@@ -48,8 +48,8 @@
     </div>
 
     <div class="mx-2 flex-grow text-left">
+		{channel.password ? "🔒" : ""}
         {channel?.name || "loading.."}
-        {channel.password ? "🔒" : ""}
     </div>
 
 
