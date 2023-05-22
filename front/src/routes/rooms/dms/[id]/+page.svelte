@@ -66,13 +66,18 @@
 
     let loadValue = async ()=>{
         refresh = !refresh;
+		console.log("DM: LOAD START")
         let res: Response;
+
+		_showCurrentRoom = true;
+		_showAllRooms = false;
+		_showRoomUser = false;
 
         if (!await userservice.isLogged())
             await goto("/");
 
         user = await userservice.getCurrentUser();
-		console.log("User obtained: ", user);
+		console.log("DM: User obtained: ", user);
 
         res = await fetch(`${PUBLIC_API_URI}/user/friend`, {
             method: 'GET',
@@ -124,7 +129,7 @@
         else
             id_room = Number($page.params.id);
         current_room = rooms.find((item: (Rooms & {user: RoomUser[]}))=>{return (item.id === id_room)}) as (Rooms & {user: RoomUser[]});
-        console.log(current_room);
+        console.log("DM: CURRENT ROOM:", current_room);
         if (!current_room && $page.params.id != "last")
         {
             await goto("/rooms/dms/last");
@@ -346,7 +351,9 @@
 
 {#key refresh}
 <div class="flex-col">
+	{#if user && current_room}
 	<NavBar user={user} current_channel={current_room?.id || -1}/>
+	{/if}
 	
 	<div class="flex py-2 landscape:py-0 md:pt-10 xl:pt-10">
 	

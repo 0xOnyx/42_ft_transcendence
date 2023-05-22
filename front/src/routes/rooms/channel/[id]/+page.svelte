@@ -64,7 +64,7 @@
 
     let loadValue = async ()=>{
         refresh = !refresh;
-        console.log("LOAD OK");
+        console.log("CHANNEL: LOAD START");
         let res: Response;
 
 		_showCurrentRoom = true;
@@ -74,13 +74,7 @@
         if (!await userservice.isLogged()) {
             await goto("/");}
 
-		const urlSegments = $page.url.toString().split('/');
-		console.log(urlSegments);
 
-		if (urlSegments.length < 5 || !(urlSegments[3] === 'rooms' && urlSegments[4] === 'channel')) {
-			console.log($page.url.toString());
-			return;
-		}
 		user = await userservice.getCurrentUser();
 
         res = await fetch(`${PUBLIC_API_URI}/user/friend`, {
@@ -108,22 +102,22 @@
             }
         }
 
-        console.log("CURRENT VALUE")
+		const urlSegments = $page.url.toString().split('/');
 
-            console.log("REFETCH");
+		if (urlSegments.length < 5 || !(urlSegments[3] === 'rooms' && urlSegments[4] === 'channel')) {
+			return;
+		}
+
+            console.log("REFETCH CHANNEL MESSAGE");
             res = await fetch(`${PUBLIC_API_URI}/message/rooms`, {
                 method: 'GET',
                 credentials: 'include'
             })
             rooms = await res.json();
-        console.log(rooms);
-        console.log(current_room_id);
         if ($page.params.id == "last")
         {
             if (!rooms || rooms.length <= 0) {
                 current_room_id = -1;
-                console.log("RETURN")
-                console.log(current_room_id)
                 return;
             }
             id_room = rooms[0].id;
@@ -135,7 +129,7 @@
         )})
         current_room_id = rooms.findIndex((item: (Rooms & {user: RoomUser[]}))=>{return (item.id === id_room)});
 
-        console.log("ID ROOM +> ", current_room_id);
+        console.log("CHANNEL ID ROOM +> ", current_room_id);
 
         if (current_room_id == -1 && $page.params.id != "last")
         {
@@ -437,7 +431,9 @@
 
 {#key refresh}
 <div class="flex-col">
-	<NavBar user={user} current_channel={rooms[current_room_id]?.id || -1}/>
+	{#if user && rooms}
+		<NavBar user={user} current_channel={rooms[current_room_id]?.id || -1}/>
+	{/if}
 
 	<div class="flex py-2 landscape:py-0 md:pt-10 xl:pt-10">
 
