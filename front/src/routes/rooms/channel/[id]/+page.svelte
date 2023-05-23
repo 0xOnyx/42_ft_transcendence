@@ -50,7 +50,7 @@
     let socket: Socket;
     let connectedWs: Boolean = false;
     let iscurrentFriend: Boolean = false;
-    let currentRoomUserSelect: User;
+    let currentRoomUserSelect: User | null;
     let chatbox : HTMLDivElement;
     let unread_message: number = 0;
     let error : string = ""
@@ -150,7 +150,7 @@
                 return item;
             });
 
-            const index = rooms.findIndex((item: (Rooms & { user: RoomUser[] })) => {
+            const index = rooms.findIndex((item: Rooms) => {
                 return (item.id === id_room)
             })
             rooms[index].count_messages = 0;
@@ -176,7 +176,7 @@
         })
 
         socket.on("message", async (data: {send_user_id: number, room_id: number, message: (Messages & {user: User}), message_type: string})=>{
-            if (data.message.user.id != user.id)
+            if (data.message.user.id != user?.id)
             {
                 let res: Response = await fetch(`${PUBLIC_API_URI}/user/isBlockedByMe/${data.message.user.id}`, {
                     method: 'GET',
@@ -221,7 +221,7 @@
             if (rooms)
                 return ;
             const room_id_current = rooms[current_room_id].id;
-            rooms = rooms.filter(item=>{
+            rooms = rooms.filter(item => {
                 return item.id != room.id
             })
             if (room.id === room_id_current)
@@ -331,6 +331,9 @@
 
     async function kickUser()
     {
+        if (!currentRoomUserSelect)
+            return;
+
         await socket.emit("kickUser", {room_id: rooms[current_room_id].id, user_id: currentRoomUserSelect.id});
         closeKickUser = false;
         currentRoomUserSelect = null;
@@ -338,12 +341,18 @@
 
     async function banUser()
     {
+        if (!currentRoomUserSelect)
+            return;
+
         await socket.emit("banUserChannel", {room_id: rooms[current_room_id].id, user_id: currentRoomUserSelect.id})
         closeBanUser = false;
         currentRoomUserSelect = null;
     }
     async function unbanUser()
     {
+        if (!currentRoomUserSelect)
+            return;
+
         await socket.emit("unbanUserChannel", {room_id: rooms[current_room_id].id, user_id: currentRoomUserSelect.id});
         closeUnBanUser = false;
         currentRoomUserSelect = null;
@@ -351,6 +360,9 @@
 
     async function setAdmin()
     {
+        if (!currentRoomUserSelect)
+            return;
+
         await socket.emit("setUserRole", {room_id: rooms[current_room_id].id, user_id: currentRoomUserSelect.id, role: RoleUser.ADMIN});
         closeSetAdmin = false;
         currentRoomUserSelect = null;
@@ -358,6 +370,9 @@
 
     async function setUnsetAdmin()
     {
+        if (!currentRoomUserSelect)
+            return;
+
         await socket.emit("setUserRole", {room_id: rooms[current_room_id].id, user_id: currentRoomUserSelect.id, role: RoleUser.USER});
         closeUnsetAdmin = false;
         currentRoomUserSelect = null;
@@ -365,6 +380,9 @@
 
     async function setMuteTime(event)
     {
+        if (!currentRoomUserSelect)
+            return;
+
         await socket.emit("muteUser", {room_id: rooms[current_room_id].id, user_id: currentRoomUserSelect.id, number_hours: event.detail})
         closeMuteUser = false;
         currentRoomUserSelect = null;
@@ -403,19 +421,19 @@
                 buttonAccecpt={deleteRoom} buttonDecline={()=>{closeDeleteRoom = false}}></WarningAsk>
 {/if}
 
-{#if closeKickUser}
+{#if closeKickUser && currentRoomUserSelect}
     <WarningAsk title="Kick user ?" message="If your kick {currentRoomUserSelect.name}. This action cannot be undone."
                 buttonAccecpt={kickUser} buttonDecline={()=>{closeKickUser = false}}></WarningAsk>
 {/if}
-{#if closeBanUser}
+{#if closeBanUser && currentRoomUserSelect}
     <WarningAsk title="Ban user ?" message="If your ban {currentRoomUserSelect.name}. This action cannot be undone."
                 buttonAccecpt={banUser} buttonDecline={()=>{closeBanUser = false}}></WarningAsk>
 {/if}
-{#if closeSetAdmin}
+{#if closeSetAdmin && currentRoomUserSelect}
     <WarningAsk title="Set admin user ?" message="If your set admin {currentRoomUserSelect.name}. he will have all the rights."
                 buttonAccecpt={setAdmin} buttonDecline={()=>{closeSetAdmin = false}}></WarningAsk>
 {/if}
-{#if closeUnsetAdmin}
+{#if closeUnsetAdmin && currentRoomUserSelect}
     <WarningAsk title="Set admin user ?" message="If your unset admin {currentRoomUserSelect.name}. he will lose all these rights."
                 buttonAccecpt={setUnsetAdmin} buttonDecline={()=>{closeUnsetAdmin = false}}></WarningAsk>
 {/if}
@@ -423,7 +441,7 @@
     <PopUpAskTime on:timeSelect={setMuteTime} on:close={()=>{closeMuteUser = false}}></PopUpAskTime>
 {/if}
 
-{#if closeUnBanUser}
+{#if closeUnBanUser && currentRoomUserSelect}
     <WarningAsk title="Unban user ?" message="If your unban this {currentRoomUserSelect.name}. he will get access to this room."
                 buttonAccecpt={unbanUser} buttonDecline={()=>{closeUnBanUser = false}}></WarningAsk>
 {/if}
