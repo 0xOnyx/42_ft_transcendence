@@ -5,7 +5,7 @@
     import {PUBLIC_API_URI} from "$env/static/public";
     import {goto} from "$app/navigation"
     import {Socket} from "socket.io-client";
-	import { imageUrl } from '../services/Utilities';
+	import { imageUrl, getColor } from '../services/Utilities';
 	import { createEventDispatcher } from 'svelte';
 	import Checkbox from './Checkbox.svelte';
 
@@ -20,15 +20,6 @@
 		dispatch('userClicked', user )
 	}
 
-    function getColor(status: Status)
-    {
-        if (status == Status.OFFLINE)
-            return "border-zinc-600";
-        else if (status == Status.HIDDEN)
-            return "border-rose-600";
-        else if (status == Status.ONLINE)
-            return "border-green-600 text-green-600";
-    }
 </script>
 
 <button on:click={handleClick} class="cursor-pointer rounded-xl bg-color5 {checkbox ? 'p-3 text-sm' : 'p-5 text-md'} flex items-center mt-1 w-full">
