@@ -3,8 +3,11 @@
 	import DateElement from "./DateElement.svelte";
 	export let curUser : User;
 	export let gamehistory : GameHistory[];
+	export let portal : boolean = false;
 	console.log(gamehistory);
+	console.log(portal);
 </script>
+{#if portal}
 <table class="min-w-full min-h-[30px] text-center text-sm font-light sm:mt-8 md:max-2xl:mt-0">
 	<thead class="border-b font-medium dark:border-neutral-500">
 		<tr>
@@ -15,7 +18,9 @@
 		</tr>
 	  </thead>
 	{#each gamehistory as g}
-		<tr class="border-b dark:border-neutral-500">
+		<tr class="border-b border-neutral-500			
+			{(curUser.id == g.player_one_id && g.score_one > g.score_two) ||
+			(curUser.id == g.player_two_id && g.score_one < g.score_two) ? 'text-process-green' : 'text-core-red'}">
 			<td class=" px-6 py-2 font-medium">{g.player_one.name} vs {g.player_two.name}</td>
 			<td class="whitespace-nowrap px-6 py-2 font-medium">{g.score_one} - {g.score_two}</td>
 			<td class="whitespace-nowrap px-6 py-2 font-medium"><DateElement created_at={new Date(g.created_at)}></DateElement> </td>
@@ -28,3 +33,21 @@
 		</tr>
 	{/each}
 </table>
+{:else}
+<table class="max-w-1/4 min-h-[30px] text-center text-xs font-light sm:mt-8 md:max-2xl:mt-0">
+	<thead class="border-b font-medium border-neutral-500">
+		<tr>
+		  <th scope="col" class="px-6 py-4">Players</th>
+		  <th scope="col" class="px-6 py-4">Score</th>
+		</tr>
+	  </thead>
+	{#each gamehistory as g}
+		<tr class="border-b border-neutral-500 
+			{(curUser.id == g.player_one_id && g.score_one > g.score_two) ||
+			(curUser.id == g.player_two_id && g.score_one < g.score_two) ? 'text-process-green' : 'text-core-red'}">
+			<td class=" px-6 py-2 font-medium">{g.player_one.name} vs {g.player_two.name}</td>
+			<td class="whitespace-nowrap px-6 py-2 font-medium">{g.score_one} - {g.score_two}</td>
+		</tr>
+	{/each}
+</table>
+{/if}
