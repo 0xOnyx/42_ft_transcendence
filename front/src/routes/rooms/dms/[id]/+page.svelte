@@ -32,6 +32,8 @@
 	import { afterUpdate } from 'svelte';
 	import { leftHanded } from '../../../../services/Stores';
 	import PopUpAskPassword from '../../../../components/PopUpAskPassword.svelte';
+	import History from '../../../../components/History.svelte';
+	import type { GameHistory } from '../../../../types/user';
 
     let id;
 
@@ -51,6 +53,7 @@
     let message_value: string = "";
     let rooms :(Rooms & {user: RoomUser[]})[] = [];
     let current_room: (Rooms & {user: RoomUser[]});
+	let gamehistory : GameHistory[] = [];
     let current_room_user: User;
     let user : User;
     let friends : User[] = [];
@@ -155,6 +158,7 @@
                 return (item.id === id_room)
             })
             rooms[index].count_messages = 0;
+			gamehistory = await userservice.getHistory(current_room_user.id);
         }
         else
             room_message = [];
@@ -351,7 +355,7 @@
 
 {#key refresh}
 <div class="flex-col">
-	{#if user && current_room}
+	{#if user}
 	<NavBar user={user} current_channel={current_room?.id || -1}/>
 	{/if}
 	
@@ -505,13 +509,26 @@
 		<div class="overflow-auto bg-color5 flex-grow h-full rounded-xl shadow-lg shadow-black mx-4">
 			<div class="mt-5">
 				{#if rooms.length <= 0}
-				<p>NO DM</p>
-			{:else}
+					<p>NO DM</p>
+				{:else}
 				<UserInfo user={current_room_user}></UserInfo>
 
 				<div>
 					{#if user_state_room_user}
-						<UserStat userstats={user_state_room_user}></UserStat>
+						{#if history}
+							<div in:fade="{{ delay: 200, duration: 400 }}">
+								{#if gamehistory && current_room_user}
+									<History curUser={current_room_user} gamehistory={gamehistory} />
+								{:else}
+									<p>No games played</p>
+								{/if}
+								<div class="flex justify-center">
+									<button on:click={()=> {history = false}} class="flex gap-2"><Icon icon="left-arrow"/>Return</button>
+								</div>
+							</div>
+						{:else}
+							<UserStat userstats={user_state_room_user}  on:showHistory={() => {history =true}}></UserStat>
+						{/if}
 					{/if}
 				</div>
 

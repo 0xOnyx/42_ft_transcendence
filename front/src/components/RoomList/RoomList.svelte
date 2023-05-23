@@ -183,7 +183,7 @@
 		<div class="flex pt-5 overflow-auto pb-6">
 			{#if dmList}
 			<div in:fly="{{ x: -200, delay: 500, duration: 400 }}" out:fly="{{ x: -200, duration: 400 }}" class="flex-grow max-h-full overflow-auto pl-4 overscroll-contain">
-				{#if id_room && user && socket}
+				{#if user && socket}
 				<DmList bind:search_value={search_value}
 						search={search.users}
 						id_room={id_room}
