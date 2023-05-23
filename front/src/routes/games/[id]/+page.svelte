@@ -168,7 +168,7 @@
 
                     <div class=" grow justify-around lg:flex lg:flex-col my-5 lg:my-0 lg:mx-5 xl:mx-8 overflow-auto rounded-xl -order-1 lg:order-none">
 
-                        <canvas class="w-full"
+                        <canvas class="relative w-full"
                             bind:this={canvas}
                             width={800}
                             height={500}

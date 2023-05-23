@@ -440,7 +440,9 @@
 
 {#key refresh}
 <div class="flex-col">
+	{#if user}
 	<NavBar user={user} />
+	{/if}
 
 	<div class="flex py-2 landscape:py-0 md:py-10 xl:py-10">
 
