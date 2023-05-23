@@ -24,7 +24,7 @@
         <div class="flex-grow">
 
             <div class="rounded-md mx-3 bg-color6 p-5 mt-1 text-right flex">
-                <div class="flex-1">The game is finish</div>
+                <div class="flex-1">This game is finished</div>
                 <!-- {current_message.content} -->
             </div>
 
@@ -62,7 +62,7 @@
         <div class="flex-grow">
 
             <div class="rounded-md mx-3 bg-color6 p-5 mt-1 text-right flex">
-                <div class="flex-1">This game is finish</div>
+                <div class="flex-1">This game is finished</div>
                 <!-- {current_message.content} -->
 
                 <!-- <div on:click={acceptFriend} class="flex-none mx-5"><Button name="Accept" width="w-45"></Button></div> -->
@@ -86,7 +86,7 @@
         <div class="flex-grow">
 
             <div class="rounded-md mx-3 bg-color6 p-5 mt-1 text-right flex">
-                <div class="flex-1">You sent a invite to join a game</div>
+                <div class="flex-1">You sent an invite</div>
                 <!-- {current_message.content} -->
             </div>
 
@@ -124,7 +124,7 @@
         <div class="flex-grow">
 
             <div class="rounded-md mx-3 bg-color6 p-5 mt-1 text-right flex">
-                <div class="flex-1">You received to join a game</div>
+                <div class="flex-1">You received an invitation to play a game</div>
                 <!-- {current_message.content} -->
 
                 <div on:click={acceptGame} class="flex-none mx-5"><Button name="Accept" width="w-45"></Button></div>
