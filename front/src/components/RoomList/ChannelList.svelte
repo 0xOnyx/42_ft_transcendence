@@ -7,7 +7,7 @@
 
 	import type { Rooms, RoomUser } from "../../types/room";
 	import type { User } from "../../types/user";
-	import { io, type Socket } from "socket.io-client";
+	import type { Socket } from "socket.io-client";
 	import { beforeNavigate, goto } from "$app/navigation";
 	import { load } from "../../routes/games/[id]/+page";
 	import { loop_guard } from "svelte/internal";
@@ -47,11 +47,8 @@
 	onMount(async () => {
 		loadValue();
 
-        socket = io('/events', {
-            path: "/ws/"
-        });
-
         socket.on("updateRoom", (room: Rooms) =>{
+
             let index: number;
             // console.log("NEW UPDATE ROOM")
             // console.log(room);
