@@ -1,6 +1,6 @@
 <script lang="ts">
 
-    import { imageUrl } from '../services/Utilities';
+    import { imageUrl, getColor } from '../services/Utilities';
     import type {Rooms, RoomUser} from '../types/room';
     import type { User } from '../types/user';
     import { RoleUser } from '../types/user'
@@ -17,16 +17,6 @@
     onMount(async ()=>{
         current_user = await userservice.getUser(user.user_id)
     })
-
-    function getColor(status: Status)
-    {
-        if (status == Status.OFFLINE)
-            return "bg-zinc-600";
-        else if (status == Status.HIDDEN)
-            return "bg-rose-600";
-        else if (status == Status.ONLINE)
-            return "bg-green-600";
-    }
 
     const dispatch = createEventDispatcher()
 
@@ -49,21 +39,21 @@
 </script>
 
 {#if current_user}
-    <div on:click={clicker} class="mx-1.5 cursor-pointer rounded-xl {color} border-2  p-5 flex items-center mt-1">
+    <div on:click={clicker} class="mx-2 cursor-pointer rounded-xl {color} border-2 p-1 flex items-center mt-1">
 
         <div class="mx-2 flex-shrink">
 
-            <div class="w-[40px] h-[40px] bg-cover  rounded-full mx-auto"
+            <div class="w-[40px] h-[40px] bg-cover rounded-full mx-auto border-4 {getColor(current_user.online_status)}"
                  style="background-image: url( {imageUrl(current_user?.image_url)} )">
             </div>
 
         </div>
 
-        <div class="{user.ban ? 'line-through' : ''} mx-2 flex-grow text-left">
-            {current_user?.name}
-            {user.role === RoleUser.ADMIN ? "👑" : ""}
+        <div class="{user.ban ? 'line-through' : ''} mx-2 flex-grow text-left truncate">
+			{user.role === RoleUser.ADMIN ? "👑" : ""}
             {user.ban ? "⛓": ""}
             {user.mute ? "👮": ""}
+			{current_user?.name}
         </div>
         {#if current_user?.online_status && !user.ban && !user.mute}
             <div class="mx-2">

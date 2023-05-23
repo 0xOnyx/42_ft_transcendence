@@ -232,6 +232,7 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
       @MessageBody() data: {room_id: number, password?: string},
       @ConnectedSocket() client: CustomSocket
   ){
+	console.log("IN HERE ",  data.room_id, " ", data.password);
     if (!client.request.user)
       throw new WsException("no user");
     await this.messageService.joinRoom({id: Number(data.room_id)}, {id: client.request.user.id}, RoleUser.USER, data.password);

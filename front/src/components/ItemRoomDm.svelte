@@ -7,6 +7,7 @@
     import {goto} from "$app/navigation";
 	import { imageUrl } from '../services/Utilities';
 	import userservice from '../services/UserService';
+	import { getColor } from '../services/Utilities';
 
     //bg-green-600
     export let room : (Rooms & {user: RoomUser[]});
@@ -43,19 +44,18 @@
     }
 
 
-
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<div on:click={getRoom} class="border-color2  border-2 cursor-pointer rounded-xl {current ? 'bg-color2' : 'bg-color5'} p-5 flex items-center mt-1">
+<div on:click={getRoom} class="border-gray-700  border-[3px] cursor-pointer rounded-xl {current ? 'bg-color2' : 'bg-gray-400 opacity-50 italic'} p-5 flex items-center mt-1">
 
     <div class="mx-2 flex-shrink">
-        <div class="w-[40px] h-[40px] bg-cover  rounded-full mx-auto"
+        <div class="w-[40px] h-[40px] md:w-[30px] md:h-[30px] lg:w-[40px] lg:h-[40px] bg-cover  rounded-full mx-auto border-[3px] {getColor(userDm?.online_status)}"
              style="background-image: url(  {imageUrl(userDm?.image_url)} )">
         </div>
     </div>
 
-    <div class="mx-2 flex-grow text-left">
+    <div class="mx-2 flex-grow text-left text-base md:text-xs truncate">
         {userDm?.name || "loading.."}
     </div>
 	{#if room.count_messages}
