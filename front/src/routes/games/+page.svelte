@@ -193,7 +193,7 @@
 										<input class="w-full rounded-2xl py-1 px-3 bg-color5 focus:outline-none" type="text" bind:value={search_value} placeholder="Search" on:keyup={searchUser}>
 									</div>
 
-									<div id="search" class="max-h-20 sm:h-[12rem] mobile-landscape:max-h-[7rem] pb-5 masked-overflow overscroll-contain">
+									<div id="search" class="max-h-20 sm:h-[12rem] mobile-landscape:max-h-[7rem] pb-5 masked-overflow overscroll-contain text-center">
 										{#if search_value.length <= 0}
 											{#if friends.length <= 0}
 												<p>NO FRIEND</p>  <!-- CREATE THIS -->
