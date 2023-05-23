@@ -381,7 +381,7 @@
         <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
         <div class="fixed inset-0 overflow-y-auto">
             <div class="flex min-h-full items-center justify-center p-4 text-left sm:items-center sm:p-0">
-                <div class="bg-red-100 border border-red-400 text-red-700 px-60 py-3 rounded relative" role="alert">
+                <div class="bg-red-100 border border-red-400 text-red-700 px-20 md:px-60 text-center py-3 rounded relative" role="alert">
                     <strong class="font-bold">Error !</strong>
                     <span class="block sm:inline">{error}</span>
                     <span on:click={()=>{error=""}} class="absolute top-0 bottom-0 right-0 px-4 py-3">
