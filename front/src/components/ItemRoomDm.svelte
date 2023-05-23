@@ -21,17 +21,17 @@
 	let userDm: User;
 
     onMount(async ()=>{
-		console.log("onMount");
-		console.log("User: ", user);
+		// console.log("onMount");
+		// console.log("User: ", user);
 		if (roomUserDm) {
-			console.log("Found room user DM");
+			// console.log("Found room user DM");
             try {
 				let res: Response = await fetch(`${PUBLIC_API_URI}/user/id/${roomUserDm.user_id}`, {
 					method: 'GET',
 					credentials: 'include'
 				});
 				userDm = await res.json();
-				console.log(userDm);
+				// console.log(userDm);
 			} catch (error) {
                 console.error("Error fetching user data:", error);
             }

@@ -39,7 +39,7 @@
 		}
 		if (rooms.channel.length <= 0)
 		{
-			console.log("REFETCH child");
+			// console.log("REFETCH child");
 			res = await fetch(`${PUBLIC_API_URI}/message/rooms`, {
 				method: 'GET',
 				credentials: 'include'

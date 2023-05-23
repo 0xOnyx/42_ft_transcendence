@@ -75,7 +75,7 @@
 	    search_value = e.detail.text;
         search = await userservice.searchUser(search_value);
 		if (!e.detail.all) {
-			console.log("Blocked Only");
+			// console.log("Blocked Only");
 			for (let item of search) { 
 				let res: Response = await fetch(`${PUBLIC_API_URI}/user/isBlockedByMe/${item.id}`, {
 				method: 'GET',
@@ -132,7 +132,7 @@
         })
 
 		socket.on("RemoveBlock", (data: {id: number})=>{
-			console.log("Try remove");
+			// console.log("Try remove");
             locked = locked.filter((item: User)=>{
                 return (item.id != Number(data.id))
             })
@@ -190,7 +190,7 @@
     async function acceptUnbanUser()
     {
 		const id : number = closeWarningUnbanUser;
-		console.log(id);
+		// console.log(id);
         await socket.emit("unblockUser", {
             user_id: closeWarningUnbanUser
         });
@@ -204,7 +204,7 @@
 
 	async function itemClicked( e : CustomEvent) {
 		const id : number = e.detail.id;
-		console.log("itemClicked:", id);
+		// console.log("itemClicked:", id);
 		const unblockedUser = await getRoom(id, socket);
 		if (!unblockedUser) {
 			closeWarningUnbanUser = id;
@@ -363,10 +363,10 @@
 				<div class="info-user screen border-gray-700 grow h-1/2 sm:h-full sm:w-2/3 mobile-landscape:w-1/2 overflow-hidden flex shadow-lg shadow-black/50 bg-black/25 rounded-3xl">
 					<div class="screen-overlay"></div>
 					<div class="absolute flex w-full justify-between">
-						<button on:click={() => { _openSettings = !_openSettings}} class="transition-opacity duration-300 grow p-3 border-gray-700 {_openSettings ? "border-b-[3px] bg-black/50 text-gray-500" : "border-r-[3px]"}">
+						<button on:click={() => { _openSettings = false}} class="transition-opacity duration-300 grow p-3 border-gray-700 {_openSettings ? "border-b-[3px] bg-black/50 text-gray-500" : "border-r-[3px]"}">
 							Statistics
 						</button>
-						<button on:click={() => { _openSettings = !_openSettings}} class="transition-opacity duration-300 grow p-3 border-gray-700  {_openSettings ? "border-l-[3px]" : "border-b-[3px] bg-black/50 text-gray-500"}">
+						<button on:click={() => { _openSettings = true}} class="transition-opacity duration-300 grow p-3 border-gray-700  {_openSettings ? "border-l-[3px]" : "border-b-[3px] bg-black/50 text-gray-500"}">
 							Settings
 						</button>
 					</div>

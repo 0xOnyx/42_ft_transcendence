@@ -26,13 +26,13 @@
         {
             key = await res.text();
             secret = `otpauth://totp/transcendence?secret=${key}&period=30`;
-            console.log(key)
+            // console.log(key)
         }
     }
 
 	const updatePopUp = async ( e : CustomEvent ) => {
-		console.log(e.detail.text);
-        console.log(e.detail.type);
+		// console.log(e.detail.text);
+        // console.log(e.detail.type);
 		if (e.detail.text === "auth") {
 			_openAuth = !_openAuth;
 		}
@@ -51,7 +51,7 @@
             const res = await fetch(`${PUBLIC_API_URI}/auth/ValideTotp?code=${e.detail.text}&token=${key}`);
             if (res.status == 200)
             {
-                console.log(await res.text());
+                // console.log(await res.text());
 			    _openAuth = false;
             }
             else

@@ -19,7 +19,7 @@
 
     async function getRoom()
     {
-        console.log(all_channels);
+        // console.log(all_channels);
         if (all_channels.find(item=>item.id == channel.id))
             await goto(`/rooms/channel/${channel.id}`);
         else
