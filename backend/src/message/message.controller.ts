@@ -87,6 +87,8 @@ export class MessageController {
             where: Prisma.RoomsWhereInput;
             orderBy?: Prisma.RoomsOrderByWithRelationInput;
         } = {where: {type: TypeRoom.PUBLIC_ROOM}};
+        if (queryList.element === 'name' && queryList.value === '*')
+            return this.messageServiceService.getSearch(rooms);
         if (queryList.skip)
             rooms.skip = Number(queryList.skip);
         if (queryList.take)
