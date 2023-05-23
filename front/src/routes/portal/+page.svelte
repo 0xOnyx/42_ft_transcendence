@@ -199,7 +199,7 @@
     }
 
 	function unblockUser(e : CustomEvent) {
-		closeWarningUnbanUser = e.detail.user_id;
+		closeWarningUnbanUser = e.detail.id;
 	}
 
 	async function itemClicked( e : CustomEvent) {
@@ -211,9 +211,6 @@
 		}
 	}
 
-	function showHistory() {
-		history = true;
-	}
     //export let data: PageData;
 </script>
 
@@ -235,8 +232,8 @@
 </svelte:head>
 
 {#if closeWarningUnbanUser > 0}
-    <WarningAsk title="Ublock user" 
-				message="Do you want to unban this user ?."
+    <WarningAsk title="Unblock user" 
+				message="Do you want to unblock this user ?"
                 buttonAccecpt={acceptUnbanUser} 
 				buttonDecline={()=>{closeWarningUnbanUser = -1}}
 				on:unblockUser={unblockUser}></WarningAsk>
@@ -269,6 +266,7 @@
 <div class="flex-col">
 	<NavBar user={user} />
 
+	<!-- Mobile version-->
 	<div class="flex sm:hidden py-2 landscape:py-0 md:py-10 xl:py-10">
 
 		<div class="h-[80vh] grow w-full px-[5%] self-center py-1 grid overflow-hidden">
@@ -330,7 +328,7 @@
 										<div class="flex sm:flex-col mobile-landscape:flex-row justify-center gap-3">
 												<UserInfo portal={_openSettings} user={user} on:updateUserInfo={updatePopUp} />
 											{#if userstats}
-												<UserStat userstats={userstats} on:showHistory={() => {history =true}}/>
+												<UserStat portal={true} userstats={userstats} on:showHistory={() => {history =true}}/>
 											{:else}
 												<p>No games played</p>
 											{/if}
@@ -385,7 +383,7 @@
 							{:else}
 								{#if history}
 								<div in:fade="{{ delay: 200, duration: 400 }}">
-									{#if userstats}
+									{#if gamehistory && user}
 										<History curUser={user} gamehistory={gamehistory} />
 									{:else}
 										<p>No games played</p>
@@ -399,7 +397,7 @@
 									<div class="flex sm:flex-col mobile-landscape:flex-row justify-center gap-3">
 											<UserInfo portal={_openSettings} user={user} on:updateUserInfo={updatePopUp} />
 										{#if userstats}
-											<UserStat userstats={userstats} on:showHistory={() => {history =true}}/>
+											<UserStat portal={true} userstats={userstats} on:showHistory={() => {history =true}}/>
 										{:else}
 											<p>No games played</p>
 										{/if}

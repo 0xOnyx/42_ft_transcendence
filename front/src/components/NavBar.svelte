@@ -5,14 +5,17 @@
 	import Icon from "./Icon.svelte";
 	import { imageUrl } from "../services/Utilities";
 	import { leftHanded } from "../services/Stores";
-
+    import type {Messages, Rooms, RoomUser} from '../types/room';
 	import type { Rooms, RoomUser } from "../types/room";
 	import { beforeNavigate } from "$app/navigation";
 	import { onMount } from "svelte";
+    import { io, Socket } from "socket.io-client";
 
     export let user : User;
 
 	let scale : boolean = false;
+    export let current_dm: number =  -1;
+    export let current_channel: number = -1;
 
 	interface ActiveRooms {
 		channel: (Rooms & {user: RoomUser[]})[];
@@ -48,10 +51,27 @@
 		)})
 	}
 
+    let socket: Socket;
 	beforeNavigate(loadValue)
 	onMount(async () => {
-		loadValue
-	})
+		loadValue();
+
+        socket = io('/events', {
+            path: "/ws/"
+        });
+
+
+        socket.on("message", (data: {send_user_id: number, room_id: number, message: (Messages & {user: User}), message_type: string})=>{
+            const indexChannel = rooms.channel.findIndex((item: (Rooms & {user: RoomUser[]}))=>{return (item.id === data.room_id)})
+            if (indexChannel >= 0 && current_channel != rooms.channel[indexChannel].id)
+                rooms.channel[indexChannel].count_messages += 1;
+            const indexDM = rooms.dms.findIndex((item: (Rooms & {user: RoomUser[]}))=>{return (item.id === data.room_id)})
+            if (indexDM >= 0 && current_dm != rooms.dms[indexDM].id)
+                rooms.dms[indexDM].count_messages += 1;
+        })
+
+
+    })
 
 	let totalDM : number;
 	let totalCHAN : number;
@@ -130,7 +150,7 @@
 										<div class="absolute inline-flex items-center justify-center min-w-60 h-5 text-2xs -top-2 -right-2.5 px-1 font-bold text-white bg-red-500 border-2 border-white rounded-full dark:border-gray-900">{totalDM > 99 ? "99+" : totalDM}</div>
 									{/if}
 								</span>
-								<span class="text-2xs lg:text-lg">Direct Message</span> 
+								<span class="text-2xs lg:text-lg">Direct Message</span>
 								{#if totalDM > 0}
 									<div class="hidden lg:inline-flex items-center justify-center min-w-60 h-5 text-2xs -top-0.5 px-1 font-bold text-white bg-red-500 border-2 border-white rounded-full dark:border-gray-900">{totalDM > 99 ? "99+" : totalDM}</div>
 								{/if}
@@ -143,7 +163,7 @@
 									<div class="absolute inline-flex items-center justify-center min-w-60 h-5 text-2xs -top-2 -right-2.5 px-1 font-bold text-white bg-red-500 border-2 border-white rounded-full dark:border-gray-900">{totalCHAN > 99 ? "99+" : totalCHAN}</div>
 								{/if}
 							</span>
-							<span class="text-2xs lg:text-lg">Chatrooms</span> 
+							<span class="text-2xs lg:text-lg">Chatrooms</span>
 							{#if totalCHAN > 0}
 								<div class="hidden lg:inline-flex items-center justify-center min-w-60 h-5 text-2xs -top-0.5 px-1 font-bold text-white bg-red-500 border-2 border-white rounded-full dark:border-gray-900">{totalCHAN > 99 ? "99+" : totalCHAN}</div>
 							{/if}

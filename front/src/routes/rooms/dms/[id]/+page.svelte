@@ -22,10 +22,16 @@
     import DeleteFriend from "../../../../components/DeleteFriend.svelte";
     import BlockUser from "../../../../components/BlockUser.svelte";
 	import NavBar from '../../../../components/NavBar.svelte';
-	import { fade } from 'svelte/transition';
+	import { fly, fade } from 'svelte/transition';
 
     import userservice from '../../../../services/UserService';
 	import RoomList from '../../../../components/RoomList/RoomList.svelte';
+	import IconButton from '../../../../components/IconButton.svelte';
+	import { getRoom } from '../../../../services/Utilities';
+	import { imageUrl } from '../../../../services/Utilities';
+	import { afterUpdate } from 'svelte';
+	import { leftHanded } from '../../../../services/Stores';
+	import PopUpAskPassword from '../../../../components/PopUpAskPassword.svelte';
 
     let id;
 
@@ -56,16 +62,23 @@
 	let user_state_room_user : UserStats | undefined = undefined;
 
     let id_room: number;
+    let refresh: boolean = false;
 
     let loadValue = async ()=>{
-
+        refresh = !refresh;
+		console.log("DM: LOAD START")
         let res: Response;
+
+		_showCurrentRoom = true;
+		_showAllRooms = false;
+		_showRoomUser = false;
 
         if (!await userservice.isLogged())
             await goto("/");
 
         user = await userservice.getCurrentUser();
-		// console.log("User obtained: ", user);
+
+		// console.log("DM: User obtained: ", user);
 
         res = await fetch(`${PUBLIC_API_URI}/user/friend`, {
             method: 'GET',
@@ -93,7 +106,7 @@
         }
 
 		const urlSegments = $page.url.toString().split('/');
-	
+
 		if (urlSegments.length < 5 || !(urlSegments[3] === 'rooms' && urlSegments[4] === 'dms')) {
 			return;
 		}
@@ -117,7 +130,8 @@
         else
             id_room = Number($page.params.id);
         current_room = rooms.find((item: (Rooms & {user: RoomUser[]}))=>{return (item.id === id_room)}) as (Rooms & {user: RoomUser[]});
-        // console.log(current_room);
+
+        // console.log("DM: CURRENT ROOM:", current_room);
         if (!current_room && $page.params.id != "last")
         {
             await goto("/rooms/dms/last");
@@ -146,17 +160,16 @@
         }
         else
             room_message = [];
-        if (chatbox)
-            chatbox.scrollTop = chatbox.scrollHeight;
+
     }
-
-
 
     beforeNavigate(loadValue)
     onMount(async ()=>{
 
         loadValue();
+
 		// console.log("DM Page - User: ", user);
+
         socket = io('/events', {
             path: "/ws/"
         });
@@ -188,12 +201,14 @@
             else
                 rooms[index] = room;
             rooms = rooms;
+            refresh = !refresh;
         })
 
         socket.on("leftRoom", (room: (Rooms & {user: RoomUser[]})) =>{
             rooms = rooms.filter(item=>{
                 return item.id != room.id
             })
+            refresh = !refresh;
         })
 
         socket.on("NewFriend", (user: User)=>{
@@ -209,10 +224,12 @@
         socket.on("updateMessage", (message: (Messages & {user: User}))=>{
             const id = room_message.findIndex(item=>{return(item.id == message.id)});
             room_message[id] = message;
+            refresh = !refresh;
         })
 
         socket.on("exception", (data: {status: string, message: string})=>{
-            error = data.message;
+            console.log("EXCEPION");
+			error = data.message;
         });
 
     })
@@ -241,9 +258,14 @@
     }
 
 
-    let closeWarningLeftDm = false;
-    let closeWarningBlockUser = false;
+	let _showAllRooms : Boolean = false;
+	let _showCurrentRoom : Boolean = true;
+	let _showRoomUser : Boolean = false;
+
+    let closeWarningLeftDm : Boolean = false;
+    let closeWarningBlockUser : Boolean  = false;
     let closeWarningUnbanUser = -1;
+
 
     async function acceptLeftDm()
     {
@@ -270,13 +292,33 @@
         closeWarningUnbanUser = -1;
     }
 
+	async function DeleteInvite()
+    {
+		let del = friends.find(item => item.id === roomUserDm.user_id )
+        socket.emit("deleteFriend", {
+            user_id: del?.id,
+        })
+    }
+
+	async function createInvite()
+    {
+
+        socket.emit("message", {
+            room_id: current_room.id,
+            message: "",
+            message_type: MessageRole.ADD_FRIEND,
+        })
+    }
+
 	function itemClicked( e : CustomEvent) {
 		// console.log("dispatch received");
 		const id : number = e.detail.id;
+
 		// console.log("itemClicked:", id);
-		getRoom(id);
+		getRoom(id, socket);
+
 	}
-	
+
 </script>
 
 {#if error.length > 0}
@@ -285,7 +327,7 @@
         <div class="fixed inset-0 overflow-y-auto">
             <div class="flex min-h-full items-center justify-center p-4 text-left sm:items-center sm:p-0">
 
-                <div class="bg-red-100 border border-red-400 text-red-700 px-60 py-3 rounded relative" role="alert">
+                <div class="bg-red-100 border border-red-400 text-red-700 px-20 md:px-60 text-center py-3 rounded relative" role="alert">
                     <strong class="font-bold">Error !</strong>
                     <span class="block sm:inline">{error}</span>
                     <span on:click={()=>{error=""}} class="absolute top-0 bottom-0 right-0 px-4 py-3">
@@ -299,115 +341,207 @@
 
 
 {#if closeWarningLeftDm}
-    <WarningAsk title="Delete direct message" message="You will lose all of your message with {current_room_user.name}. This action cannot be undone."
+    <WarningAsk title="Delete direct message" message="All your messages with {current_room_user.name} will be lost. This action cannot be undone."
         buttonAccecpt={acceptLeftDm} buttonDecline={()=>{closeWarningLeftDm = false}}></WarningAsk>
 {/if}
 {#if closeWarningBlockUser}
-    <WarningAsk title="Block user {current_room_user.name}" message="You block this user is lose all of your message with {current_room_user.name}. This action cannot be undone."
+    <WarningAsk title="Block user {current_room_user.name}" message="All your messages with {current_room_user.name} will be lost. This action cannot be undone."
                 buttonAccecpt={BlockUserEvent} buttonDecline={()=>{closeWarningBlockUser = false}}></WarningAsk>
 {/if}
 {#if closeWarningUnbanUser > 0}
-    <WarningAsk title="Ublock user" message="Do you want to unban this user ?."
+    <WarningAsk title="Unblock user" message="Do you want to unblock this user ?"
                 buttonAccecpt={acceptUnbanUser} buttonDecline={()=>{closeWarningUnbanUser = -1}}></WarningAsk>
 {/if}
 
 
-<NavBar user={user} />
+{#key refresh}
+<div class="flex-col">
+	{#if user && current_room}
+	<NavBar user={user} current_channel={current_room?.id || -1}/>
+	{/if}
+	
+	<div class="flex py-2 landscape:py-0 md:pt-2 xl:pt-10">
+	
+		<div class="h-[80vh] md:h-screen md:pb-[7rem] lg:pb-0 grow mobile-landscape:h-screen mobile-landscape:pb-0 w-full px-[5%] self-center py-1 grid overflow-hidden">
 
-<div class="h-full container md:py-5 xl:py-10 mx-auto">
-
-    <div class="h-[85%] bg-color3 self-center md:border-4 border-black rounded p-1 pb-3 xl:p-8">
-
-        <div class="md:flex h-full text-center align-middle m-1">
-
-            <div class="md:w-1/3 lg:w-1/4 md:flex md:flex-col">
-				{#if user}
-					<RoomList 
-					dmList={true}
-					user={user}
-					socket={socket}
-					friends={friends}
-					connectedWs={connectedWs}
-					id_room={id_room}
-					on:userClicked={itemClicked}/>
-				{:else}
-					<p>LOADING..</p>
-				{/if}
-            </div>
-
-            <div class="bg-color5 grow justify-around md:flex md:flex-col my-5 md:my-0 md:mx-5 xl:mx-8 overflow-auto rounded-xl">
-
-
-                <div bind:this={chatbox} class="overflow-x-hidden overflow-y-scroll scroll-smooth mt-3 flex-grow [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
-
-                    {#if connectedWs}
-                        <MessageItem socket={socket} user={user} message={room_message}></MessageItem>
-                    {:else}
-                        <p>CONNECTING WS..</p>
-                    {/if}
-
-                </div>
-
-                <div class="flex items-center border-1 p-8">
-
-                    <input disabled={rooms.length <= 0} autofocus on:keydown={(e)=>{e.key === "Enter" && sendMessage()}} bind:value={message_value} type="text" class="disabled:border-zinc-500  border border-color2 bg-color5 rounded-md w-full p-2 pr-12 focus:outline-none" />
-                    <div class="relative">
-                        <button disabled={rooms.length <= 0} on:click={sendMessage} class="-top-4 -left-10 absolute bg-color2 disabled:bg-zinc-500 p-0 m-0 rounded-xl"><Icon icon="send" css="inline p-0 h-8 {rooms.length <= 0 ? 'stroke-zinc-500' : 'stroke-color2' }  fill-white"></Icon></button>
-                    </div>
-
-                </div>
-
-            </div>
-
-            <div class="md:w-1/3 lg:w-1/4 md:flex md:flex-col">
-
-                {#if user}
-                    <UserNotification openWarning={()=>{closeWarningLeftDm = true}} rooms={rooms} user={user}></UserNotification>
-                {:else}
-                    <p>LOADING..</p>
-                {/if}
-
-
-
-                <div class="overflow-auto mt-3 flex-grow  rounded-xl">
-                    <div class="mt-20">
-                        {#if rooms.length <= 0}
-                            <p>NO DM</p>
-                        {:else}
-                            <UserInfo user={current_room_user}></UserInfo>
-
-                            <div>
-								{#if user_state_room_user}
-                                	<UserStat userstats={user_state_room_user}></UserStat>
+			<!-- Mobile Version-->
+			<div class="relative flex md:hidden h-full sm:max-h-[90vh] text-center align-middle m-1 overflow-hidden">
+				{#if _showAllRooms == true}
+				<div in:fly="{{ x: -200, delay:200, duration: 400 }}" out:fly="{{ x: -200, duration: 400 }}" class="flex-col grow relative">
+					<div class="flex justify-end pb-4">
+						<button on:click={() => {_showAllRooms = false; _showCurrentRoom = true;}} class="flex items-center gap-2">Back<Icon icon="right-arrow"/></button>
+					</div>
+					<div id="RoomList" class="flex-grow h-[90%]">
+						{#if user}
+							<RoomList
+							dmList={true}
+							user={user}
+							socket={socket}
+							friends={friends}
+							connectedWs={connectedWs}
+							id_room={id_room}
+							on:userClicked={itemClicked}
+							on:requestPassword={() => {console.log("coucou ter");}}/>
+						{:else}
+							<p>LOADING..</p>
+						{/if}
+					</div>
+				</div>
+				{:else if _showCurrentRoom == true}
+					<div in:fly="{{ y: 200, delay: 500, duration: 400 }}" out:fly="{{ y:200, duration: 200 }}" class="flex-col grow relative h-[90%]">
+		
+						<div id="CurrenrRoom" class="screen border-gray-700 shadow-lg shadow-black/50 bg-black/25 grow flex flex-col my-5 md:my-0 md:mx-5 mx-4 xl:mx-8 overflow-auto rounded-xl h-full">
+							<div class="screen-overlay"></div>
+							<div class="grid grid-cols-3 relative items-center py-3 bg-black/50 border-b-2 border-gray-700">
+									<button on:click={() => {_showAllRooms=true; _showCurrentRoom=false;}} class="flex items-center gap-1 justify-start pl-2 text-sm"><Icon icon="left-arrow" width="20" height="20"/><Icon icon="chat" width="20" height="20"/></button>
+								{#if current_room_user}
+									<div class="text-md md:text-xl italic truncate">{current_room_user?.name}</div>
 								{/if}
-                            </div>
+									<button on:click={() => {_showCurrentRoom=false; _showRoomUser=true;}} class="flex items-end justify-end text-sm pl-4">		
+										<span class="w-[40px] h-[40px] mobile-landscape:w-[20px] mobile-landscape:h-[20px] sm:w-[20px] sm:h-[20px] bg-cover rounded-full mx-2"
+										style="background-image: url( {imageUrl(current_room_user?.image_url)} )"></button>
+							</div>
+							<div bind:this={chatbox} class="relative mt-3 flex-grow overflow-x-hidden overflow-y-scroll">
+
+								{#if connectedWs}
+									<MessageItem socket={socket} user={user} message={room_message}></MessageItem>
+								{:else}
+									<p>CONNECTING WS..</p>
+								{/if}
+
+							</div>
+
+							<div id="message-input" class="relative flex items-center bottom-0 border-1 p-8">
+
+								<input disabled={rooms.length <= 0} on:keydown={(e)=>{e.key === "Enter" && sendMessage()}} bind:value={message_value} type="text" class="disabled:border-zinc-500  border-2 border-gray-700 bg-gray-500/75 rounded-md w-full p-2 pr-12 focus:outline-none" />
+								<div class="relative">
+									<button disabled={rooms.length <= 0} on:click={sendMessage} class="-top-4 -left-10 absolute disabled:bg-zinc-500 p-0 m-0 rounded-full"><Icon icon="send" css="inlinep-0 h-8 {rooms.length <= 0 ? 'stroke-zinc-500' : 'stroke-black' }  fill-thread-blue"></Icon></button>
+								</div>
+
+							</div>
+
+						</div>
+					</div>
+				{:else if _showRoomUser == true}
+				<div in:fly="{{ x: 200, delay: 500, duration: 400 }}" out:fly="{{ x:200, duration: 200 }}" class="flex-col grow relative h-[90%]">
+					<div class="flex justify-start pb-4">
+						<button on:click={() => {_showRoomUser = false; _showCurrentRoom = true;}} class="flex items-center gap-2"><Icon icon="left-arrow"/>Back</button>
+					</div>
+					<div class="overflow-auto mt-2 bg-color5 flex-grow h-full rounded-xl shadow-lg shadow-black mx-4">
+						<div class="mt-20">
+							{#if rooms.length <= 0}
+								<p>NO DM</p>
+							{:else}
+								<UserInfo user={current_room_user}></UserInfo>
+	
+								<div>
+									{#if user_state_room_user}
+										<UserStat userstats={user_state_room_user}></UserStat>
+									{/if}
+								</div>
+	
+	
+								<div class="flex flex-col gap-2 mt-5">
+									{#if !roomUserDm }
+										<p>LOADING..</p>
+									{:else}
+										{#if !friends.find(item => item.id === roomUserDm.user_id ) }
+											<IconButton on:buttonClick={createInvite} icon="addUser" icon_size="30" color="text-process-green border-process-green bg-transparent" shadow="shadow-md shadow-process-green/50" title="Send friend request"/>
+										{:else}
+											<IconButton on:buttonClick={DeleteInvite} icon="banUser" color="text-core-red border-core-red bg-transparent" shadow="shadow-md shadow-core-red/50" title="Remove friend"/>
+										{/if}
+										<IconButton on:buttonClick={()=>{closeWarningBlockUser = true}} icon="banUser" color="text-core-red border-core-red bg-transparent" shadow="shadow-md shadow-core-red/50" title="Block User"/>
+									{/if}
+								</div>
+	
+							{/if}
+						</div>
+					</div>
+				</div>
+				{/if}
+
+			</div>
 
 
-                            <div>
-                                {#if !roomUserDm }
-                                    <p>LOADING..</p>
-                                {:else}
-                                    {#if !friends.find(item => item.id === roomUserDm.user_id ) }
-                                        <RequestFriend room={current_room} socket={socket} user={current_room_user}></RequestFriend>
-                                    {:else}
-                                        <DeleteFriend socket={socket} user={friends.find(item => item.id === roomUserDm.user_id )}></DeleteFriend>
-                                    {/if}
-                                    <BlockUser openWarning={()=>{closeWarningBlockUser = true}}></BlockUser>
-                                {/if}
-                            </div>
+<!-- Computer Version-->
+<div class="relative hidden md:grid md:grid-cols-4 max-h-full sm:max-h-full pb-10 mobile-landscape:max-h-full mobile-landscape:pb-2 text-center align-middle m-1 overflow-hidden {$leftHanded ? 'mobile-landscape:pl-[3.75rem]' : 'mobile-landscape:pr-[3.75rem]'} overscroll-none">
+	<div class="md:flex md:flex-col h-screen md:pb-[9rem] lg:pb-[8rem] mobile-landscape:pb-9">
+	<div id="RoomList" class="grow">
+		{#if user}
+			<RoomList
+				dmList={true}
+				user={user}
+				socket={socket}
+				friends={friends}
+				connectedWs={connectedWs}
+				id_room={id_room}
+				on:userClicked={itemClicked}/>
+		{:else}
+			<p>LOADING..</p>
+		{/if}
+		</div>
+</div>
+	<div class="md:flex md:flex-col col-span-2 h-screen md:pb-[9rem] lg:pb-[8rem] mobile-landscape:pb-9 ">
+	<div id="CurrenrRoom" class="screen border-gray-700 shadow-lg shadow-black/50 bg-black/25 grow md:flex md:flex-col my-5  md:my-0 md:mx-5 xl:mx-8 overflow-auto rounded-xl">
+		<div class="screen-overlay"></div>
+		<div bind:this={chatbox} class="relative overflow-x-hidden overflow-y-scroll scroll-smooth mt-3 flex-grow">
 
-                        {/if}
-                    </div>
+			{#if connectedWs}
+				<MessageItem socket={socket} user={user} message={room_message}></MessageItem>
+			{:else}
+				<p>CONNECTING WS..</p>
+			{/if}
 
+		</div>
 
-                </div>
+		<div class="relative flex items-center border-1 p-8 pt-1">
 
-            </div>
+			<input disabled={rooms.length <= 0} on:keydown={(e)=>{e.key === "Enter" && sendMessage()}} bind:value={message_value} type="text" class="disabled:border-zinc-500  border-2 border-gray-700 bg-gray-500/75 rounded-md w-full p-2 pr-12 focus:outline-none" />
+			<div class="relative">
+				<button disabled={rooms.length <= 0} on:click={sendMessage} class="-top-4 -left-10 absolute disabled:bg-zinc-500 p-0 m-0 rounded-full"><Icon icon="send" css="inlinep-0 h-8 {rooms.length <= 0 ? 'stroke-zinc-500' : 'stroke-black' }  fill-thread-blue"/></button>
+			</div>
 
-        </div>
+		</div>
 
-    </div>
-
+	</div>
 </div>
 
+	<div id="RoomUsers" class="md:flex md:flex-col h-screen md:pb-[9rem] lg:pb-[8rem] mobile-landscape:pb-9">
+		<div class="overflow-auto bg-color5 flex-grow h-full rounded-xl shadow-lg shadow-black mx-4">
+			<div class="mt-5">
+				{#if rooms.length <= 0}
+				<p>NO DM</p>
+			{:else}
+				<UserInfo user={current_room_user}></UserInfo>
+
+				<div>
+					{#if user_state_room_user}
+						<UserStat userstats={user_state_room_user}></UserStat>
+					{/if}
+				</div>
+
+
+				<div class="flex flex-col gap-2 mt-5">
+					{#if !roomUserDm }
+						<p>LOADING..</p>
+					{:else}
+						{#if !friends.find(item => item.id === roomUserDm.user_id ) }
+							<IconButton on:buttonClick={createInvite} icon="addUser" icon_size="30" color="text-process-green border-process-green bg-transparent" shadow="shadow-md shadow-process-green/50" title="Send friend request"/>
+						{:else}
+							<IconButton on:buttonClick={DeleteInvite} icon="banUser" color="text-core-red border-core-red bg-transparent" shadow="shadow-md shadow-core-red/50" title="Remove friend"/>
+						{/if}
+						<IconButton on:buttonClick={()=>{closeWarningBlockUser = true}} icon="banUser" color="text-core-red border-core-red bg-transparent" shadow="shadow-md shadow-core-red/50" title="Block User"/>
+					{/if}
+				</div>
+
+			{/if}
+			</div>
+		</div>
+	</div>
+	</div>
+	</div>
+
+    </div>
+</div>
+{/key}
 
