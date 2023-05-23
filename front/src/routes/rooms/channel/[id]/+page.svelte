@@ -191,20 +191,20 @@
 
         socket.on("updateRoom", (room: (Rooms & {user: RoomUser[]})) =>{
             let index: number;
-            console.log("NEW UPDATE ROOM")
-            console.log(room);
+            // console.log("NEW UPDATE ROOM")
+            // console.log(room);
             if ((index = rooms.findIndex(item => item.id === room.id)) == -1)
                 rooms.push(room);
             else
                 rooms[index] = room;
             rooms = rooms;
-            console.log(rooms);
+            // console.log(rooms);
             refresh = !refresh;
             invalidateAll();
         })
 
         socket.on("leftRoom", (room: (Rooms & {user: RoomUser[]})) =>{
-            console.log("left room");
+            // console.log("left room");
             if (rooms)
                 return ;
             const room_id_current = rooms[current_room_id].id;
@@ -358,7 +358,7 @@
     }
 
 	function handleRoomCreation() {
-		console.log("event received");
+		// console.log("event received");
 		closePopupCreateRoom = true;
 	}
 

@@ -20,7 +20,7 @@ export function imageUrl(image: string | undefined) : string
 
 export async function getRoom( id : number, socket : Socket) : Promise<Boolean>
 {
-	console.log("room path");
+	// console.log("room path");
 	const res: Response = await fetch(`${PUBLIC_API_URI}/message/getDmUser/${id}`, {
 		method: 'GET',
 		credentials: 'include'
@@ -43,7 +43,7 @@ export async function getRoom( id : number, socket : Socket) : Promise<Boolean>
 	}
 	if (res.status == 200) {
 		rooms = await res.json();
-		console.log(rooms);
+		// console.log(rooms);
 		if (rooms)
 			await goto(`/rooms/dms/${rooms.id}`);
 	}

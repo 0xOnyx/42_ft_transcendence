@@ -28,7 +28,7 @@
 
 		if (rooms.length <= current_rooms_length)
 		{
-			console.log("REFETCH child");
+			// console.log("REFETCH child");
 			res = await fetch(`${PUBLIC_API_URI}/message/rooms`, {
 				method: 'GET',
 				credentials: 'include'
@@ -39,7 +39,7 @@
 			!(item.user.find(element=>element.user_id == user.id).ban)
 		)})
 		rooms.sort((a,b) => (b.id) - (a.id));
-		console.log(rooms);
+		// console.log(rooms);
 		current_rooms_length = rooms.length;
 	}
 
@@ -49,18 +49,18 @@
 
         socket.on("updateRoom", (room: (Rooms & {user: RoomUser[]})) =>{
             let index: number;
-            console.log("NEW UPDATE ROOM")
-            console.log(room);
+            // console.log("NEW UPDATE ROOM")
+            // console.log(room);
             if ((index = rooms.findIndex(item => item.id === room.id)) == -1)
                 rooms.push(room);
             else
                 rooms[index] = room;
             rooms = rooms;
-            console.log(rooms);
+            // console.log(rooms);
         })
 
 		socket.on("leftRoom", (room: (Rooms & {user: RoomUser[]})) =>{
-            console.log("left room");
+            // console.log("left room");
             rooms = rooms.filter(item=>{
                 return item.id != room.id
             })
