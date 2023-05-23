@@ -146,7 +146,7 @@
 				<div class="screen border-gray-700 shadow-lg shadow-black/50 bg-black/25 grow md:flex md:flex-col md:my-0 md:mx-5 xl:mx-8 mobile-landscape:m-1 overflow-auto rounded-xl ">
 					<div class="screen-overlay"></div>
 					<div class="relative grid mobile-landscape:grid-cols-3 lg:grid-cols-3">
-						
+
 						<div id="matchmaking" class="flex flex-col items-center ">
 							<h2 class="mt-3 text-md sm:text-xl">Matchmaking</h2>
 							<div id="joinBox" class="lg:grow text-xs md:text-xs xl:text-sm mx-5 my-3 bg-gray-700 lg:max-h-12 rounded-xl flex">
@@ -182,39 +182,23 @@
 									</div>
 								</div>
 
-								<div class="p-4 pt-0 flex h-full flex-col">
+								<div class="p-4 pt-2 flex h-full flex-col">
 
-									<h2 class="flex space-x-2 text-left min-h-[30px] items-center text-sm">
+									<h2 class="flex space-x-2 text-left min-h-[20px] items-center text-sm">
 										<Icon icon="friends" />
 										<span>Friends (optional)</span>
 									</h2>
 
-									<div class="border-t-2 py-2 mt-2">
-										<input class="w-full rounded-2xl py-1 px-3 bg-color5 focus:outline-none" type="text" bind:value={search_value} placeholder="Search" on:keyup={searchUser}>
-									</div>
-
-									<div id="search" class="max-h-20 sm:h-[12rem] mobile-landscape:max-h-[7rem] pb-5 masked-overflow overscroll-contain text-center">
-										{#if search_value.length <= 0}
-											{#if friends.length <= 0}
-												<p>NO FRIEND</p>  <!-- CREATE THIS -->
-											{:else}
-												{#each friends as friend}
-													{#key refresh}
-														<ItemName user={friend} on:userClicked={selectUser} checkbox={true} checked={isSelectedUser(friend)}></ItemName>
-													{/key}
-												{/each}
-											{/if}
-										{:else}
-											{#if  search.length <= 0}
-												<p>no user found :/</p>  <!-- CREATE THIS -->
-											{:else}
-												{#each search as user}
-													{#key refresh}
-														<ItemName user={user} on:userClicked={selectUser} checkbox={true} checked={isSelectedUser(user)}></ItemName>
-													{/key}
-												{/each}
-											{/if}
-										{/if}
+									<div id="search" class="border-t-2 py-3 mt-2 pb-5 masked-overflow overscroll-contain">
+                                        {#if friends.length <= 0}
+                                            <p>NO FRIEND</p>  <!-- CREATE THIS -->
+                                        {:else}
+                                            {#each friends as friend}
+                                                {#key refresh}
+                                                    <ItemName user={friend} on:userClicked={selectUser} checkbox={true} checked={isSelectedUser(friend)}></ItemName>
+                                                {/key}
+                                            {/each}
+                                        {/if}
 									</div>
 								</div>
 							</div>

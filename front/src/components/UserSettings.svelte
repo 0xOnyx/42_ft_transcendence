@@ -84,16 +84,20 @@
 {#if _openAuth && secret}
 <PopUp id="auth" user={user} secret={secret} on:closePopUp={updatePopUp} on:confirmPopUp={updatePopUp} title="Two-factor authentication (2FA)" />
 {/if}
-<div class="flex flex-col gap-3 items-start">
-	<div class="flex items-center justify-center gap-3 {$leftHanded ? 'text-process-green' : 'text-gray-300' }">
-		<Switch bind:checked={$leftHanded} />
-		<span class="text-xs">Left Handed </span>
-	</div>
-	<div class="flex items-center justify-center gap-3 {_enableAuth ? 'text-process-green' : 'text-gray-300' }">
-		<Switch bind:checked={_enableAuth} on:inputChange={updatePopUp}/>
-		<div class="flex flex-col items-start">
-			<span class="text-xs">Two-factor</span>
-			<span class="text-xs">authentication (2FA) </span>
-		</div>
-	</div>
+<div class="flex flex-col gap-3 items-center">
+
+    <div>
+        <div class="flex gap-3 mt-4 {$leftHanded ? 'text-process-green' : 'text-gray-300' }">
+            <Switch bind:checked={$leftHanded} />
+            <span class="text-xs">Left Handed </span>
+        </div>
+        <div class="flex gap-3 mt-4 {_enableAuth ? 'text-process-green' : 'text-gray-300' }">
+            <Switch bind:checked={_enableAuth} on:inputChange={updatePopUp}/>
+            <div class="flex flex-col items-start">
+                <span class="text-xs">Two-factor</span>
+                <span class="text-xs">authentication (2FA) </span>
+            </div>
+        </div>
+    </div>
+
 </div>

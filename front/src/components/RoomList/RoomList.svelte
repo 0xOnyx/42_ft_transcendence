@@ -156,7 +156,7 @@
     <PopUpAskPassword joinChannel={joinChannel} close={()=>{closeRequestPassword = -1}}></PopUpAskPassword>
 {/if}
 
-<div class="relative flex flex-col h-screen md:pb-[9rem] lg:pb-[8rem] mobile-landscape:pb-9 grow overflow-hidden">
+<div class="relative flex flex-col h-screen pb-[15rem] md:pb-[9rem] lg:pb-[8rem] mobile-landscape:pb-9 grow overflow-hidden">
 	<div class="">
 		<div class="flex items-center justify-between border-b-2 ">
 			<button id="dm-list" on:click={ () => { dmList = true}}>

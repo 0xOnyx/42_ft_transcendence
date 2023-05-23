@@ -8,6 +8,7 @@
     import {onMount} from "svelte";
     import {Status} from '../types/user';
     import {createEventDispatcher} from "svelte";
+	import Icon from './Icon.svelte';
 
     //bg-green-600
     export let user : RoomUser;
@@ -30,10 +31,12 @@
     function getColorBg(user)
     {
         if (user.ban)
-            return 'bg-red-500 border-white';
+            return 'bg-transparent border-core-red text-core-red opacity-75 italic border-[3px]';
         else if (Date.parse(user.term_penalty) > Date.now())
-            return 'bg-yellow-500 border-white';
-        return 'bg-color2 border-color2'
+            return 'bg-gray-400 border-gray-700 italic opacity-50';
+		else if (user.role === RoleUser.ADMIN)
+			return 'bg-thread-blue border-gold-200 text-gold-200'
+        return 'bg-thread-blue border-white'
     }
 
 </script>
@@ -49,10 +52,16 @@
 
         </div>
 
+		{#if user.ban}
+		<Icon icon="ban" width="28" height="28" />
+		{:else if user.mute}
+		<Icon icon="mute" width="28" height="28" />
+		{:else if user.role === RoleUser.ADMIN}
+		<Icon icon="crown" width="30" height="30" />
+		{/if}
+
         <div class="{user.ban ? 'line-through' : ''} mx-2 flex-grow text-left truncate">
-			{user.role === RoleUser.ADMIN ? "👑" : ""}
-            {user.ban ? "⛓": ""}
-            {user.mute ? "👮": ""}
+ 
 			{current_user?.name}
         </div>
         {#if current_user?.online_status && !user.ban && !user.mute}

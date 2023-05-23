@@ -205,7 +205,13 @@ type matchmakingPlayer = {socket : Socket, user_id : number}
           }
 
           if (!pong.players[0].connected && !pong.players[1].connected) {
-            this.gameService.delete(pong.getGameId());
+            this.prismaGameService.find(pong.getGameId()).then((game) => {
+              if (game != null) {
+                if (game.status != StatusGame.FINISHED)
+                  this.gameService.delete(game.id);
+              }
+            });
+            
           }
 
         }

@@ -199,7 +199,7 @@
     }
 
 	function unblockUser(e : CustomEvent) {
-		closeWarningUnbanUser = e.detail.user_id;
+		closeWarningUnbanUser = e.detail.id;
 	}
 
 	async function itemClicked( e : CustomEvent) {
@@ -211,9 +211,6 @@
 		}
 	}
 
-	function showHistory() {
-		history = true;
-	}
     //export let data: PageData;
 </script>
 
@@ -235,8 +232,8 @@
 </svelte:head>
 
 {#if closeWarningUnbanUser > 0}
-    <WarningAsk title="Ublock user" 
-				message="Do you want to unban this user ?."
+    <WarningAsk title="Unblock user" 
+				message="Do you want to unblock this user ?"
                 buttonAccecpt={acceptUnbanUser} 
 				buttonDecline={()=>{closeWarningUnbanUser = -1}}
 				on:unblockUser={unblockUser}></WarningAsk>
