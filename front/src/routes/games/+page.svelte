@@ -140,16 +140,16 @@
 	{#if user}
 		<NavBar user={user} />
 	{/if}
-	<div class="flex py-2 landscape:py-0 md:py-10 xl:py-10">
-		<div class="h-[80vh] grow  mobile-landscape:pb-2 mobile-landscape:h-screen w-full px-[5%] self-center py-1 grid overflow-auto">
+	<div class="flex landscape:py-0 md:py-10 xl:py-10">
+		<div class="h-[80vh] grow  mobile-landscape:pb-2 mobile-landscape:h-screen w-full px-[5%] self-center grid overflow-visible">
 			<div class="{$leftHanded ? 'mobile-landscape:pl-[3.75rem]' : 'mobile-landscape:pr-[3.75rem]'}">
-				<div class="screen border-gray-700 shadow-lg shadow-black/50 bg-black/25 grow md:flex md:flex-col my-5 md:my-0 md:mx-5 xl:mx-8 mobile-landscape:m-1 overflow-auto rounded-xl ">
+				<div class="screen border-gray-700 shadow-lg shadow-black/50 bg-black/25 grow md:flex md:flex-col md:my-0 md:mx-5 xl:mx-8 mobile-landscape:m-1 overflow-auto rounded-xl ">
 					<div class="screen-overlay"></div>
 					<div class="relative grid mobile-landscape:grid-cols-3 lg:grid-cols-3">
 						
 						<div id="matchmaking" class="flex flex-col items-center ">
-							<h2 class="mt-3 text-xl">Matchmaking</h2>
-							<div id="joinBox" class="lg:grow text-sm md:text-xs xl:text-sm mx-5 my-3 bg-gray-700 lg:max-h-12 rounded-xl flex">
+							<h2 class="mt-3 text-md sm:text-xl">Matchmaking</h2>
+							<div id="joinBox" class="lg:grow text-xs md:text-xs xl:text-sm mx-5 my-3 bg-gray-700 lg:max-h-12 rounded-xl flex">
 								<div class="p-3 text-center flex justiy-center items-center space-x-2">
 									{#if join}
 										<Icon icon="load" /><span>Waiting for a game...</span>
@@ -168,9 +168,9 @@
 
 						<div class=" mobile-landscape:hidden lg:hidden border-b-2 border-gray-700 mx-4 sm:mx-10 mt-5"></div>
 
-						<div id="customGame" class="flex flex-col items-center overflow-auto overscroll-contain mobile-landscape:col-span-2 lg:col-span-2">
-							<h2 class="mt-3 text-xl">New Custom Game</h2>
-							<div id="newgameBox" class="sm:h-80 lg:h-[30rem] grow mx-5 mt-3 bg-gray-700 overflow-auto rounded-xl grid sm:grid-cols-2">
+						<div id="customGame" class="flex flex-col items-center mobile-landscape:h-[22rem] overflow-auto overscroll-contain mobile-landscape:col-span-2 lg:col-span-2">
+							<h2 class="mt-3 text-md sm:text-xl">New Custom Game</h2>
+							<div id="newgameBox" class="sm:h-80 lg:h-[30rem] mobile-landscape:max-h-80 grow mx-5 mt-3 bg-gray-700 overflow-auto rounded-xl grid sm:grid-cols-2">
 
 								<div class="p-4 pb-0 pt-2 flex flex-col">
 									<h2 class="flex space-x-2 text-left min-h-[20px] items-center text-sm">
@@ -193,7 +193,7 @@
 										<input class="w-full rounded-2xl py-1 px-3 bg-color5 focus:outline-none" type="text" bind:value={search_value} placeholder="Search" on:keyup={searchUser}>
 									</div>
 
-									<div id="search" class="h-20 sm:h-[12rem] pb-5 masked-overflow overscroll-contain">
+									<div id="search" class="max-h-20 sm:h-[12rem] mobile-landscape:max-h-[7rem] pb-5 masked-overflow overscroll-contain">
 										{#if search_value.length <= 0}
 											{#if friends.length <= 0}
 												<p>NO FRIEND</p>  <!-- CREATE THIS -->
