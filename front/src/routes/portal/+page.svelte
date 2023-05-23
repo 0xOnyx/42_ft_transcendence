@@ -76,7 +76,7 @@
         search = await userservice.searchUser(search_value);
 		if (!e.detail.all) {
 			// console.log("Blocked Only");
-			for (let item of search) { 
+			for (let item of search) {
 				let res: Response = await fetch(`${PUBLIC_API_URI}/user/isBlockedByMe/${item.id}`, {
 				method: 'GET',
 				credentials: 'include'
@@ -232,9 +232,9 @@
 </svelte:head>
 
 {#if closeWarningUnbanUser > 0}
-    <WarningAsk title="Unblock user" 
+    <WarningAsk title="Unblock user"
 				message="Do you want to unblock this user ?"
-                buttonAccecpt={acceptUnbanUser} 
+                buttonAccecpt={acceptUnbanUser}
 				buttonDecline={()=>{closeWarningUnbanUser = -1}}
 				on:unblockUser={unblockUser}></WarningAsk>
 {/if}
@@ -264,13 +264,15 @@
 {/if}
 
 <div class="flex-col">
-	<NavBar user={user} />
+    {#if user}
+	    <NavBar user={user} />
+    {/if}
 
 	<!-- Mobile version-->
 	<div class="flex sm:hidden py-2 landscape:py-0 md:py-10 xl:py-10">
 
 		<div class="h-[80vh] grow w-full px-[5%] self-center py-1 grid overflow-hidden">
-			
+
 			<div class="flex flex-col text-center align-middle m-1">
 
 				{#if _openFriends}
@@ -281,7 +283,7 @@
 							<Icon icon="settings"/>
 						</button>
 					</div>
-					<UsersList user={user} bind:friends={friends} bind:locked={locked} bind:search={search} socket={socket} on:userClicked={itemClicked} on:unblock={unblockUser} on:search={searchUser} />		
+					<UsersList user={user} bind:friends={friends} bind:locked={locked} bind:search={search} socket={socket} on:userClicked={itemClicked} on:unblock={unblockUser} on:search={searchUser} />
 				</div>
 				{:else}
 				<div in:fly="{{ x: -200, delay: 500, duration: 400 }}" out:fly="{{ x: -200, duration: 400 }}" class="relative flex-col space-y-4 h-full">
@@ -357,7 +359,7 @@
 	<div class="hidden sm:flex py-2 landscape:py-0 md:py-10 xl:py-10">
 
 		<div class="h-[80vh] grow sm:h-screen mobile-landscape:h-screen w-full px-[5%] self-center py-1 grid overflow-hidden">
-			
+
 			<div class="flex flex-col sm:flex-row sm:max-h-[85%] gap-4 {$leftHanded ? 'mobile-landscape:pl-[3.75rem]' : 'mobile-landscape:pr-[3.75rem]'} sm:grid-cols-3 text-center align-middle m-1">
 
 				<div class="info-user screen border-gray-700 grow h-1/2 sm:h-full sm:w-2/3 mobile-landscape:w-1/2 overflow-hidden flex shadow-lg shadow-black/50 bg-black/25 rounded-3xl">
@@ -416,7 +418,7 @@
 			</div>
 
 
-				<UsersList user={user} bind:friends={friends} bind:locked={locked} bind:search={search} socket={socket} on:userClicked={itemClicked} on:unblock={unblockUser} on:search={searchUser} />		
+				<UsersList user={user} bind:friends={friends} bind:locked={locked} bind:search={search} socket={socket} on:userClicked={itemClicked} on:unblock={unblockUser} on:search={searchUser} />
 
 			</div>
 
