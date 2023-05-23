@@ -189,32 +189,16 @@
 										<span>Friends (optional)</span>
 									</h2>
 
-									<div class="border-t-2 py-3 mt-2">
-										<input class="w-full rounded-2xl py-1 px-3 bg-color5 focus:outline-none" type="text" bind:value={search_value} placeholder="Search" on:keyup={searchUser}>
-									</div>
-
-									<div id="search" class="max-h-20 sm:h-[12rem] mobile-landscape:max-h-[7rem] pb-5 masked-overflow overscroll-contain">
-										{#if search_value.length <= 0}
-											{#if friends.length <= 0}
-												<p>NO FRIEND</p>  <!-- CREATE THIS -->
-											{:else}
-												{#each friends as friend}
-													{#key refresh}
-														<ItemName user={friend} on:userClicked={selectUser} checkbox={true} checked={isSelectedUser(friend)}></ItemName>
-													{/key}
-												{/each}
-											{/if}
-										{:else}
-											{#if  search.length <= 0}
-												<p>no user found :/</p>  <!-- CREATE THIS -->
-											{:else}
-												{#each search as user}
-													{#key refresh}
-														<ItemName user={user} on:userClicked={selectUser} checkbox={true} checked={isSelectedUser(user)}></ItemName>
-													{/key}
-												{/each}
-											{/if}
-										{/if}
+									<div id="search" class="border-t-2 py-3 mt-2 pb-5 masked-overflow overscroll-contain">
+                                        {#if friends.length <= 0}
+                                            <p>NO FRIEND</p>  <!-- CREATE THIS -->
+                                        {:else}
+                                            {#each friends as friend}
+                                                {#key refresh}
+                                                    <ItemName user={friend} on:userClicked={selectUser} checkbox={true} checked={isSelectedUser(friend)}></ItemName>
+                                                {/key}
+                                            {/each}
+                                        {/if}
 									</div>
 								</div>
 							</div>
