@@ -43,7 +43,7 @@
     let search_value: string = "";
     let message_value: string = "";
     let rooms :(Rooms & {user: RoomUser[]})[] = [];
-    let current_room_id: Number = -1;
+    let current_room_id: number = -1;
     let current_room_user: User;
     let user : User;
     let friends : User[] = [];
@@ -52,7 +52,7 @@
     let iscurrentFriend: Boolean = false;
     let currentRoomUserSelect: User;
     let chatbox : HTMLDivElement;
-    let unread_message: Number = 0;
+    let unread_message: number = 0;
     let error : string = ""
     let refresh : boolean = false;
 
@@ -315,7 +315,7 @@
         closePopupCreateRoom = false;
     }
 
-    async function changePassword(event)
+    async function changePassword(event : CustomEvent)
     {
         socket.emit("updateRoomPublic", {room_id: rooms[current_room_id].id, password: event.detail});
         closePassworRoom = false;
