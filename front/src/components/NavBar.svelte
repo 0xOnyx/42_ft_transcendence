@@ -182,7 +182,7 @@
 							{user?.name || "LOADING.."}
 						</div>
 					</button>
-					<div class="absolute flex flex-col justify-center translate-y-9 group-hover:scale-100 {scale ? 'scale-100' : 'scale-0'} transition-all origin-top space-y-2">
+					<div class="z-[100] absolute flex flex-col justify-center translate-y-9 group-hover:scale-100 {scale ? 'scale-100' : 'scale-0'} transition-all origin-top space-y-2">
 						<a class="flex items-center space-x-1"  href="/portal">
 							<Icon icon="settings" height="20" width="20" />
 							<span class="hidden md:flex text-left text-sm">Profile</span>
