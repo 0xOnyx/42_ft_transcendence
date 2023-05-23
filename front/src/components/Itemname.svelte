@@ -22,23 +22,25 @@
 
 </script>
 
-<button on:click={handleClick} class="cursor-pointer rounded-xl bg-color5 p-5 flex items-center mt-1 w-full">
+<button on:click={handleClick} class="cursor-pointer rounded-xl bg-color5 {checkbox ? 'p-3 text-sm' : 'p-5 text-md'} flex items-center mt-1 w-full">
 
     <div class="mx-2 flex-shrink">
 
-        <div class="w-[40px] h-[40px] bg-cover rounded-full mx-auto border-4 {getColor(user.online_status)}"
+        <div class="{checkbox ? 'w-[30px] h-[30px]' :'w-[40px] h-[40px]'} bg-cover rounded-full mx-auto border-4 {getColor(user.online_status)}"
              style="background-image: url( {imageUrl(user?.image_url)} )">
 
         </div>
 
     </div>
 
-    <div class="mx-2 flex-grow text-left truncate">
+    <div class="{checkbox ? 'px-1': 'mx-2'} flex-grow text-left truncate {getColor(user.online_status)}">
         {user.name}
     </div>
 
     {#if checkbox}
-    <Checkbox disable={true} bind:checked={checked}></Checkbox>
+	<div class="items-center mt-1">
+		<Checkbox disable={true} bind:checked={checked}/>
+	</div>
     {/if}
 
 </button>

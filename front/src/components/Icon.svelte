@@ -122,6 +122,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 24 24">
 	<path fill={color} d="M12 21q-3.45 0-6.013-2.288T3.05 13H5.1q.35 2.6 2.313 4.3T12 19q2.925 0 4.963-2.038T19 12q0-2.925-2.038-4.963T12 5q-1.725 0-3.225.8T6.25 8H9v2H3V4h2v2.35q1.275-1.6 3.113-2.475T12 3q1.875 0 3.513.713t2.85 1.924q1.212 1.213 1.925 2.85T21 12q0 1.875-.713 3.513t-1.924 2.85q-1.213 1.212-2.85 1.925T12 21Zm2.8-4.8L11 12.4V7h2v4.6l3.2 3.2l-1.4 1.4Z"/>
 </svg>
+{:else if icon == "blackhole"}
+<svg xmlns="http://www.w3.org/2000/svg"width={width} height={height} viewBox="0 0 24 24">
+	<g fill="none" stroke={color} stroke-width="1.5">
+		<circle cx="12" cy="12" r="2"/>
+		<path stroke-linecap="round" d="M12 10c5 0 4.6 12-3 12"/>
+		<path stroke-linecap="round" d="M12.312 14c-5 0-4.6-12 3-12"/>
+		<path stroke-dasharray="2 2" stroke-linecap="round" d="M10.631 10.696c3.536-3.535 11.738 5.233 6.364 10.607" opacity=".5"/>
+		<path stroke-dasharray="2 2" stroke-linecap="round" d="M13.68 13.304C10.145 16.84 1.942 8.07 7.316 2.697" opacity=".5"/>
+		<path stroke-dasharray="2 2" stroke-linecap="round" d="M10.852 13.524C7.316 9.99 16.084 1.786 21.458 7.16" opacity=".5"/>
+		<path stroke-dasharray="2 2" stroke-linecap="round" d="M13.46 10.476c3.535 3.535-5.233 11.738-10.607 6.364" opacity=".5"/>
+		<path stroke-linecap="round" d="M10 12.312c0-5 12-4.6 12 3"/>
+		<path stroke-linecap="round" d="M14 12c0 5-12 4.6-12-3"/>
+	</g>
 {:else if icon == "delete"}
 <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 24 24">
 	<path fill={color} d="M12 4c-4.419 0-8 3.582-8 8s3.581 8 8 8s8-3.582 8-8s-3.581-8-8-8zm3.707 10.293a.999.999 0 1 1-1.414 1.414L12 13.414l-2.293 2.293a.997.997 0 0 1-1.414 0a.999.999 0 0 1 0-1.414L10.586 12L8.293 9.707a.999.999 0 1 1 1.414-1.414L12 10.586l2.293-2.293a.999.999 0 1 1 1.414 1.414L13.414 12l2.293 2.293z"/>

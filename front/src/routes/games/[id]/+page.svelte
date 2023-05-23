@@ -12,6 +12,8 @@
 	import userservice from "../../../services/UserService";
 	import { goto } from "$app/navigation";
 	import { GameType, type Game } from "../../../types/game";
+	import Icon from "../../../components/Icon.svelte";
+	import { leftHanded } from "../../../services/Stores";
 
     let socket : Socket;
     let canvas : HTMLCanvasElement;
@@ -130,86 +132,59 @@
 
 </script>
 
-<NavBar user={user} />
-
-
-<div class="h-full py-7 lg:py-10 xl:py-10">
-
-    <div class="lg:h-[85%] mx-[2%] self-center py-1">
-
-        <div class="grid lg:grid-cols-12 h-full text-center align-middle m-1">
-
-            <div class="relative lg:col-start-2 lg:col-span-10 screen shadow-lg shadow-black/50 bg-black/25 lg:overflow-auto rounded-3xl">
-				<div class="absolute screen-overlay"></div>
-                <div class="h-full flex flex-col lg:flex-row">
-
-
-                    <div class="lg:w-1/4 lg:flex lg:flex-col">
-
-                        <div class="overflow-auto bg-color5 flex-grow rounded-xl">
-
-                            <div  class="mt-20">
-
-                                <UserInfo portal={true} user={userOne} />
-
-                            </div>
-
-                            <div>
-								{#if userstats_user1}
-								
-	                                <UserStat userstats={userstats_user1}></UserStat>
-								{/if}
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <div class=" grow justify-around lg:flex lg:flex-col my-5 lg:my-0 lg:mx-5 xl:mx-8 overflow-auto rounded-xl -order-1 lg:order-none">
-
-                        <canvas class="w-full"
-                            bind:this={canvas}
-                            width={800}
-                            height={500}
-                        ></canvas>
-
-                    </div>
-
-                    <div class="lg:w-1/4 lg:flex lg:flex-col">
-
-
-                        <div class="overflow-auto bg-color5 flex-grow rounded-xl">
-
-                            {#if userTwo}
-                                <div class="mt-20">
-
-                                    <UserInfo portal={true} user={userTwo} />
-
-                                </div>
-
-                                <div>
-
-									{#if userstats_user2}						
-	                                	<UserStat userstats={userstats_user2}></UserStat>
+<div class="flex-col">
+	{#if user}
+		<NavBar user={user} />
+	{/if}
+	<div class="flex py-2 landscape:py-0 md:py-10 xl:py-10">
+		<div class="h-[80vh] grow mobile-landscape:pb-2 mobile-landscape:h-screen w-full px-[5%] self-center py-1 grid overflow-auto">
+			<div class="{$leftHanded ? 'mobile-landscape:pl-[3.75rem]' : 'mobile-landscape:pr-[3.75rem]'}">
+				<div class="grid h-full text-center align-middle m-1">
+					<div class="relative border-gray-700 screen shadow-lg shadow-black/50 bg-black/25 overflow-hidden rounded-3xl grid grid-rows-3 sm:grid-rows-1 sm:grid-cols-10 mb-5">
+						<div class="absolute screen-overlay"></div>
+						
+						<div id="userOne" class="relative row-start-1 sm:col-start-1 sm:row-start-1 sm:col-span-2 lg:flex lg:flex-col">
+							<div class="overflow-auto bg-color5 sm:h-full pb-5 grid grid-cols-2 sm:grid-cols-1 sm:flex-grow rounded-2xl rounded-b-none sm:rounded-r-none">
+								<div  class="mt-5 sm:mt-20 mobile-landscape:mt-10">
+									{#if userOne}
+										<UserInfo user={userOne} />
 									{/if}
+								</div>
+								<div class="mt-5">
+									{#if userstats_user1}
+										<UserStat userstats={userstats_user1}></UserStat>
+									{/if}
+								</div>
+							</div>
+						</div>
 
+						<div class="relative m-auto items-center justify-center row-start-2 sm:row-start-1 sm:col-start-3 sm:col-span-6 -order-1 lg:order-none">
+							<canvas class="relative w-full"
+								bind:this={canvas}
+								width={800}
+								height={500}
+							></canvas>
+						</div>
 
-                                </div>
+						{#if userTwo}
+							<div id="userTwo" class="relative self-end sm:self-stretch sm:self-autosm:col-start-9 sm:col-span-2 lg:flex lg:flex-col">
+								<div class="overflow-auto bg-color5 pb-5 sm:h-full grid grid-cols-2 sm:grid-cols-1 sm:flex-grow rounded-2xl rounded-t-none sm:rounded-l-none">
+									<div class="mt-5 sm:mt-20 mobile-landscape:mt-10">
+											<UserInfo user={userTwo} />
+									</div>
+									<div class="mt-5">
+										{#if userstats_user2}
+											<UserStat userstats={userstats_user2}></UserStat>
+										{/if}
+									</div>
+								</div>
+							</div>
+						{/if}
 
-                            {/if}
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
-
 
