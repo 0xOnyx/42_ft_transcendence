@@ -10,14 +10,14 @@
 	import { getColor } from '../services/Utilities';
 
     //bg-green-600
-    export let room : Rooms;
+    export let room : (Rooms & {user: RoomUser[]});
 	export let user : User;
     export let current: boolean;
 
     let roomUserDm: RoomUser | undefined
 
 	$: roomUserDm = room?.user.find((element: RoomUser) => element.user_id != Number(user.id));
-
+    
 	let userDm: User;
 
     onMount(async ()=>{

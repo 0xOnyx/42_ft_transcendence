@@ -9,7 +9,7 @@ export type Rooms =
     password?: string,
     last_message_id?: number,
     count_messages?: number,
-    user?: Array<RoomUser>,
+    users?: Array<RoomUser>,
     messages?: Array<Messages>,
 }
 

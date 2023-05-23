@@ -9,7 +9,7 @@
 	import type { User } from "../../types/user";
 	import type { Socket } from "socket.io-client";
 
-	let rooms :Rooms[] = [];
+	let rooms :(Rooms & {user: RoomUser[]})[] = [];
 
 	export let search_value : string = '';
 	export let search : User[] = [];
@@ -35,7 +35,7 @@
 		loadValue();
 
 
-        socket.on("updateRoom", (room: Rooms) =>{
+        socket.on("updateRoom", (room: (Rooms & {user: RoomUser[]})) =>{
             let index: number;
             if ((index = rooms.findIndex(item => item.id === room.id)) == -1)
                 rooms.push(room);
@@ -44,7 +44,7 @@
             rooms = rooms;
         })
 
-        socket.on("leftRoom", (room: Rooms) =>{
+        socket.on("leftRoom", (room: (Rooms & {user: RoomUser[]})) =>{
             rooms = rooms.filter(item=>{
                 return item.id != room.id
             })

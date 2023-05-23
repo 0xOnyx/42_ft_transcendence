@@ -18,8 +18,8 @@
     export let current_channel: number = -1;
 
 	interface ActiveRooms {
-		channel: Rooms[];
-		dms: Rooms[];
+		channel: (Rooms & {user: RoomUser[]})[];
+		dms: (Rooms & {user: RoomUser[]})[];
 	};
 	let rooms : ActiveRooms = {
 		channel : [],
@@ -46,7 +46,7 @@
 			})
 			rooms.channel = await res.json();
 		}
-		rooms.channel = rooms.channel.filter((item: Rooms)=>{return (
+		rooms.channel = rooms.channel.filter((item: (Rooms & {user: RoomUser[]}))=>{return (
 			!(item.user.find(element=>element.user_id == user.id).ban)
 		)})
 	}
@@ -62,10 +62,10 @@
 
 
         socket.on("message", (data: {send_user_id: number, room_id: number, message: (Messages & {user: User}), message_type: string})=>{
-            const indexChannel = rooms.channel.findIndex((item: Rooms)=>{return (item.id === data.room_id)})
+            const indexChannel = rooms.channel.findIndex((item: (Rooms & {user: RoomUser[]}))=>{return (item.id === data.room_id)})
             if (indexChannel >= 0 && current_channel != rooms.channel[indexChannel].id)
                 rooms.channel[indexChannel].count_messages += 1;
-            const indexDM = rooms.dms.findIndex((item: Rooms)=>{return (item.id === data.room_id)})
+            const indexDM = rooms.dms.findIndex((item: (Rooms & {user: RoomUser[]}))=>{return (item.id === data.room_id)})
             if (indexDM >= 0 && current_dm != rooms.dms[indexDM].id)
                 rooms.dms[indexDM].count_messages += 1;
         })

@@ -12,7 +12,7 @@
 	import { load } from "../../routes/games/[id]/+page";
 	import { loop_guard } from "svelte/internal";
 
-	let rooms :Rooms[] = [];
+	let rooms :(Rooms & {user: RoomUser[]})[] = [];
 	let current_rooms_length = 0;
 
 	export let search_value : string = '';
@@ -35,7 +35,7 @@
 			})
 			rooms = await res.json();
 		}
-		rooms = rooms.filter((item: Rooms)=>{return (
+		rooms = rooms.filter((item: (Rooms & {user: RoomUser[]}))=>{return (
 			!(item.user.find(element=>element.user_id == user.id).ban)
 		)})
 		rooms.sort((a,b) => (b.id) - (a.id));
@@ -47,8 +47,7 @@
 	onMount(async () => {
 		loadValue();
 
-        socket.on("updateRoom", (room: Rooms) =>{
-
+        socket.on("updateRoom", (room: (Rooms & {user: RoomUser[]})) =>{
             let index: number;
             // console.log("NEW UPDATE ROOM")
             // console.log(room);
@@ -60,7 +59,7 @@
             // console.log(rooms);
         })
 
-		socket.on("leftRoom", (room: Rooms) =>{
+		socket.on("leftRoom", (room: (Rooms & {user: RoomUser[]})) =>{
             // console.log("left room");
             rooms = rooms.filter(item=>{
                 return item.id != room.id

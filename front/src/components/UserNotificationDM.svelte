@@ -6,7 +6,7 @@
 
     export let openWarning: Function;
     export let user : User;
-    export let rooms: Rooms[];
+    export let rooms: (Rooms & {user: RoomUser[]})[];
 
     $: total = rooms.reduce((accumulator, currentValue) => accumulator + currentValue.count_messages, 0);
 

@@ -8,7 +8,7 @@
 	const dispatch = createEventDispatcher();
 
     //bg-green-600
-    export let room : Rooms;
+    export let room : (Rooms & {user: RoomUser[]});
     export let current: boolean;
 
 

@@ -22,7 +22,7 @@
 	import PopUpCreateDm from "../PopUpCreateDm.svelte";
 	import IconButton from "../IconButton.svelte";
 	import PopUpAskPassword from "../PopUpAskPassword.svelte";
-
+	
 	export let dmList : boolean = true;
 	export let fromDM : Boolean = true;
 
@@ -32,7 +32,7 @@
 		rooms: Rooms[];
 		users: User[];
 	}
-	let search : Search = {
+	let search : Search = { 
 		rooms : [],
 		users : []
 	};
@@ -61,7 +61,7 @@
 	export let locked : User[] = [];
 	export let socket: Socket ;
 	export let connectedWs : Boolean;
-	export let rooms : Rooms[] = [];
+	export let rooms : (Rooms & {user: RoomUser[]})[] = [];
 	export let id_room : Number;
 
 	let closePopupCreateRoom = false;
@@ -142,9 +142,9 @@
 </script>
 
 {#if closeWarningUnblockUser > 0}
-    <WarningAsk title="Unblock user"
+    <WarningAsk title="Unblock user" 
 				message="Do you want to unblock this user ?."
-                buttonAccecpt={acceptUnblockUser}
+                buttonAccecpt={acceptUnblockUser} 
 				buttonDecline={()=>{closeWarningUnblockUser = -1}}
 				on:unblockUser={unblockUser}></WarningAsk>
 {/if}
@@ -192,8 +192,8 @@
 						DMPage={fromDM}
 						on:userClicked={itemClicked}/>
 				{:else}
-					<p>CONNECTING..</p>
-				{/if}
+					<p>CONNECTING..</p>	
+				{/if}	
 			</div>
 			{:else}
 			<div in:fly="{{ x: 200, delay: 500, duration: 400 }}" out:fly="{{ x: 200, duration: 400 }}" class="flex-grow max-h-full overflow-auto pl-4 overscroll-contain">

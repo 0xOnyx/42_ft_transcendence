@@ -5,7 +5,7 @@
 	import type { User } from '../types/user';
 
     //bg-green-600
-    export let room : Rooms;
+    export let room : (Rooms & {user: RoomUser[]});
     export let user : User;
 
 </script>
