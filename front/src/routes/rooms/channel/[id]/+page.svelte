@@ -61,6 +61,7 @@
 	let _showAllRooms : Boolean = false;
 	let _showCurrentRoom : Boolean = true;
 	let _showRoomUsers : Boolean = false;
+    let locked : User[] = [];
 
     let loadValue = async ()=>{
         refresh = !refresh;
@@ -141,13 +142,12 @@
                 credentials: 'include'
             })
             room_message = await res.json();
-            // roomUserDm = current_room?.user.find((element: RoomUser) => element.user_id != Number(user.id));
-            // res = await fetch(`${PUBLIC_API_URI}/user/id/${roomUserDm.user_id}`, {
-            //     method: 'GET',
-            //     credentials: 'include'
-            // });
-            //
-            // current_room_user = await res.json();
+            locked = await userservice.getBlockedUsers();
+            room_message = room_message.map(item=>{
+                if (locked.some(element => element.id == item.user.id))
+                    item.content = "blocked user";
+                return item;
+            });
 
             const index = rooms.findIndex((item: (Rooms & { user: RoomUser[] })) => {
                 return (item.id === id_room)
@@ -174,7 +174,19 @@
             connectedWs = true;
         })
 
-        socket.on("message", (data: {send_user_id: number, room_id: number, message: (Messages & {user: User}), message_type: string})=>{
+        socket.on("message", async (data: {send_user_id: number, room_id: number, message: (Messages & {user: User}), message_type: string})=>{
+            if (data.message.user.id != user.id)
+            {
+                let res: Response = await fetch(`${PUBLIC_API_URI}/user/isBlockedByMe/${data.message.user.id}`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                let status = await res.json();
+                console.log(status);
+                if (status) {
+                    data.message.content = "blocked user";
+                }
+            }
             if (data.room_id === id_room)
                 room_message.push(data.message);
             else
@@ -461,7 +473,7 @@
 				</div>
 				{:else if _showCurrentRoom == true}
 					<div in:fly="{{ y: 200, delay: 500, duration: 400 }}" out:fly="{{ y:200, duration: 200 }}" class="flex-col grow relative h-full">
-		
+
 						<div id="CurrenrRoom" class="screen border-gray-700 shadow-lg shadow-black/50 bg-black/25 grow flex flex-col my-5 md:my-0 md:mx-5 mx-4 xl:mx-8 overflow-auto rounded-xl h-full">
 							<div class="screen-overlay"></div>
 							<div class="grid grid-cols-3 relative py-3 bg-black/50 border-b-2 border-gray-700">
@@ -568,7 +580,7 @@
 
 
 					</div>
-					
+
 
 				</div>
 				</div>
@@ -580,7 +592,7 @@
 			<div class="relative hidden md:grid md:grid-cols-4 max-h-full sm:max-h-full pb-10 mobile-landscape:max-h-full mobile-landscape:pb-2 text-center align-middle m-1 overflow-hidden {$leftHanded ? 'mobile-landscape:pl-[3.75rem]' : 'mobile-landscape:pr-[3.75rem]'} overscroll-none">
 				<div class="md:flex md:flex-col max-h-screen md:pb-[9rem] lg:pb-[8rem] mobile-landscape:pb-9">
 				<div id="RoomList" class="grow">
-					{#if user && socket && friends && connectedWs && rooms && id_room}
+
 						<RoomList
 							dmList={false}
 							fromDM={false}
@@ -590,9 +602,7 @@
 							connectedWs={connectedWs}
 							rooms={rooms}
 							id_room={id_room}/>
-						{:else}	
-							<p>CONNECTING..</p>	
-						{/if}				
+
 				</div>
 
 
@@ -625,7 +635,7 @@
 				<div id="RoomUsers" class="md:flex md:flex-col h-screen md:pb-[9rem] lg:pb-[8rem] mobile-landscape:pb-9">
 
 					<div class="overflow-auto bg-color5 flex-grow h-full rounded-xl shadow-lg shadow-black mr-4">
-						<div class="flex items-center justify-end m-2"> 
+						<div class="flex items-center justify-end m-2">
 							<button on:click={()=>{closeWarningLeftChannel = true}} class="cursor-pointer flex text-sm gap-1 items-center">
 								Leave Room<Icon icon="exit" width="30" height="30" css="inline stroke-none fill-white"></Icon>
 							</button>
