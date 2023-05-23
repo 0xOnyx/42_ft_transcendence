@@ -1,6 +1,4 @@
 <script lang="ts">
-    import Button from '../../../../components/Button.svelte';
-    import ItemRoomDm from '../../../../components/ItemRoomDm.svelte';
     import MessageItem from '../../../../components/Message.svelte';
     import Icon from '../../../../components/Icon.svelte';
     import WarningAsk from '../../../../components/warningAsk.svelte'
@@ -9,18 +7,13 @@
     import type {Friend} from '../../../../types/friend'
     import type {Messages, Rooms, RoomUser} from '../../../../types/room';
     import {MessageRole} from '../../../../types/room';
-	import UserNotification from '../../../../components/UserNotificationDM.svelte';
 	import UserStat from '../../../../components/UserStat.svelte';
 	import UserInfo from '../../../../components/UserInfo.svelte';
-    import ItemName from '../../../../components/Itemname.svelte'
     import { page } from "$app/stores";
     import {onMount} from "svelte";
     import {PUBLIC_API_URI} from "$env/static/public";
     import {goto, beforeNavigate} from "$app/navigation";
     import {io, Socket} from "socket.io-client";
-    import RequestFriend from "../../../../components/RequestFriend.svelte";
-    import DeleteFriend from "../../../../components/DeleteFriend.svelte";
-    import BlockUser from "../../../../components/BlockUser.svelte";
 	import NavBar from '../../../../components/NavBar.svelte';
 	import { fly, fade } from 'svelte/transition';
 
@@ -56,7 +49,7 @@
     let friends : User[] = [];
     let socket: Socket;
     let connectedWs: Boolean = false;
-    let roomUserDm: RoomUser;
+    let roomUserDm: RoomUser | undefined ;
 	let chatbox : HTMLDivElement;
     let error : string = ""
 	let user_state_room_user : UserStats | undefined = undefined;
@@ -141,10 +134,12 @@
             })
             room_message = await res.json();
             roomUserDm = current_room?.user.find((element: RoomUser) => element.user_id != Number(user.id));
-            res = await fetch(`${PUBLIC_API_URI}/user/id/${roomUserDm.user_id}`, {
-                method: 'GET',
-                credentials: 'include'
-            });
+            if (roomUserDm) {
+                res = await fetch(`${PUBLIC_API_URI}/user/id/${roomUserDm.user_id}`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+            }
 
             current_room_user = await res.json();
 
@@ -354,9 +349,9 @@
 	{#if user && current_room}
 	<NavBar user={user} current_channel={current_room?.id || -1}/>
 	{/if}
-	
+
 	<div class="flex py-2 landscape:py-0 md:pt-2 xl:pt-10">
-	
+
 		<div class="h-[80vh] md:h-screen md:pb-[7rem] lg:pb-0 grow mobile-landscape:h-screen mobile-landscape:pb-0 w-full px-[5%] self-center py-1 grid overflow-hidden">
 
 			<!-- Mobile Version-->
@@ -384,7 +379,7 @@
 				</div>
 				{:else if _showCurrentRoom == true}
 					<div in:fly="{{ y: 200, delay: 500, duration: 400 }}" out:fly="{{ y:200, duration: 200 }}" class="flex-col grow relative h-[90%]">
-		
+
 						<div id="CurrenrRoom" class="screen border-gray-700 shadow-lg shadow-black/50 bg-black/25 grow flex flex-col my-5 md:my-0 md:mx-5 mx-4 xl:mx-8 overflow-auto rounded-xl h-full">
 							<div class="screen-overlay"></div>
 							<div class="grid grid-cols-3 relative items-center py-3 bg-black/50 border-b-2 border-gray-700">
@@ -392,7 +387,7 @@
 								{#if current_room_user}
 									<div class="text-md md:text-xl italic truncate">{current_room_user?.name}</div>
 								{/if}
-									<button on:click={() => {_showCurrentRoom=false; _showRoomUser=true;}} class="flex items-end justify-end text-sm pl-4">		
+									<button on:click={() => {_showCurrentRoom=false; _showRoomUser=true;}} class="flex items-end justify-end text-sm pl-4">
 										<span class="w-[40px] h-[40px] mobile-landscape:w-[20px] mobile-landscape:h-[20px] sm:w-[20px] sm:h-[20px] bg-cover rounded-full mx-2"
 										style="background-image: url( {imageUrl(current_room_user?.image_url)} )"></button>
 							</div>
@@ -428,14 +423,14 @@
 								<p>NO DM</p>
 							{:else}
 								<UserInfo user={current_room_user}></UserInfo>
-	
+
 								<div>
 									{#if user_state_room_user}
 										<UserStat userstats={user_state_room_user}></UserStat>
 									{/if}
 								</div>
-	
-	
+
+
 								<div class="flex flex-col gap-2 mt-5">
 									{#if !roomUserDm }
 										<p>LOADING..</p>
@@ -448,7 +443,7 @@
 										<IconButton on:buttonClick={()=>{closeWarningBlockUser = true}} icon="banUser" color="text-core-red border-core-red bg-transparent" shadow="shadow-md shadow-core-red/50" title="Block User"/>
 									{/if}
 								</div>
-	
+
 							{/if}
 						</div>
 					</div>
