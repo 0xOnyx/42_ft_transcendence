@@ -42,7 +42,7 @@
     let room_message: (Messages & {user: User})[]= [];
     let search_value: string = "";
     let message_value: string = "";
-    let rooms :(Rooms & {user: RoomUser[]})[] = [];
+    let rooms :Rooms[] = [];
     let current_room_id: number = -1;
     let current_room_user: User;
     let user : User;
@@ -126,10 +126,10 @@
         }
         else
             id_room = Number($page.params.id);
-        rooms = rooms.filter((item: (Rooms & {user: RoomUser[]}))=>{return (
+        rooms = rooms.filter((item: Rooms)=>{return (
             !(item.user.find(element=>element.user_id == user.id).ban)
         )})
-        current_room_id = rooms.findIndex((item: (Rooms & {user: RoomUser[]}))=>{return (item.id === id_room)});
+        current_room_id = rooms.findIndex((item: Rooms)=>{return (item.id === id_room)});
 
         // console.log("CHANNEL ID ROOM +> ", current_room_id);
 
@@ -192,7 +192,7 @@
                 room_message.push(data.message);
             else
             {
-                const index = rooms.findIndex((item: (Rooms & {user: RoomUser[]}))=>{return (item.id === data.room_id)})
+                const index = rooms.findIndex((item: Rooms)=>{return (item.id === data.room_id)})
                 if (index >= 0)
                     rooms[index].count_messages += 1;
             }
@@ -202,7 +202,7 @@
         })
 
 
-        socket.on("updateRoom", (room: (Rooms & {user: RoomUser[]})) =>{
+        socket.on("updateRoom", (room: Rooms) =>{
             let index: number;
             // console.log("NEW UPDATE ROOM")
             // console.log(room);
@@ -216,7 +216,7 @@
             invalidateAll();
         })
 
-        socket.on("leftRoom", (room: (Rooms & {user: RoomUser[]})) =>{
+        socket.on("leftRoom", (room: Rooms) =>{
             // console.log("left room");
             if (rooms)
                 return ;
