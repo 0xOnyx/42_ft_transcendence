@@ -45,7 +45,7 @@
     let rooms :Rooms[] = [];
     let current_room_id: number = -1;
     let current_room_user: User;
-    let user : User;
+    let user : (User | undefined) = undefined;
     let friends : User[] = [];
     let socket: Socket;
     let connectedWs: Boolean = false;
@@ -461,6 +461,7 @@
 						<button on:click={() => {_showAllRooms = false; _showCurrentRoom = true;}} class="flex items-center gap-2">Back<Icon icon="right-arrow"/></button>
 					</div>
 					<div id="RoomList" class="flex-grow h-[90%]">
+                        {#if user}
 						<RoomList
 							dmList={false}
 							fromDM={false}
@@ -470,6 +471,7 @@
 							connectedWs={connectedWs}
 							rooms={rooms}
 							id_room={id_room}/>
+                        {/if}
 					</div>
 				</div>
 				{:else if _showCurrentRoom == true}
@@ -594,6 +596,7 @@
 				<div class="md:flex md:flex-col max-h-screen md:pb-[9rem] lg:pb-[8rem] mobile-landscape:pb-9">
 				<div id="RoomList" class="grow">
 
+                    {#if user}
 						<RoomList
 							dmList={false}
 							fromDM={false}
@@ -603,6 +606,7 @@
 							connectedWs={connectedWs}
 							rooms={rooms}
 							id_room={id_room}/>
+                        {/if}
 
 				</div>
 
