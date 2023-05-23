@@ -102,7 +102,7 @@
 
         socket.on('gotoGame', (data : any) => {
 
-            console.log('gotoGame', data);
+            // console.log('gotoGame', data);
 
             if (data.user_id == user.id)
                 goto("/games/" + data.game_id);
@@ -113,7 +113,7 @@
         friends = await userservice.getFriends();
 
         async function test() {
-            console.log(await userservice.isLogged());
+            // console.log(await userservice.isLogged());
         }
 
         test();

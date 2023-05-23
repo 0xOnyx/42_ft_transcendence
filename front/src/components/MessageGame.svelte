@@ -14,7 +14,7 @@
         //console.log(current_message.content);
         await goto(`/games/${current_message.content}`)
     }
-    console.log(current_message)
+    // console.log(current_message)
 
 </script>
 

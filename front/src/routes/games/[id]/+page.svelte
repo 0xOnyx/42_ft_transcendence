@@ -70,7 +70,7 @@
 
             });
 
-            console.log(game);
+            // console.log(game);
 
             if (game.map_type == GameType.CLASSIC) {
                 pong = <Pong>(new Pong(800, 500, canvas.getContext('2d'), socket));

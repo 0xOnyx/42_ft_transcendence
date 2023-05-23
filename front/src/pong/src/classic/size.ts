@@ -13,7 +13,7 @@ export default class Size
 
     log() : Size 
     {
-        console.log('Size', this.w, this.h);
+        // console.log('Size', this.w, this.h);
         return this;
     }
 

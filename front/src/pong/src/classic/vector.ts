@@ -12,7 +12,7 @@ export default class Vector
 
     log() : Vector 
     {
-        console.log('vector', this.x, this.y);
+        // console.log('vector', this.x, this.y);
         return this;
     }
 

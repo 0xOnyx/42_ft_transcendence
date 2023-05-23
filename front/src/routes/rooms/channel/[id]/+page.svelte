@@ -65,7 +65,7 @@
 
     let loadValue = async ()=>{
         refresh = !refresh;
-        console.log("CHANNEL: LOAD START");
+        // console.log("CHANNEL: LOAD START");
         let res: Response;
 
 		_showCurrentRoom = true;
@@ -74,7 +74,6 @@
 
         if (!await userservice.isLogged()) {
             await goto("/");}
-
 
 		user = await userservice.getCurrentUser();
 
@@ -110,11 +109,13 @@
 		}
 
             console.log("REFETCH CHANNEL MESSAGE");
+
             res = await fetch(`${PUBLIC_API_URI}/message/rooms`, {
                 method: 'GET',
                 credentials: 'include'
             })
             rooms = await res.json();
+
         if ($page.params.id == "last")
         {
             if (!rooms || rooms.length <= 0) {
@@ -130,7 +131,7 @@
         )})
         current_room_id = rooms.findIndex((item: (Rooms & {user: RoomUser[]}))=>{return (item.id === id_room)});
 
-        console.log("CHANNEL ID ROOM +> ", current_room_id);
+        // console.log("CHANNEL ID ROOM +> ", current_room_id);
 
         if (current_room_id == -1 && $page.params.id != "last")
         {
@@ -203,20 +204,20 @@
 
         socket.on("updateRoom", (room: (Rooms & {user: RoomUser[]})) =>{
             let index: number;
-            console.log("NEW UPDATE ROOM")
-            console.log(room);
+            // console.log("NEW UPDATE ROOM")
+            // console.log(room);
             if ((index = rooms.findIndex(item => item.id === room.id)) == -1)
                 rooms.push(room);
             else
                 rooms[index] = room;
             rooms = rooms;
-            console.log(rooms);
+            // console.log(rooms);
             refresh = !refresh;
             invalidateAll();
         })
 
         socket.on("leftRoom", (room: (Rooms & {user: RoomUser[]})) =>{
-            console.log("left room");
+            // console.log("left room");
             if (rooms)
                 return ;
             const room_id_current = rooms[current_room_id].id;
@@ -370,7 +371,7 @@
     }
 
 	function handleRoomCreation() {
-		console.log("event received");
+		// console.log("event received");
 		closePopupCreateRoom = true;
 	}
 
