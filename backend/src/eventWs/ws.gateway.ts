@@ -525,7 +525,7 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
     const dmUser: (Rooms & {user: RoomUser[]})[] = await this.messageService.getDmUser({id: game.player_one_id});
     let room = undefined;
     if (!dmUser || !(room = dmUser.find((element: (Rooms & {user: RoomUser[]})) => {
-      return !!element.user.find((element: RoomUser) => element.user_id == Number(game.player_one_id))})))
+      return !!element.user.find((element: RoomUser) => element.user_id == Number(game.player_two_id))})))
       throw new WsException("dm not exist");
     const message = game.id.toString();
     const message_db: (Messages & {user: User}) = await this.messageService.createMessage({id: game.player_one_id}, {id: room.id}, TypeMessage.INVITE_GAME, message)
