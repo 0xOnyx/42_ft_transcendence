@@ -14,28 +14,32 @@
 
     <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
 
-    <div class="fixed inset-0 z-10 overflow-y-auto">
+    <div class="fixed inset-0 z-10 bottom-1/3 sm:bottom-0 mobile-landscape:bottom-0 overflow-y-auto">
         <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
 
-            <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
-                <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+            <div class="relative bg-gray-700 transform overflow-hidden rounded-lg text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                <div class="px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
 
                         <div class="flex w-full text-center sm:ml-4 sm:mr-4 sm:mt-0 sm:text-left">
-                                <div class="mt-3 mr-4  w-full">
-                                    <span class="block text-sm font-medium text-slate-700">This room required password to join !</span>
+                                <div class="mt-3 mr-4 w-full">
+                                    <span class="block text-sm font-medium text-gray-200 mb-5">A password is required to join this room!</span>
                                     <!-- Using form state modifiers, the classes can be identical for every input -->
-                                    <input bind:value={password} type="password" placeholder="Password room" class="text-slate-600 mt-5 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400
-                                              focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
-                                              disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none
-                                              invalid:border-pink-500 invalid:text-pink-600
-                                              focus:invalid:border-pink-500 focus:invalid:ring-pink-500"/>
+                                    <div class="relative">
+										<input	id="Password"
+												on:keyup={(e)=>{(e.keyCode === 13)}}
+												class="w-full peer rounded-t-md border-b-[3px] border-gray-600 py-1 px-3 bg-gray-300 text-gray-900 placeholder:text-transparent focus:outline-none focus:border-process-green"
+												type="password"
+												bind:value={password}
+												placeholder="Password" />
+										<label for="Password" class="absolute py-1 px-2 peer-placeholder-shown:left-1 peer-placeholder-shown:-top-0.5 peer-placeholder-shown:text-lg transition-transform-colors duration-300 ease-out text-2xs text-process-green transform -translate-y-full peer-placeholder-shown:translate-y-0 -left-2 peer-placeholder-shown:text-gray-900/25">Password</label>
+									</div>
                                 </div>
                         </div>
 
                 </div>
-                <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
-                    <button on:click={()=>{joinChannel(password)}} disabled='{password.length <= 0}' type="button" class="inline-flex w-full justify-center rounded-md {password.length <= 0 ? 'bg-blue-300' : 'bg-blue-600 hover:bg-blue-500'} px-3 py-2 text-sm font-semibold text-white shadow-sm  sm:ml-3 sm:w-auto">Join Channel</button>
-                    <button on:click={close()} type="button" class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto">Cancel</button>
+                <div class="px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 mb-2">
+                    <button on:click={()=>{joinChannel(password)}} disabled='{password.length <= 0}' type="button" class="inline-flex w-full justify-center rounded-md px-3 py-2 text-sm font-semibold disabled:bg-white/50 disabled:italic disabled:text-gray-200/50 disabled:shadow-none disabled:border-gray-200/50 disabled:hover:translate-y-0 border-[3px]  bg-transparent hover:-translate-y-1 transition-all duration-200 text-process-green border-process-green shadow-lg shadow-process-green/50 sm:ml-3 sm:w-auto">Join Channel</button>
+                    <button on:click={close()} type="button" class="mt-3 inline-flex w-full justify-center rounded-md bg-transparent px-3 py-2 text-sm font-semibold hover:-translate-y-1 transition-all duration-200 border-[3px] border-core-red shadow-lg text-core-red shadow-core-red/50 sm:mt-0 sm:w-auto">Cancel</button>
                 </div>
 
 

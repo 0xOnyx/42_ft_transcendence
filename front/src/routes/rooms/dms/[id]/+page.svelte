@@ -166,6 +166,7 @@
 
         loadValue();
 		console.log("DM Page - User: ", user);
+
         socket = io('/events', {
             path: "/ws/"
         });
@@ -313,7 +314,6 @@
 		getRoom(id, socket);
 	}
 
-
 </script>
 
 {#if error.length > 0}
@@ -322,7 +322,7 @@
         <div class="fixed inset-0 overflow-y-auto">
             <div class="flex min-h-full items-center justify-center p-4 text-left sm:items-center sm:p-0">
 
-                <div class="bg-red-100 border border-red-400 text-red-700 px-60 py-3 rounded relative" role="alert">
+                <div class="bg-red-100 border border-red-400 text-red-700 px-20 md:px-60 text-center py-3 rounded relative" role="alert">
                     <strong class="font-bold">Error !</strong>
                     <span class="block sm:inline">{error}</span>
                     <span on:click={()=>{error=""}} class="absolute top-0 bottom-0 right-0 px-4 py-3">
@@ -336,15 +336,15 @@
 
 
 {#if closeWarningLeftDm}
-    <WarningAsk title="Delete direct message" message="You will lose all of your message with {current_room_user.name}. This action cannot be undone."
+    <WarningAsk title="Delete direct message" message="All your messages with {current_room_user.name} will be lost. This action cannot be undone."
         buttonAccecpt={acceptLeftDm} buttonDecline={()=>{closeWarningLeftDm = false}}></WarningAsk>
 {/if}
 {#if closeWarningBlockUser}
-    <WarningAsk title="Block user {current_room_user.name}" message="You block this user is lose all of your message with {current_room_user.name}. This action cannot be undone."
+    <WarningAsk title="Block user {current_room_user.name}" message="All your messages with {current_room_user.name} will be lost. This action cannot be undone."
                 buttonAccecpt={BlockUserEvent} buttonDecline={()=>{closeWarningBlockUser = false}}></WarningAsk>
 {/if}
 {#if closeWarningUnbanUser > 0}
-    <WarningAsk title="Ublock user" message="Do you want to unban this user ?."
+    <WarningAsk title="Unblock user" message="Do you want to unblock this user ?"
                 buttonAccecpt={acceptUnbanUser} buttonDecline={()=>{closeWarningUnbanUser = -1}}></WarningAsk>
 {/if}
 
