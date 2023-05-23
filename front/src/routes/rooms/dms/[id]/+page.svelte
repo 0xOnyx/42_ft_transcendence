@@ -440,7 +440,20 @@
 	
 								<div>
 									{#if user_state_room_user}
-										<UserStat userstats={user_state_room_user}></UserStat>
+										{#if history}
+										<div in:fade="{{ delay: 200, duration: 400 }}">
+											{#if gamehistory && current_room_user}
+												<History portal={true} curUser={current_room_user} gamehistory={gamehistory} />
+											{:else}
+												<p>No games played</p>
+											{/if}
+											<div class="flex justify-center">
+												<button on:click={()=> {history = false}} class="flex gap-2"><Icon icon="left-arrow"/>Return</button>
+											</div>
+										</div>
+										{:else}
+											<UserStat userstats={user_state_room_user}  on:showHistory={() => {history =true}}></UserStat>
+										{/if}
 									{/if}
 								</div>
 	

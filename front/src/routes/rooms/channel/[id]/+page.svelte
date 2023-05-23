@@ -35,6 +35,8 @@
 
 	import { leftHanded } from '../../../../services/Stores';
 	import IconButton from '../../../../components/IconButton.svelte';
+	import History from '../../../../components/History.svelte';
+	import type { GameHistory } from '../../../../types/user';
 
     let id;
 
@@ -51,6 +53,7 @@
     let connectedWs: Boolean = false;
     let iscurrentFriend: Boolean = false;
     let currentRoomUserSelect: User;
+	let gamehistory : GameHistory[] = [];
     let chatbox : HTMLDivElement;
     let unread_message: Number = 0;
     let error : string = ""
@@ -62,6 +65,7 @@
 	let _showCurrentRoom : Boolean = true;
 	let _showRoomUsers : Boolean = false;
     let locked : User[] = [];
+	let history : Boolean = false;
 
     let loadValue = async ()=>{
         refresh = !refresh;
@@ -542,7 +546,20 @@
 									<UserInfo user={currentRoomUserSelect}></UserInfo>
 
 									<div>
-										<UserStat userstats={currentRoomUserSelect}></UserStat>
+										{#if history}
+										<div in:fade="{{ delay: 200, duration: 400 }}">
+											{#if gamehistory}
+												<History portal={true} curUser={currentRoomUserSelect} gamehistory={gamehistory} />
+											{:else}
+												<p>No games played</p>
+											{/if}
+											<div class="flex justify-center">
+												<button on:click={()=> {history = false}} class="flex gap-2"><Icon icon="left-arrow"/>Return</button>
+											</div>
+										</div>
+										{:else}
+										<UserStat userstats={currentRoomUserSelect} on:showHistory={() => {history = true}}></UserStat>
+										{/if}
 									</div>
 
 									<div class="flex-col mt-4 space-y-2">
@@ -569,7 +586,7 @@
 								{:else if rooms[current_room_id]?.user.length > 0}
 								 <div in:fly="{{ x: -200, delay: 500, duration: 400 }}" out:fly="{{ x:-200, duration: 200 }}">
 									{#each rooms[current_room_id]?.user as user}
-										<ItemRoomUserElement on:clicker={async ()=>{currentRoomUserSelect = await userservice.getUser(user.user_id)}} user={user}></ItemRoomUserElement>
+										<ItemRoomUserElement on:clicker={async ()=>{currentRoomUserSelect = await userservice.getUser(user.user_id); gamehistory = await userservice.getHistory(currentRoomUserSelect.id);}} user={user}></ItemRoomUserElement>
 									{/each}
 								</div>
 								{/if}
@@ -667,10 +684,23 @@
 									<UserInfo user={currentRoomUserSelect}></UserInfo>
 
 									<div>
-										<UserStat userstats={currentRoomUserSelect}></UserStat>
+										{#if history}
+										<div in:fade="{{ delay: 200, duration: 400 }}">
+											{#if gamehistory}
+												<History curUser={currentRoomUserSelect} gamehistory={gamehistory} />
+											{:else}
+												<p>No games played</p>
+											{/if}
+											<div class="flex justify-center">
+												<button on:click={()=> {history = false}} class="flex gap-2"><Icon icon="left-arrow"/>Return</button>
+											</div>
+										</div>
+										{:else}
+										<UserStat userstats={currentRoomUserSelect} on:showHistory={() => {history = true}}></UserStat>
+										{/if}
 									</div>
 
-									<div class="flex-col mt-4 mobile-landscape:mt-1 space-y-2 overflow-auto">
+									<div class="flex-col mt-4 mobile-landscape:mt-1 space-y-2 overflow-visible">
 										{#if rooms[current_room_id]?.user.find(element => element.role === RoleUser.ADMIN && element.user_id === user.id)
 										&& rooms[current_room_id]?.owner_id !== currentRoomUserSelect.id  && currentRoomUserSelect.id !== user.id}
 											{#if !rooms[current_room_id]?.user.find(element =>element.user_id === currentRoomUserSelect.id).ban}
@@ -694,7 +724,7 @@
 								{:else if rooms[current_room_id]?.user.length > 0}
 								 <div in:fly="{{ x: -200, delay: 500, duration: 400 }}" out:fly="{{ x:-200, duration: 200 }}">
 									{#each rooms[current_room_id]?.user as user}
-										<ItemRoomUserElement on:clicker={async ()=>{currentRoomUserSelect = await userservice.getUser(user.user_id)}} user={user}></ItemRoomUserElement>
+										<ItemRoomUserElement on:clicker={async ()=>{currentRoomUserSelect = await userservice.getUser(user.user_id); gamehistory = await userservice.getHistory(currentRoomUserSelect.id);}} user={user}></ItemRoomUserElement>
 									{/each}
 								</div>
 								{/if}
