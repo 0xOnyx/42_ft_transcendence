@@ -2,7 +2,7 @@
 backend/node_modules
 front/node_modules
 docker/data
-
+docker-prod/data
 
 # Logs
 logs
