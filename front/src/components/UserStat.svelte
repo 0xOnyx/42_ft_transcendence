@@ -49,7 +49,7 @@
 	</div>
 
 	<div class="flex justify-center">
-		<LeagueBadge league={userstats?.league} /> <!-- remove '|| "gold"' once userstats.league ok -->
+		<LeagueBadge league={userstats?.level} /> <!-- remove '|| "gold"' once userstats.league ok -->
 	</div>
 
 </div>
