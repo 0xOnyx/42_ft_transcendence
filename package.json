@@ -1,8 +1,0 @@
-{
-  "dependencies": {
-    "passport-totp": "^0.0.2"
-  },
-  "devDependencies": {
-    "@types/notp": "^2.0.2"
-  }
-}
