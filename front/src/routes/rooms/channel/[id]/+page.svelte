@@ -45,7 +45,7 @@
     let search_value: string = "";
     let message_value: string = "";
     let rooms :(Rooms & {user: RoomUser[]})[] = [];
-    let current_room_id: Number = -1;
+    let current_room_id: number = -1;
     let current_room_user: User;
     let user : User;
     let friends : User[] = [];
@@ -129,9 +129,13 @@
         }
         else
             id_room = Number($page.params.id);
-        rooms = rooms.filter((item: (Rooms & {user: RoomUser[]}))=>{return (
-            !(item.user.find(element=>element.user_id == user.id).ban)
-        )})
+        rooms = rooms.filter((item: (Rooms & {user: RoomUser[]}))=>{
+            let ru : (RoomUser | undefined) = item.user.find(element=>element.user_id == user.id);
+			if (ru) {
+				return !(ru.ban);
+			}
+			return true;
+        })
         current_room_id = rooms.findIndex((item: (Rooms & {user: RoomUser[]}))=>{return (item.id === id_room)});
 
         // console.log("CHANNEL ID ROOM +> ", current_room_id);

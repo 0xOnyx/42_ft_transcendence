@@ -46,9 +46,13 @@
 			})
 			rooms.channel = await res.json();
 		}
-		rooms.channel = rooms.channel.filter((item: (Rooms & {user: RoomUser[]}))=>{return (
-			!(item.user.find(element=>element.user_id == user.id).ban)
-		)})
+		rooms.channel = rooms.channel.filter((item: (Rooms & {user: RoomUser[]}))=>{
+			let ru : (RoomUser | undefined) = item.user.find(element=>element.user_id == user.id);
+			if (ru) {
+				return !(ru.ban);
+			}
+			return true;
+		})
 	}
 
     let socket: Socket;
