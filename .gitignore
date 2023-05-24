@@ -111,3 +111,5 @@ dist
 
 # Mac
 .DS_store
+.idea
+.vscode
