@@ -4,7 +4,7 @@
 	export let curUser : User;
 	export let gamehistory : GameHistory[];
 	export let portal : boolean = false;
-	console.log(gamehistory);
+	// console.log(gamehistory);
 </script>
 
 {#if portal}
