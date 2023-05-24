@@ -9,8 +9,8 @@ services:
       - "80:80"
     volumes:
       - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ../backend/image:/backend/image
-      - ../front/build:/var/www/front:delegated
+      - ./backend/image:/backend/image
+      - ./front/build:/var/www/front:delegated
     depends_on:
       frontend_builder:
         condition: service_completed_successfully
@@ -22,11 +22,9 @@ services:
     image: postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: postgres
+      POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASS}
       POSTGRES_DB: transcendence
-    ports:
-      - "5432:5432"
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
     networks:
@@ -35,17 +33,15 @@ services:
 
   frontend_builder:
     container_name: frontend_builder-prod
-    build: ./front
+    build: ./front/docker
     volumes:
-      - ../front:/app:delegated
+      - ./front:/app:delegated
 
   backend-prod:
     container_name: backend-prod
-    build: ./back
+    build: ./backend/docker
     volumes:
-      - ../backend:/app:delegated
-    ports:
-      - "3000:3000"
+      - ./backend:/app:delegated
     depends_on:
       - postgres
     networks:
