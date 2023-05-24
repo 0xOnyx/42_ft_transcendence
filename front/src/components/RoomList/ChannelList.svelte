@@ -35,9 +35,14 @@
 			})
 			rooms = await res.json();
 		}
-		rooms = rooms.filter((item: (Rooms & {user: RoomUser[]}))=>{return (
-			!(item.user.find(element=>element.user_id == user.id).ban)
-		)})
+		rooms = rooms.filter((item: (Rooms & {user: RoomUser[]})) => {
+			let ru : (RoomUser | undefined) = item.user.find(element=>element.user_id == user.id);
+			if (ru) {
+				return !(ru.ban);
+			}
+			return true;
+		});
+
 		rooms.sort((a,b) => (b.id) - (a.id));
 		// console.log(rooms);
 		current_rooms_length = rooms.length;
