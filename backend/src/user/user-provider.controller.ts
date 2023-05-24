@@ -178,22 +178,5 @@ export class UserProviderController {
     }
 
 
-    /*
-    @UseGuards(AuthenticatedGuard)
-    @Post("block/:id")
-    @ApiOperation({summary: "Block user by id"})
-    blockuser(@Param("id") id: string, @Request() req: any)
-    {
-        //this.userServiceServer.delete_friend(req.user.id, Number(id)); TODO: IMPLEMENT THIS
-        this.userServiceServer.blockUser(req.user.id, Number(id));
-    }
 
-    @UseGuards(AuthenticatedGuard)
-    @Post("unblock/:id")
-    @ApiOperation({summary: "Unblock user by id"})
-    unblockUser(@Param("id") id: string, @Request() req: any)
-    {
-        this.userServiceServer.unblockuser(req.user.id, Number(id));
-    }
-    */
 }

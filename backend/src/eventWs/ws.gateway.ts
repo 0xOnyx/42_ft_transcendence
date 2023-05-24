@@ -203,7 +203,6 @@ export class WsGateway  implements OnGatewayInit, OnGatewayConnection, OnGateway
       }
       else if (data.message_type == "INVITE_GAME") {
         typeMessage = TypeMessage.INVITE_GAME;
-        //TODO : Create game and modify message to invite game;
       }
       else
           throw new WsException("bad message type");

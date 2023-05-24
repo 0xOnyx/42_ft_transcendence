@@ -15,7 +15,7 @@ all:
 
 run:
 	echo "start project"
-	cd docker-prod && docker compose up --build 
+	cd docker-prod && docker compose up --build
 
 stop:
 	echo "start project"
