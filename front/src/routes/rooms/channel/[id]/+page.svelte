@@ -73,6 +73,7 @@
         console.log("CHANNEL: LOAD START");
         let res: Response;
 
+        currentRoomUserSelect = null;
 		_showCurrentRoom = true;
 		_showAllRooms = false;
 		_showRoomUsers = false;
@@ -464,6 +465,7 @@
 						<button on:click={() => {_showAllRooms = false; _showCurrentRoom = true;}} class="flex items-center gap-2">Back<Icon icon="right-arrow"/></button>
 					</div>
 					<div id="RoomList" class="flex-grow h-[90%]">
+                        {#if user && socket}
 						<RoomList
 							dmList={false}
 							fromDM={false}
@@ -473,6 +475,7 @@
 							connectedWs={connectedWs}
 							rooms={rooms}
 							id_room={id_room}/>
+                        {/if}
 					</div>
 				</div>
 				{:else if _showCurrentRoom == true}
