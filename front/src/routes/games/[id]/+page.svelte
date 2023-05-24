@@ -17,6 +17,7 @@
 	import History from "../../../components/History.svelte";
 	import type { GameHistory } from "../../../types/user";
 	import { fade } from "svelte/transition";
+	import IconButton from "../../../components/IconButton.svelte";
 
     let socket : Socket;
     let canvas : HTMLCanvasElement;
@@ -138,6 +139,9 @@
         socket.close();
 
     });
+	async function ReturnPortal() {
+		await goto('/games');
+	}
 
 </script>
 
@@ -145,6 +149,7 @@
 	{#if user}
 		<NavBar user={user} />
 	{/if}
+	{#if game}
 	<div class="flex py-2 landscape:py-0 md:py-10 xl:py-10">
 		<div class="h-[80vh] grow mobile-landscape:pb-2 mobile-landscape:h-screen w-full px-[5%] self-center py-1 grid overflow-auto">
 			<div class="{$leftHanded ? 'mobile-landscape:pl-[3.75rem]' : 'mobile-landscape:pr-[3.75rem]'}">
@@ -221,5 +226,24 @@
 			</div>
 		</div>
 	</div>
+	{:else}
+	<div class="flex py-2 landscape:py-0 md:py-10 xl:py-10">
+		<div class="h-[80vh] grow mobile-landscape:pb-2 mobile-landscape:h-screen w-full px-[5%] self-center py-1 grid overflow-auto">
+			<div class="{$leftHanded ? 'mobile-landscape:pl-[3.75rem]' : 'mobile-landscape:pr-[3.75rem]'}">
+				<div class="grid h-full text-center align-middle m-1">
+					<div class="relative border-gray-700 screen shadow-lg shadow-black/50 bg-black/25 overflow-hidden rounded-3xl justify-center grid-rows-3 sm:grid-rows-1 sm:grid-cols-10 mb-5 flex">
+						<div class="absolute screen-overlay"></div>
+
+						<div class="relative self-center text-lg space-y-2">
+							<div>This game does not exist</div>
+							<IconButton icon="left-arrow" title="Return" on:buttonClick={ReturnPortal} />
+						</div>
+
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	{/if}
 </div>
 
