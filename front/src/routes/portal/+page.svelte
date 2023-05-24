@@ -264,7 +264,9 @@
 {/if}
 
 <div class="flex-col">
+	{#if user}
 	<NavBar user={user} />
+	{/if}
 
 	<!-- Mobile version-->
 	<div class="flex sm:hidden py-2 landscape:py-0 md:py-10 xl:py-10">
