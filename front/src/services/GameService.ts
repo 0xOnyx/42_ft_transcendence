@@ -35,7 +35,7 @@ export class GameService
 
         if (res.status != 201)
         {
-            console.error((await res.json()).message[0]);
+            //console.error((await res.json()).message[0]);
             return Promise.resolve(null);
         }
 
@@ -58,7 +58,7 @@ export class GameService
 
         if (res.status != 200)
         {
-            console.error((await res.json()).message[0]);
+            //console.error((await res.json()).message[0]);
             return Promise.resolve(null);
         }
 
