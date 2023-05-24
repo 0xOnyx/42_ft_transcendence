@@ -23,7 +23,7 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: mysecretpassword #TODO: use .env
+      POSTGRES_PASSWORD: ${DB_PASS}
       POSTGRES_DB: transcendence
     ports:
       - "5432:5432"
