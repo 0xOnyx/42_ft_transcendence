@@ -17,6 +17,7 @@
 	import History from "../../../components/History.svelte";
 	import type { GameHistory } from "../../../types/user";
 	import { fade } from "svelte/transition";
+	import IconButton from "../../../components/IconButton.svelte";
 
     let socket : Socket;
     let canvas : HTMLCanvasElement;
@@ -138,6 +139,9 @@
         socket.close();
 
     });
+	async function ReturnPortal() {
+		await goto('/games');
+	}
 
 </script>
 
@@ -149,15 +153,20 @@
 		<div class="h-[80vh] grow mobile-landscape:pb-2 mobile-landscape:h-screen w-full px-[5%] self-center py-1 grid overflow-auto">
 			<div class="{$leftHanded ? 'mobile-landscape:pl-[3.75rem]' : 'mobile-landscape:pr-[3.75rem]'}">
 				<div class="grid h-full text-center align-middle m-1">
-					<div class="relative border-gray-700 screen shadow-lg shadow-black/50 bg-black/25 overflow-hidden rounded-3xl grid grid-rows-3 sm:grid-rows-1 sm:grid-cols-10 mb-5">
+					<div class="relative border-gray-700 screen shadow-lg shadow-black/50 bg-black/25 overflow-hidden grid rounded-3xl grid-rows-3 sm:grid-rows-1 sm:grid-cols-10 mb-5">
 						<div class="absolute screen-overlay"></div>
 						
+						{#if !game}
+						<div class="relative z-[100] self-center row-start-2 sm:row-start-1 sm:col-start-5 sm:col-span-2 flex flex-col text-lg space-y-2">
+							<div>This game does not exist</div>
+							<IconButton icon="left-arrow" title="Return" on:buttonClick={ReturnPortal} />
+						</div>
+						{/if}
+						{#if userOne}
 						<div id="userOne" class="relative row-start-1 sm:col-start-1 sm:row-start-1 sm:col-span-2 lg:flex lg:flex-col">
 							<div class="overflow-auto bg-color5 sm:h-full pb-5 grid grid-cols-2 sm:grid-cols-1 sm:flex-grow rounded-2xl rounded-b-none sm:rounded-r-none">
 								<div  class="mt-5 sm:mt-20 mobile-landscape:mt-10">
-									{#if userOne}
 										<UserInfo user={userOne} />
-									{/if}
 								</div>
 								<div class="mt-5">
 									{#if userstats_user1}
@@ -179,6 +188,7 @@
 								</div>
 							</div>
 						</div>
+						{/if}
 
 						<div class="relative m-auto items-center justify-center row-start-2 sm:row-start-1 sm:col-start-3 sm:col-span-6 -order-1 lg:order-none">
 							<canvas class="relative w-full"
