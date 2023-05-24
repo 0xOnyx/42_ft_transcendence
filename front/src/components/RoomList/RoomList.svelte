@@ -121,21 +121,21 @@
 
 	async function joinChannel(password : string)
     {
-		console.log("emit id: ", closeRequestPassword);
+		// console.log("emit id: ", closeRequestPassword);
         socket.emit("joinRoomPublic", {room_id: closeRequestPassword, password: password}, async (room)=>{
-            console.log("Room: ", room);
+            // console.log("Room: ", room);
 			if (room)
             {
                 closeRequestPassword = -1;
                 search_value = "";
-				console.log("ROOM ID ", room.id);
+				// console.log("ROOM ID ", room.id);
                 await goto(`/rooms/channel/${room.id}`)
             }
         })
     }
 
 	function passwordNeeded(e : CustomEvent) {
-		console.log("PASSWORD for ", e.detail.id);
+		// console.log("PASSWORD for ", e.detail.id);
 		closeRequestPassword = e.detail.id;
 	}
 

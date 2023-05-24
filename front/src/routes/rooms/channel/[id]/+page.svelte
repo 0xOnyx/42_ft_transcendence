@@ -70,7 +70,6 @@
     let loadValue = async ()=>{
         refresh = !refresh;
         // console.log("CHANNEL: LOAD START");
-        console.log("CHANNEL: LOAD START");
         let res: Response;
 
 		_showCurrentRoom = true;
@@ -113,7 +112,7 @@
 			return;
 		}
 
-            console.log("REFETCH CHANNEL MESSAGE");
+            // console.log("REFETCH CHANNEL MESSAGE");
             res = await fetch(`${PUBLIC_API_URI}/message/rooms`, {
                 method: 'GET',
                 credentials: 'include'
@@ -186,7 +185,7 @@
                     credentials: 'include'
                 });
                 let status = await res.json();
-                console.log(status);
+                // console.log(status);
                 if (status) {
                     data.message.content = "blocked user";
                 }
