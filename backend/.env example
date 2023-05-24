@@ -1,4 +1,4 @@
-DATABASE_URL="postgresql://user:pass@IP:5432/transcendence?schema=public&connect_timeout=1000"
+DATABASE_URL="postgresql://postgres:mysecretpassword@postgres:5432/transcendence?schema=public&connect_timeout=1000"
 API_OAUTH2=https://api.intra.42.fr/
 CLIENT_ID={42_APP_CLIENT_ID}
 CLIENT_SECRET={42_APP_CLIENT_SECRET}
