@@ -14,6 +14,9 @@
 	import { GameType, type Game } from "../../../types/game";
 	import Icon from "../../../components/Icon.svelte";
 	import { leftHanded } from "../../../services/Stores";
+	import History from "../../../components/History.svelte";
+	import type { GameHistory } from "../../../types/user";
+	import { fade } from "svelte/transition";
 
     let socket : Socket;
     let canvas : HTMLCanvasElement;
@@ -28,6 +31,10 @@
 
     let userOne : User;
     let userTwo : User;
+	let historyOne : Boolean = false;
+	let historyTwo : Boolean = false;
+	let gamehistoryOne : GameHistory[] = [];
+	let gamehistoryTwo : GameHistory[] = [];
 
 	onMount(async () => {
 
@@ -66,6 +73,8 @@
 
 				userstats_user1 = await userservice.getStats(userOne.id);
 				userstats_user2 = await userservice.getStats(userTwo.id);
+				gamehistoryOne = await userservice.getHistory(userOne.id);
+				gamehistoryTwo = await userservice.getHistory(userTwo.id);
 
 
             });
@@ -152,7 +161,20 @@
 								</div>
 								<div class="mt-5">
 									{#if userstats_user1}
-										<UserStat userstats={userstats_user1}></UserStat>
+										{#if historyOne}
+										<div in:fade="{{ delay: 200, duration: 400 }}">
+											{#if gamehistoryOne}
+												<History curUser={userOne} gamehistory={gamehistoryOne} />
+											{:else}
+												<p>No games played</p>
+											{/if}
+											<div class="flex justify-center">
+												<button on:click={()=> {historyOne = false}} class="flex gap-2"><Icon icon="left-arrow"/>Return</button>
+											</div>
+										</div>
+										{:else}
+										<UserStat userstats={userstats_user1} on:showHistory={() => {historyOne = true}}></UserStat>
+										{/if}
 									{/if}
 								</div>
 							</div>
@@ -174,7 +196,20 @@
 									</div>
 									<div class="mt-5">
 										{#if userstats_user2}
-											<UserStat userstats={userstats_user2}></UserStat>
+											{#if historyTwo}
+											<div in:fade="{{ delay: 200, duration: 400 }}">
+												{#if gamehistoryTwo}
+													<History curUser={userTwo} gamehistory={gamehistoryTwo} />
+												{:else}
+													<p>No games played</p>
+												{/if}
+												<div class="flex justify-center">
+													<button on:click={()=> {historyTwo = false}} class="flex gap-2"><Icon icon="left-arrow"/>Return</button>
+												</div>
+											</div>
+											{:else}
+											<UserStat userstats={userstats_user2} on:showHistory={() => {historyTwo = true}}></UserStat>
+											{/if}
 										{/if}
 									</div>
 								</div>
