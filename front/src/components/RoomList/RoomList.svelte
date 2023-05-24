@@ -197,6 +197,7 @@
 			</div>
 			{:else}
 			<div in:fly="{{ x: 200, delay: 500, duration: 400 }}" out:fly="{{ x: 200, duration: 400 }}" class="flex-grow max-h-full overflow-auto pl-4 overscroll-contain">
+				{#if user && socket}
 				<ChannelList bind:search_value={search_value}
 					search={search.rooms}
 					id_room={id_room}
@@ -205,6 +206,7 @@
 					connectedWs={connectedWs}
 					DMPage={fromDM}
 					on:requestPassword={passwordNeeded}/>
+				{/if}
 			</div>
 			{/if}
 		</div>
