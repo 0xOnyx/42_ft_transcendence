@@ -69,7 +69,7 @@
 
     let loadValue = async ()=>{
         refresh = !refresh;
-		console.log("DM: LOAD START")
+		// console.log("DM: LOAD START")
         let res: Response;
 
 		_showCurrentRoom = true;
@@ -232,7 +232,7 @@
         })
 
         socket.on("exception", (data: {status: string, message: string})=>{
-            console.log("EXCEPION");
+            // console.log("EXCEPION");
 			error = data.message;
         });
 
@@ -385,7 +385,7 @@
 							connectedWs={connectedWs}
 							id_room={id_room}
 							on:userClicked={itemClicked}
-							on:requestPassword={() => {console.log("coucou ter");}}/>
+							on:requestPassword={() => {/*console.log("coucou ter");*/}}/>
 						{:else}
 							<p>LOADING..</p>
 						{/if}
