@@ -70,7 +70,6 @@
     let loadValue = async ()=>{
         refresh = !refresh;
         // console.log("CHANNEL: LOAD START");
-        console.log("CHANNEL: LOAD START");
         let res: Response;
 
 		_showCurrentRoom = true;
@@ -113,7 +112,7 @@
 			return;
 		}
 
-            console.log("REFETCH CHANNEL MESSAGE");
+            // console.log("REFETCH CHANNEL MESSAGE");
             res = await fetch(`${PUBLIC_API_URI}/message/rooms`, {
                 method: 'GET',
                 credentials: 'include'
@@ -186,7 +185,7 @@
                     credentials: 'include'
                 });
                 let status = await res.json();
-                console.log(status);
+                // console.log(status);
                 if (status) {
                     data.message.content = "blocked user";
                 }
@@ -627,7 +626,7 @@
 				<div class="md:flex md:flex-col col-span-2 h-screen md:pb-[9rem] lg:pb-[8rem] mobile-landscape:pb-9 ">
 				<div id="CurrenrRoom" class="screen border-gray-700 shadow-lg shadow-black/50 bg-black/25 grow md:flex md:flex-col my-5  md:my-0 md:mx-5 xl:mx-8 overflow-auto rounded-xl">
 					<div class="screen-overlay"></div>
-					<div bind:this={chatbox} class="relative overflow-x-hidden overflow-y-scroll scroll-smooth mt-3 flex-grow">
+					<div bind:this={chatbox} class="relative overflow-x-hidden scroll-smooth mt-3 flex-grow">
 
 						{#if connectedWs}
 							<MessageItem socket={socket} user={user} message={room_message}></MessageItem>
